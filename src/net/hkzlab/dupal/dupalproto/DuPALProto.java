@@ -41,7 +41,7 @@ public class DuPALProto {
             respString.add(CMD_RESP_ERROR);
         } else if(response.startsWith(RESP_START) && response.endsWith(RESP_END)) {
             response = response.substring(1, response.length()-1).trim();
-            char command = response.charAt(1);
+            char command = response.charAt(0);
             switch(command) {
                 case CMD_READ: 
                 case CMD_WRITE: {
