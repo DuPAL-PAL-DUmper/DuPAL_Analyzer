@@ -32,6 +32,30 @@ public class DuPALProto {
         return ""+CMD_START+CMD_RESET+CMD_END;
     }
 
+    public static int handleREADResponse(String response) {
+        String[] readRes = parseResponse(response);
+
+        if((readRes == null) || readRes.length != 2 || readRes[0].charAt(0) != CMD_READ) return -1;
+        
+        try {
+            return Integer.parseInt(readRes[1], 16);
+        } catch(NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    public static int handleWRITEResponse(String response) {
+         String[] readRes = parseResponse(response);
+
+        if((readRes == null) || readRes.length != 2 || readRes[0].charAt(0) != CMD_WRITE) return -1;
+        
+        try {
+            return Integer.parseInt(readRes[1], 16);
+        } catch(NumberFormatException e) {
+            return -1;
+        }       
+    }
+
     public static String[] parseResponse(String response) {
         ArrayList<String> respString = new ArrayList<>();
 

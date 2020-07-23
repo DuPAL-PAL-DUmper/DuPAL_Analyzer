@@ -2,6 +2,8 @@ package net.hkzlab.dupal.boardio;
 
 import static jssc.SerialPort.*;
 
+import java.nio.charset.StandardCharsets;
+
 import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortTimeoutException;
@@ -58,6 +60,29 @@ public class DuPALManager {
                 catch (SerialPortTimeoutException | SerialPortException e) { break; }
             }
         }
+    }
+
+    public void writeCommand(String command) {
+        if((serport != null) && serport.isOpened()) {
+            try {
+                serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
+                try { Thread.sleep(25); } catch(InterruptedException e) {}; // Wait a bit for execution and response
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String readResponse() {
+         if((serport != null) && serport.isOpened()) {
+            try {
+                return serport.readString().trim();
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return null;
     }
 
     public boolean enterRemoteMode() {
