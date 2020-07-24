@@ -1,6 +1,7 @@
 package net.hkzlab.palanalisys;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MacroState {
     public static final String MS_PRE_TAG = "MS_";
@@ -10,45 +11,21 @@ public class MacroState {
     public final SubState[] substates;
     public final StateLink[] links;
 
-    public MacroState(final String tag, final boolean[] rpin_status, int outPins, int inPins) {
+    public MacroState(final String tag, final boolean[] rpin_status, final int outPins, final int inPins) {
         this.tag = tag;
         this.rpin_status = rpin_status;
 
-        links = new StateLink[2^inPins]; // Create space for the future links out of this
-
-        int possible_bin_sstates = 2 ^ outPins;
-        ArrayList<SubState> sStates = new ArrayList<>();
-        byte[] pstatus;
-        for(int idx = 0; idx < possible_bin_sstates; idx++) {
-            pstatus = new byte[outPins];
-
-            // Generate this binary combination
-            for(int idx_bit = 0; idx_bit < outPins; idx_bit++) {
-                pstatus[idx_bit] = (byte)((idx >> idx_bit) & 0x01);
-            }
-
-            sStates.add(new SubState(tag, this, pstatus));
-
-            // Generate the remaining combinations with hi-z
-            for(int hiz_idx = 0; hiz_idx < possible_bin_sstates; hiz_idx++) {
-                for(int idx_bit = 0; idx_bit < outPins; idx_bit++) {
-                    byte[] oc_pstatus = new byte[outPins];
-                    oc_pstatus[idx_bit] = ((hiz_idx >> idx_bit) & 0x01) > 0 ? -1 : pstatus[idx_bit];
-                }  
-
-                sStates.add(new SubState(tag, this, pstatus));
-            }
-        }
-
-        substates = sStates.toArray(new SubState[sStates.size()]);
+        links = new StateLink[2 ^ inPins]; // Create space for the future links out of this
+        substates = new SubState[3 ^ outPins]; // Create space for substates (each output pin is 3-state)
     }
 
     @Override
     public String toString() {
-        StringBuffer strBuf = new StringBuffer();
-        strBuf.append(MS_PRE_TAG+tag+" - ");
+        final StringBuffer strBuf = new StringBuffer();
+        strBuf.append(MS_PRE_TAG + tag + " - ");
 
-        for(boolean rpin : rpin_status) strBuf.append(rpin ? '1':'0');
+        for (final boolean rpin : rpin_status)
+            strBuf.append(rpin ? '1' : '0');
 
         return strBuf.toString();
     }
@@ -57,10 +34,36 @@ public class MacroState {
     public int hashCode() {
         int hash = 0;
 
-        for(int idx = 0; idx < rpin_status.length; idx++) {
+        for (int idx = 0; idx < rpin_status.length; idx++) {
             hash ^= ((rpin_status[idx] ? 1 : 0) << (idx % 32));
         }
 
         return hash ^ tag.hashCode();
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (this.getClass() != o.getClass())
+            return false;
+
+        final MacroState ops = (MacroState) o;
+        if(!ops.tag.equals(this.tag)) return false;
+        if(!Arrays.equals(ops.rpin_status, this.rpin_status)) return false;
+
+        return true;
+    }
+
+    public static int calculateMacroStateIndex(boolean[] rpinStatus) {
+        int index = 0;
+
+        for(int idx = 0; idx < rpinStatus.length; idx++) {
+            index |= ((rpinStatus[idx] ? 1:0) << idx);
+        }
+
+        return index;
+    }    
 }

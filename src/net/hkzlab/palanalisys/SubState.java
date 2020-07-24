@@ -53,4 +53,14 @@ public class SubState {
 
         return true;
     }
+
+    public static int calculateSubStateIndex(byte[] pinStatus) {
+        int index = 0;
+
+        for(int idx = 0; idx < pinStatus.length; idx++) {
+            index += ((pinStatus[idx] + 1) & 0xFF) * (3^idx);
+        }
+
+        return index;
+    }
 }
