@@ -3,25 +3,25 @@ package net.hkzlab.devices;
 public class PAL16R4Specs implements PALSpecsInterface {
 
     @Override
-    public int getINPinsTotal() {
+    public int getINPins() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getIOPinsTotal() {
+    public int getIOPins() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getOPinsTotal() {
+    public int getOUTPins() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getROPinsTotal() {
+    public int getROUTPins() {
         // TODO Auto-generated method stub
         return 0;
     }
