@@ -2,6 +2,7 @@ package net.hkzlab.dupal;
 
 import net.hkzlab.dupal.boardio.DuPALManager;
 import net.hkzlab.dupal.dupalproto.DuPALProto;
+import net.hkzlab.palanalisys.MacroState;
 import net.hkzlab.palanalisys.SubState;
 
 public class App {
@@ -30,8 +31,13 @@ public class App {
             dpm.cleanup();
         }
         */
-        SubState ss = new SubState("TEST", new byte[] {-1, 0, -1, 0, -1, -1});
-        System.out.println(ss.toString());
-        System.out.println(ss.hashCode());
+        //SubState ss = new SubState("TEST", new byte[] {-1, 0, -1, 0, -1, -1});
+        //System.out.println(ss.toString());
+        //System.out.println(ss.hashCode());
+
+        MacroState ms = new MacroState("TEST", new boolean[] {true, true, false, true}, 3);
+        System.out.println(ms.toString());
+        System.out.println(ms.hashCode());
+
     }
 }

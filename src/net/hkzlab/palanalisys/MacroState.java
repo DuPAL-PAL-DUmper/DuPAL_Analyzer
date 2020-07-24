@@ -49,4 +49,15 @@ public class MacroState {
 
         return strBuf.toString();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+
+        for(int idx = 0; idx < rpin_status.length; idx++) {
+            hash ^= ((rpin_status[idx] ? 1 : 0) << (idx % 32));
+        }
+
+        return hash;
+    }
 }
