@@ -2,11 +2,13 @@ package net.hkzlab.dupal;
 
 import net.hkzlab.dupal.boardio.DuPALManager;
 import net.hkzlab.dupal.dupalproto.DuPALProto;
+import net.hkzlab.palanalisys.SubState;
 
 public class App {
     public static void main(String[] args) throws Exception {
         DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
 
+        /*
         try {
             System.out.println(dpm.enterRemoteMode());
 
@@ -27,6 +29,9 @@ public class App {
         } finally {
             dpm.cleanup();
         }
-        
+        */
+        SubState ss = new SubState("TEST", new byte[] {-1, 0, -1, 0, -1, -1});
+        System.out.println(ss.toString());
+        System.out.println(ss.hashCode());
     }
 }
