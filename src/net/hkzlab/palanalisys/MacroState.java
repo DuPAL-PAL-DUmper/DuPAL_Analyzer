@@ -8,10 +8,13 @@ public class MacroState {
     public final String tag;
     public final boolean[] rpin_status;
     public final SubState[] substates;
+    public final StateLink[] links;
 
-    public MacroState(final String tag, final boolean[] rpin_status, int outPins) {
+    public MacroState(final String tag, final boolean[] rpin_status, int outPins, int inPins) {
         this.tag = tag;
         this.rpin_status = rpin_status;
+
+        links = new StateLink[2^inPins]; // Create space for the future links out of this
 
         int possible_bin_sstates = 2 ^ outPins;
         ArrayList<SubState> sStates = new ArrayList<>();
@@ -24,7 +27,7 @@ public class MacroState {
                 pstatus[idx_bit] = (byte)((idx >> idx_bit) & 0x01);
             }
 
-            sStates.add(new SubState(tag, pstatus));
+            sStates.add(new SubState(tag, this, pstatus));
 
             // Generate the remaining combinations with hi-z
             for(int hiz_idx = 0; hiz_idx < possible_bin_sstates; hiz_idx++) {
@@ -33,7 +36,7 @@ public class MacroState {
                     oc_pstatus[idx_bit] = ((hiz_idx >> idx_bit) & 0x01) > 0 ? -1 : pstatus[idx_bit];
                 }  
 
-                sStates.add(new SubState(tag, pstatus));
+                sStates.add(new SubState(tag, this, pstatus));
             }
         }
 
@@ -58,6 +61,6 @@ public class MacroState {
             hash ^= ((rpin_status[idx] ? 1 : 0) << (idx % 32));
         }
 
-        return hash;
+        return hash ^ tag.hashCode();
     }
 }

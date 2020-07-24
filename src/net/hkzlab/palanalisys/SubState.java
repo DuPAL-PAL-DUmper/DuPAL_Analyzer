@@ -6,10 +6,12 @@ public class SubState {
     public static final String SS_PRE_TAG = "SS_";
 
     public final String tag;
+    public final MacroState macroState;
     public final byte[] pin_status;
 
-    public SubState(final String tag, final byte[] pin_status) {
+    public SubState(final String tag, final MacroState macroState, final byte[] pin_status) {
         this.tag = tag;
+        this.macroState = macroState;
         this.pin_status = pin_status;
     } 
 
@@ -36,7 +38,7 @@ public class SubState {
             hash ^= (pin_status[idx] & 0xFF) << (8 * byte_idx);
         }
 
-        return hash;
+        return hash ^ tag.hashCode();
     }
 
     @Override

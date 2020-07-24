@@ -35,9 +35,9 @@ public class App {
         //System.out.println(ss.toString());
         //System.out.println(ss.hashCode());
 
-        MacroState ms = new MacroState("TEST", new boolean[] {true, true, false, true}, 3);
-        System.out.println(ms.toString());
-        System.out.println(ms.hashCode());
+        //MacroState ms = new MacroState("TEST", new boolean[] {true, true, false, true}, 3);
+        //System.out.println(ms.toString());
+        //System.out.println(ms.hashCode());
 
     }
 }
