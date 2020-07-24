@@ -1,6 +1,6 @@
 package net.hkzlab.devices;
 
-public class PAL16R4Specs implements PALSpecsInterface {
+public class PAL16R6Specs implements PALSpecsInterface {
 
     @Override
     public int getNumINPins() {
@@ -9,7 +9,7 @@ public class PAL16R4Specs implements PALSpecsInterface {
 
     @Override
     public int getNumIOPins() {
-        return 4;
+        return 2;
     }
 
     @Override
@@ -19,7 +19,7 @@ public class PAL16R4Specs implements PALSpecsInterface {
 
     @Override
     public int getNumROUTPins() {
-        return 4;
+        return 6;
     }
 
     @Override
