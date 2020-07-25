@@ -11,7 +11,7 @@ public class MacroState {
 
     public final SubState[] substates;
     public final StateLink[] links;
-    private final HashMap<Integer, SubState> ssMap;
+    public final HashMap<Integer, SubState> ssMap;
 
     public MacroState(final String tag, final boolean[] rpin_status, final int outPins, final int inPins) {
         this.tag = tag;

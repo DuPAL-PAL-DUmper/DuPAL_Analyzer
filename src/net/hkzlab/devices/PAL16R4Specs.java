@@ -23,13 +23,45 @@ public class PAL16R4Specs implements PALSpecsInterface {
     }
 
     @Override
-    public int getCLKPin() {
-        return 1;
+    public int getCLKPinMask() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
-    public int getOEPin() {
-        return 11;
+    public int getOEPinMask() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getINMask() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getOUTMask() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getIO_INMask() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getIO_OUTMask() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getROUTMask() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

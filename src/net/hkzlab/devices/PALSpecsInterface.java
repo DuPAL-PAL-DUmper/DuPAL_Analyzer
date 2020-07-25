@@ -6,6 +6,11 @@ public interface PALSpecsInterface {
     public int getNumOUTPins();
     public int getNumROUTPins();
 
-    public int getCLKPin();
-    public int getOEPin();
+    public int getCLKPinMask();
+    public int getOEPinMask();
+    public int getINMask();
+    public int getOUTMask();
+    public int getIO_INMask();
+    public int getIO_OUTMask();
+    public int getROUTMask();
 }

@@ -47,11 +47,11 @@ public class SubState {
         return true;
     }
 
-    public static int calculateSubStateIndex(final byte[] pinStatus) {
+    public static int calculateSubStateIndex(final boolean[] inputs) {
         int index = 0;
 
-        for(int idx = 0; idx < pinStatus.length; idx++) {
-            index += ((pinStatus[idx] + 1) & 0xFF) * (3^idx);
+        for(int idx = 0; idx < inputs.length; idx++) {
+            index += ((inputs[idx] ? 1 : 0) << idx);
         }
 
         return index;
