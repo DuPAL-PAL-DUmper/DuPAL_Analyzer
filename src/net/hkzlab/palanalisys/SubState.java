@@ -31,14 +31,7 @@ public class SubState {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-
-        for(int idx = 0; idx < pin_status.length; idx++) {
-            int byte_idx = idx % 4;
-            hash ^= (pin_status[idx] & 0xFF) << (8 * byte_idx);
-        }
-
-        return hash ^ tag.hashCode();
+        return calculateSubStateKey(pin_status) ^ tag.hashCode();
     }
 
     @Override
@@ -54,7 +47,7 @@ public class SubState {
         return true;
     }
 
-    public static int calculateSubStateIndex(byte[] pinStatus) {
+    public static int calculateSubStateIndex(final byte[] pinStatus) {
         int index = 0;
 
         for(int idx = 0; idx < pinStatus.length; idx++) {
@@ -62,5 +55,19 @@ public class SubState {
         }
 
         return index;
+    }
+
+    /**
+     * 
+     */
+    public static int calculateSubStateKey(final byte[] in_comb) {
+        int hash = 0;
+
+        for(int idx = 0; idx < in_comb.length; idx++) {
+            int byte_idx = idx % 4;
+            hash ^= (in_comb[idx] & 0xFF) << (8 * byte_idx);
+        }
+
+        return hash;       
     }
 }

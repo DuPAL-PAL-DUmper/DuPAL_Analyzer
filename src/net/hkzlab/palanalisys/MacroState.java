@@ -1,22 +1,25 @@
 package net.hkzlab.palanalisys;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class MacroState {
     public static final String MS_PRE_TAG = "MS_";
 
     public final String tag;
     public final boolean[] rpin_status;
+
     public final SubState[] substates;
     public final StateLink[] links;
+    private final HashMap<Integer, SubState> ssMap;
 
     public MacroState(final String tag, final boolean[] rpin_status, final int outPins, final int inPins) {
         this.tag = tag;
         this.rpin_status = rpin_status;
 
         links = new StateLink[2 ^ inPins]; // Create space for the future links out of this
-        substates = new SubState[3 ^ outPins]; // Create space for substates (each output pin is 3-state)
+        substates = new SubState[2 ^ inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
+        ssMap = new HashMap<>(); // Prepare the hashmap we'll use to avoid substate duplicates
     }
 
     @Override
