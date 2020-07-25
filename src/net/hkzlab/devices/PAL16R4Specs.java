@@ -21,17 +21,15 @@ public class PAL16R4Specs implements PALSpecsInterface {
     public int getNumROUTPins() {
         return 4;
     }
-
+    
     @Override
     public int getCLKPinMask() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0x00000001;
     }
 
     @Override
     public int getOEPinMask() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0x00000200;
     }
 
     @Override

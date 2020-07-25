@@ -24,14 +24,12 @@ public class PAL16R6Specs implements PALSpecsInterface {
 
     @Override
     public int getCLKPinMask() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0x00000001;
     }
 
     @Override
     public int getOEPinMask() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0x00000200;
     }
 
     @Override
