@@ -1,13 +1,17 @@
 package net.hkzlab.dupal;
 
+import net.hkzlab.devices.PAL16R6Specs;
+import net.hkzlab.devices.PALSpecs;
+import net.hkzlab.dupal.boardio.DuPALAnalyzer;
 import net.hkzlab.dupal.boardio.DuPALManager;
-import net.hkzlab.dupal.dupalproto.DuPALProto;
-import net.hkzlab.palanalisys.MacroState;
-import net.hkzlab.palanalisys.SubState;
 
 public class App {
     public static void main(String[] args) throws Exception {
         DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
+        PALSpecs pspecs = new PAL16R6Specs();
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
+
+        dpan.startAnalisys();
 
         /*
         try {
