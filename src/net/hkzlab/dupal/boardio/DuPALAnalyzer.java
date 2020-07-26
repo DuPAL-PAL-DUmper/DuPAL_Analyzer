@@ -33,30 +33,38 @@ public class DuPALAnalyzer {
     }
 
     private void guessIOs() {
+        logger.info("guessIOs() - starting...");
+
         int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask();
+
+        logger.info("guessIOs() - inmask: " + Integer.toHexString(inmask));
 
         int read, out_pins = 0;
         for(int idx = 0; idx <= inmask; idx++) {
             if((idx & ~inmask) != 0) continue; // We need to skip this round
 
+            logger.info("guessIOs() -> clock run " + Integer.toHexString(idx) + " outs: " + Integer.toBinaryString(out_pins));
+
             for(int i_idx = 0; i_idx <= inmask; i_idx++) {
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
+                
+                //logger.info("guessIOs() -> internal run " + Integer.toHexString(i_idx));
 
                 dpm.writeCommand(DuPALProto.buildWRITECommand((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() )));
                 dpm.writeCommand(DuPALProto.buildREADCommand());
                 read = DuPALProto.handleREADResponse(dpm.readResponse());
-                out_pins |= (read ^ pspecs.getIO_READMask());
+                out_pins |= (read ^ pspecs.getIO_READMask()) & pspecs.getIO_READMask();
                 
                 dpm.writeCommand(DuPALProto.buildWRITECommand(i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() | pspecs.getIO_WRITEMask())));
                 dpm.writeCommand(DuPALProto.buildREADCommand());
                 read = DuPALProto.handleREADResponse(dpm.readResponse());
-                out_pins |= ((read ^ ~pspecs.getIO_READMask()) & pspecs.getIO_READMask());
+                out_pins |= ((read ^ ~pspecs.getIO_READMask())) & pspecs.getIO_READMask();
             }
 
             pulseClock(idx & ~pspecs.getOEPinMask());
         }
 
-        System.out.println("TEST - guessIO: " + Integer.toHexString(out_pins));
+        logger.info("guessIOs() - end... got:" + Integer.toHexString(out_pins) + " outs:" + Integer.toBinaryString(out_pins));
     }
 
     private void pulseClock(int addr) {

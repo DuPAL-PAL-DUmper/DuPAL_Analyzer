@@ -11,6 +11,11 @@ public class App {
         PALSpecs pspecs = new PAL16R6Specs();
         DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
 
+        if(!dpm.enterRemoteMode()) {
+            System.out.println("Unable to enter remote mode!");
+            System.exit(-1);
+        }
+
         dpan.startAnalisys();
 
         /*
