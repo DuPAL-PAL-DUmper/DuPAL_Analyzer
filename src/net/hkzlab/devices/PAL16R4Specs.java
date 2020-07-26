@@ -13,11 +13,6 @@ public class PAL16R4Specs implements PALSpecsInterface {
     }
 
     @Override
-    public int getNumOUTPins() {
-        return 0;
-    }
-
-    @Override
     public int getNumROUTPins() {
         return 4;
     }
@@ -34,32 +29,26 @@ public class PAL16R4Specs implements PALSpecsInterface {
 
     @Override
     public int getINMask() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0x000001FE;
     }
 
     @Override
-    public int getOUTMask() {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getIO_READMask() {
+        return 0xE1;
     }
 
     @Override
-    public int getIO_INMask() {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getIO_WRITEMask() {
+        return 0x00038400;
     }
 
     @Override
-    public int getIO_OUTMask() {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getROUT_READMask() {
+        return 0x1E;
     }
 
     @Override
-    public int getROUTMask() {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getROUT_WRITEMask() {
+        return 0x00007800;
     }
-
 }
