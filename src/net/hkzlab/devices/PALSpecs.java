@@ -1,6 +1,6 @@
 package net.hkzlab.devices;
 
-public interface PALSpecsInterface {
+public interface PALSpecs {
     public int getNumINPins();
     public int getNumIOPins();
     public int getNumROUTPins();
