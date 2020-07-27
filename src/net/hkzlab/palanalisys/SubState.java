@@ -18,7 +18,7 @@ public class SubState {
     @Override
     public String toString() {
         StringBuffer strBuf = new StringBuffer();
-        strBuf.append(SS_PRE_TAG+tag+" - ");
+        strBuf.append(SS_PRE_TAG+tag+"-");
 
         for(byte pin : pin_status) {
             if(pin < 0) strBuf.append('x');
@@ -47,7 +47,7 @@ public class SubState {
         return true;
     }
 
-    public static int calculateSubStateIndex(final Boolean[] inputs) {
+    public static int calculateSubStateIndex(final boolean[] inputs) {
         int index = 0;
 
         for(int idx = 0; idx < inputs.length; idx++) {

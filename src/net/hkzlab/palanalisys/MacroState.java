@@ -1,6 +1,5 @@
 package net.hkzlab.palanalisys;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class MacroState {
@@ -26,7 +25,7 @@ public class MacroState {
 
     @Override
     public String toString() {
-        return MS_PRE_TAG + tag + " - " + String.format("%02X", rpin_status);
+        return MS_PRE_TAG + tag;
     }
 
     @Override

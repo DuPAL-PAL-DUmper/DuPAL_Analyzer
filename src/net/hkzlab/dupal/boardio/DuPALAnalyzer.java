@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import net.hkzlab.devices.PALSpecs;
 import net.hkzlab.dupal.dupalproto.DuPALProto;
 import net.hkzlab.palanalisys.MacroState;
+import net.hkzlab.palanalisys.StateLink;
 import net.hkzlab.palanalisys.SubState;
 
 public class DuPALAnalyzer {
@@ -98,7 +99,7 @@ public class DuPALAnalyzer {
         //logger.info("Output states at start: " + String.format("%02X", (pins & IOasOUT_Mask)));
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
-        MacroState ms = new MacroState(buildMSTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+        MacroState ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
         
         mStates[mstate_idx] = ms; // Save it in our Array
         logger.info("Added " + ms + " at index " + mstate_idx);
@@ -109,19 +110,39 @@ public class DuPALAnalyzer {
 
     private boolean analyzeMacroState(MacroState ms) {
         if((ms.substates.length > 0) && (ms.substates[0] == null)) {
-            logger.info("Generating all possible substates for this macro state...");
+            logger.info("Generating all possible substates for macro state ["+ms+"]");
             genAllMSSubStates(ms);
         }
 
         int idx_mask = buildInputMask();
         int links_counter = 0;
 
+        logger.info("Now check if we have a link to follow...");
+
         // Check if we have a link to generate
-        for(int idx = 0; idx <= 0x387FE; idx+=2) {
+        int maxidx = pspecs.getIO_WRITEMask() | pspecs.getINMask();
+        for(int idx = 0; idx <= maxidx; idx+=2) {
             if((idx & idx_mask) != 0) continue; // Skip this run
 
             if(ms.links[links_counter] == null) {
-                // TODO: Ok, build a link and move to the next macrostate
+                logger.info("Generating link at index " + links_counter);
+
+                pulseClock(idx); // Enter the new state
+                int pins = readPINs();
+                int mstate_idx = (pins & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift();
+                MacroState nms = mStates[mstate_idx];
+                SubState ss = null;
+                StateLink sl = null;
+
+                if(nms == null) {
+                    nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+                    mStates[mstate_idx] = nms;
+                }
+                ss = generateSubState(nms, idx, idx_mask);
+                sl = new StateLink(ms.tag, writeAddrToBooleans(idx, idx_mask), ss);
+                ms.links[links_counter] = sl;
+
+                logger.info("Connected MS '"+ms+"' with SS '"+ss+"' ["+nms+"] with link '"+sl+"'");
 
                 return true;
             }
@@ -136,61 +157,76 @@ public class DuPALAnalyzer {
         return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << 10));
     }
 
-    private void genAllMSSubStates(MacroState ms) {
-        int idx_mask = buildInputMask();
+    private boolean[] writeAddrToBooleans(int addr, int mask) {
+        ArrayList<Boolean> instate = new ArrayList<>();
+        for(int pin_idx = 0; pin_idx < 18; pin_idx++) {
+           if(((mask >> pin_idx) & 0x01) > 0) continue; // Output pin, not interested
+
+           if(((addr >> pin_idx) & 0x01) > 0) instate.add(true);
+           else instate.add(false);
+        }
+
+        boolean[] barr = new boolean[instate.size()];
+
+        for(int idx = 0; idx < barr.length; idx++) barr[idx] = instate.get(idx);
+        
+        return barr;
+    }
+
+    private SubState generateSubState(MacroState ms, int idx, int idx_mask) {
+        SubState ss = null;
         int pins_1, pins_2, hiz_pins;
 
+        ArrayList<Byte> pinstate = new ArrayList<>();
+        boolean[] instate = null;
+
+        writePINs(idx);
+        pins_1 = readPINs();
+           
+        writePINs(idx | (IOasOUT_Mask << 10));
+        pins_2 = readPINs();
+
+        hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
+
+        for(int pin_idx = 0; pin_idx < 8; pin_idx++) {
+            if(((IOasOUT_Mask >> pin_idx) & 0x01) == 0) continue; // Not an output pin we're interested in
+
+            if(((hiz_pins >> pin_idx) & 0x01) > 0) pinstate.add((byte)-1);
+            else if (((pins_1 >> pin_idx) & 0x01) > 0) pinstate.add((byte)1);
+            else pinstate.add((byte)0);
+        }
+
+        instate = writeAddrToBooleans(idx, idx_mask);
+
+        logger.debug("pinstate len: " + pinstate.size() + " instate len: " + instate.length);
+
+        Byte[] out_state = pinstate.toArray(new Byte[pinstate.size()]);
+        int ss_idx = SubState.calculateSubStateIndex(instate);
+        int ss_key = SubState.calculateSubStateKey(out_state);
+            
+        logger.debug("substate index: " + ss_idx + " key: " + ss_key);
+
+        ss = ms.ssMap.get(Integer.valueOf(ss_key));
+        if(ss == null) {
+            ss = new SubState(ms.tag, ms, out_state);
+            ms.ssMap.put(Integer.valueOf(ss_key), ss);
+        } 
+        
+        ms.substates[ss_idx] = ss;
+
+        return ss;
+    }
+
+    private void genAllMSSubStates(MacroState ms) {
+        int idx_mask = buildInputMask();
         logger.debug("Input mask " + Integer.toBinaryString(idx_mask) + "b");
 
-        ArrayList<Byte> pinstate = new ArrayList<>();
-        ArrayList<Boolean> instate = new ArrayList<>();
-
-        for(int idx = 0; idx <= 0x387FE; idx+=2) {
+        int maxidx = pspecs.getIO_WRITEMask() | pspecs.getINMask();
+        for(int idx = 0; idx <= maxidx; idx+=2) {
             if((idx & idx_mask) != 0) continue; // Skip this run
 
             logger.debug("Testing combination 0x" + Integer.toHexString(idx));
-
-            pinstate.clear();
-            instate.clear();
-
-            writePINs(idx);
-            pins_1 = readPINs();
-            
-            writePINs(idx | IOasOUT_Mask);
-            pins_2 = readPINs();
-
-            hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
-
-            for(int pin_idx = 0; pin_idx < 8; pin_idx++) {
-                if(((IOasOUT_Mask >> pin_idx) & 0x01) == 0) continue; // Not an output pin we're interested in
-
-                if(((hiz_pins >> pin_idx) & 0x01) > 0) pinstate.add((byte)-1);
-                else if (((pins_1 >> pin_idx) & 0x01) > 0) pinstate.add((byte)1);
-                else pinstate.add((byte)0);
-            }
-
-            for(int pin_idx = 0; pin_idx < 18; pin_idx++) {
-                if(((idx_mask >> pin_idx) & 0x01) > 0) continue; // Output pin, not interested
-
-                if(((idx >> pin_idx) & 0x01) > 0) instate.add(true);
-                else instate.add(false);
-            }
-            
-            logger.debug("pinstate len: " + pinstate.size() + " instate len: " + instate.size());
-
-            Byte[] out_state = pinstate.toArray(new Byte[pinstate.size()]);
-            int ss_idx = SubState.calculateSubStateIndex(instate.toArray(new Boolean[instate.size()]));
-            int ss_key = SubState.calculateSubStateKey(out_state);
-            SubState ss = null;
-            
-            logger.debug("substate index: " + ss_idx + " key: " + ss_key);
-
-            ss = ms.ssMap.get(Integer.valueOf(ss_key));
-            if(ss == null) {
-                ss = new SubState(ms.tag, ms, out_state);
-                ms.ssMap.put(Integer.valueOf(ss_key), ss);
-            }
-            ms.substates[ss_idx] = ss;
+            generateSubState(ms, idx, idx_mask);
         }
 
         writePINs(0);
@@ -206,7 +242,7 @@ public class DuPALAnalyzer {
         return DuPALProto.handleWRITEResponse(dpm.readResponse());
     }
 
-    static private String buildMSTag(int idx) {
+    static private String buildTag(int idx) {
         return "TAG_"+Integer.toHexString(idx);
     }
 }

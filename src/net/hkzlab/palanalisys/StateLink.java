@@ -18,7 +18,7 @@ public class StateLink {
     @Override
     public String toString() {
         final StringBuffer strBuf = new StringBuffer();
-        strBuf.append(SL_PRE_TAG + tag + " - ");
+        strBuf.append(SL_PRE_TAG + tag + "-");
 
         for (final boolean in : inputs)
             strBuf.append(in ? '1' : '0');
