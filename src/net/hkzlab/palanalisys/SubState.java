@@ -7,9 +7,9 @@ public class SubState {
 
     public final String tag;
     public final MacroState macroState;
-    public final byte[] pin_status;
+    public final Byte[] pin_status;
 
-    public SubState(final String tag, final MacroState macroState, final byte[] pin_status) {
+    public SubState(final String tag, final MacroState macroState, final Byte[] pin_status) {
         this.tag = tag;
         this.macroState = macroState;
         this.pin_status = pin_status;
@@ -47,7 +47,7 @@ public class SubState {
         return true;
     }
 
-    public static int calculateSubStateIndex(final boolean[] inputs) {
+    public static int calculateSubStateIndex(final Boolean[] inputs) {
         int index = 0;
 
         for(int idx = 0; idx < inputs.length; idx++) {
@@ -60,12 +60,12 @@ public class SubState {
     /**
      * 
      */
-    public static int calculateSubStateKey(final byte[] in_comb) {
+    public static int calculateSubStateKey(final Byte[] out_comb) {
         int hash = 0;
 
-        for(int idx = 0; idx < in_comb.length; idx++) {
+        for(int idx = 0; idx < out_comb.length; idx++) {
             int byte_idx = idx % 4;
-            hash ^= (in_comb[idx] & 0xFF) << (8 * byte_idx);
+            hash ^= (out_comb[idx] & 0xFF) << (8 * byte_idx);
         }
 
         return hash;       

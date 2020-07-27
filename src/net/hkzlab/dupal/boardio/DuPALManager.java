@@ -70,7 +70,7 @@ public class DuPALManager {
     public void writeCommand(String command) {
         if((serport != null) && serport.isOpened()) {
             try {
-                logger.info("Command -> " + command);
+                logger.debug("Command -> " + command);
                 serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
                 try { Thread.sleep(25); } catch(InterruptedException e) {}; // Wait a bit for execution and response
             } catch (SerialPortException e) {
@@ -84,7 +84,7 @@ public class DuPALManager {
             try {
                 String resp = serport.readString().trim();
                 
-                logger.info("Response <- " + resp);
+                logger.debug("Response <- " + resp);
                 
                 return resp;
             } catch (SerialPortException e) {

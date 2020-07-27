@@ -19,21 +19,21 @@ public class MacroState {
         this.rpin_status = rpin_status;
         this.rpins = rpins;
 
-        links = new StateLink[2 ^ inPins]; // Create space for the future links out of this
-        substates = new SubState[2 ^ inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
+        links = new StateLink[1 << inPins]; // Create space for the future links out of this
+        substates = new SubState[1 << inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
         ssMap = new HashMap<>(); // Prepare the hashmap we'll use to avoid substate duplicates
     }
 
     @Override
     public String toString() {
-        return MS_PRE_TAG + tag + " - " + Integer.toBinaryString(rpin_status);
+        return MS_PRE_TAG + tag + " - " + String.format("%02X", rpin_status);
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
 
-        for (int idx = 0; idx < (2^rpins); idx++) {
+        for (int idx = 0; idx < (1 << rpins); idx++) {
             hash ^= (((rpin_status >> idx) & 0x01) << (idx % 32));
         }
 
