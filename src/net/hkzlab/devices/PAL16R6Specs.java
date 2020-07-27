@@ -51,4 +51,9 @@ public class PAL16R6Specs implements PALSpecs {
     public int getROUT_WRITEMask() {
         return getROUT_READMask() << 10;
     }
+
+    @Override
+    public String toString() {
+        return "PAL16R6";
+    }
 }

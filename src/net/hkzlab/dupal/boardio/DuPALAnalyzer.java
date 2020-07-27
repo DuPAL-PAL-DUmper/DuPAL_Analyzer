@@ -24,8 +24,10 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() {
+        logger.info("startAnalisys() - Device:" + pspecs + " kwnown IOs? " + (IOasOUT_Mask < 0 ? "Y" : "N"));
+
         if(IOasOUT_Mask < 0) { // We need to detect the status of the IOs...
-            guessIOs(); // TODO: Try to guess whether IOs are Inputs or Outputs
+            IOasOUT_Mask = guessIOs(); // Try to guess whether IOs are Inputs or Outputs
         }
 
         // TODO: Actually perform the analisys
