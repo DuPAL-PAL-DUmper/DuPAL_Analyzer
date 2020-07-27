@@ -7,15 +7,17 @@ public class MacroState {
     public static final String MS_PRE_TAG = "MS_";
 
     public final String tag;
-    public final boolean[] rpin_status;
+    public final int rpins;
+    public final int rpin_status;
 
     public final SubState[] substates;
     public final StateLink[] links;
     public final HashMap<Integer, SubState> ssMap;
 
-    public MacroState(final String tag, final boolean[] rpin_status, final int outPins, final int inPins) {
+    public MacroState(final String tag, final int rpin_status, final int rpins, final int inPins) {
         this.tag = tag;
         this.rpin_status = rpin_status;
+        this.rpins = rpins;
 
         links = new StateLink[2 ^ inPins]; // Create space for the future links out of this
         substates = new SubState[2 ^ inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
@@ -24,21 +26,15 @@ public class MacroState {
 
     @Override
     public String toString() {
-        final StringBuffer strBuf = new StringBuffer();
-        strBuf.append(MS_PRE_TAG + tag + " - ");
-
-        for (final boolean rpin : rpin_status)
-            strBuf.append(rpin ? '1' : '0');
-
-        return strBuf.toString();
+        return MS_PRE_TAG + tag + " - " + Integer.toBinaryString(rpin_status);
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
 
-        for (int idx = 0; idx < rpin_status.length; idx++) {
-            hash ^= ((rpin_status[idx] ? 1 : 0) << (idx % 32));
+        for (int idx = 0; idx < (2^rpins); idx++) {
+            hash ^= (((rpin_status >> idx) & 0x01) << (idx % 32));
         }
 
         return hash ^ tag.hashCode();
@@ -54,8 +50,8 @@ public class MacroState {
             return false;
 
         final MacroState ops = (MacroState) o;
+        if(ops.rpin_status != this.rpin_status) return false;
         if(!ops.tag.equals(this.tag)) return false;
-        if(!Arrays.equals(ops.rpin_status, this.rpin_status)) return false;
 
         return true;
     }

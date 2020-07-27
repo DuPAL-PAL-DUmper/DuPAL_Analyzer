@@ -94,6 +94,7 @@ public class DuPALAnalyzer {
         logger.info("Output states at start: " + Integer.toBinaryString(pins & IOasOUT_Mask) + "b");
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
+        MacroState ms = new MacroState(buildMSTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
     }
 
     private int readPINs() {
