@@ -24,14 +24,13 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() {
-        logger.info("startAnalisys() - Device:" + pspecs + " kwnown IOs? " + (IOasOUT_Mask < 0 ? "Y" : "N"));
+        logger.info("startAnalisys() - Device:" + pspecs + " known IOs? " + (IOasOUT_Mask < 0 ? "Y" : "N"));
 
         if(IOasOUT_Mask < 0) { // We need to detect the status of the IOs...
             IOasOUT_Mask = guessIOs(); // Try to guess whether IOs are Inputs or Outputs
         }
 
-        // TODO: Actually perform the analisys
-
+        internal_analisys();
     }
 
     private int guessIOs() {
@@ -47,11 +46,13 @@ public class DuPALAnalyzer {
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
 
-            logger.info("guessIOs() -> run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+            logger.debug("guessIOs() -> run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
 
             for(int i_idx = 0; i_idx <= inmask; i_idx++) {
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
-                if(out_pins == pspecs.getIO_READMask()) break;
+                if(out_pins == pspecs.getIO_READMask()) break; // Stop checking, we already found that all IOs are outputs...
+
+                logger.debug("guessIOs() -> internal loop: " + (i_idx >> 1));
                 
                 dpm.writeCommand(DuPALProto.buildWRITECommand((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() )));
                 dpm.writeCommand(DuPALProto.buildREADCommand());
@@ -75,5 +76,9 @@ public class DuPALAnalyzer {
     private void pulseClock(int addr) {
         dpm.writeCommand(DuPALProto.buildWRITECommand((addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask())); // Clock high,
         dpm.writeCommand(DuPALProto.buildWRITECommand(addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask()))); // Clock low
+    }
+
+    private void internal_analisys() {
+        logger.info("internal_analisys() - Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask));
     }
 }
