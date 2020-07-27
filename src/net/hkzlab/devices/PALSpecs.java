@@ -12,4 +12,6 @@ public interface PALSpecs {
     public int getIO_WRITEMask();
     public int getROUT_READMask();
     public int getROUT_WRITEMask();
+
+    public int getROUT_READMaskShift();
 }

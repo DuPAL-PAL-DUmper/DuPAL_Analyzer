@@ -56,4 +56,9 @@ public class PAL16R6Specs implements PALSpecs {
     public String toString() {
         return "PAL16R6";
     }
+
+    @Override
+    public int getROUT_READMaskShift() {
+        return 0;
+    }
 }

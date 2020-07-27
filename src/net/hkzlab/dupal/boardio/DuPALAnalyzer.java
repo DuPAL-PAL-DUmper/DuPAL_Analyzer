@@ -5,9 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import net.hkzlab.devices.PALSpecs;
 import net.hkzlab.dupal.dupalproto.DuPALProto;
+import net.hkzlab.palanalisys.MacroState;
 
 public class DuPALAnalyzer {
     private final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
+
+    private final MacroState[] mStates;
 
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
@@ -17,6 +20,8 @@ public class DuPALAnalyzer {
         this.dpm = dpm;
         this.pspecs = pspecs;
         this.IOasOUT_Mask = IOasOUT_Mask;
+
+        this.mStates = new MacroState[2^pspecs.getNumROUTPins()];
     } 
     
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs) {
@@ -79,7 +84,7 @@ public class DuPALAnalyzer {
 
     private void internal_analisys() {
         logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask)+"b");
-        int pins;
+        int pins, mstate_idx;
 
         writePINs(0x00); // Set the address to 0, enable the /OE pin and leave clock to low
         pins = readPINs();
@@ -87,6 +92,8 @@ public class DuPALAnalyzer {
         int routstate = pins & pspecs.getROUT_READMask();
         logger.info("Registered output states at start: " + Integer.toBinaryString(routstate) + "b");
         logger.info("Output states at start: " + Integer.toBinaryString(pins & IOasOUT_Mask) + "b");
+
+        mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
     }
 
     private int readPINs() {
@@ -97,5 +104,9 @@ public class DuPALAnalyzer {
     private int writePINs(int addr) {
         dpm.writeCommand(DuPALProto.buildWRITECommand(addr));
         return DuPALProto.handleWRITEResponse(dpm.readResponse());
+    }
+
+    static private String buildMSTag(int idx) {
+        return "MS_"+Integer.toHexString(idx);
     }
 }
