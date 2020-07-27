@@ -99,16 +99,45 @@ public class DuPALAnalyzer {
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
         MacroState ms = new MacroState(buildMSTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
-        logger.info("Generating all possible substates for this macro state...");
-        genAllMSSubStates(ms);
+        
         mStates[mstate_idx] = ms; // Save it in our Array
-
         logger.info("Added " + ms + " at index " + mstate_idx);
+
+        analyzeMacroState(ms);
         // TODO: Now, we have a starting point
     }
 
+    private boolean analyzeMacroState(MacroState ms) {
+        if((ms.substates.length > 0) && (ms.substates[0] == null)) {
+            logger.info("Generating all possible substates for this macro state...");
+            genAllMSSubStates(ms);
+        }
+
+        int idx_mask = buildInputMask();
+        int links_counter = 0;
+
+        // Check if we have a link to generate
+        for(int idx = 0; idx <= 0x387FE; idx+=2) {
+            if((idx & idx_mask) != 0) continue; // Skip this run
+
+            if(ms.links[links_counter] == null) {
+                // TODO: Ok, build a link and move to the next macrostate
+
+                return true;
+            }
+
+            links_counter++; // Keep the counter up to date
+        }
+
+        return false; // We did not move from the macrostate
+    }
+
+    private int buildInputMask() {
+        return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << 10));
+    }
+
     private void genAllMSSubStates(MacroState ms) {
-        int idx_mask = (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << 10));
+        int idx_mask = buildInputMask();
         int pins_1, pins_2, hiz_pins;
 
         logger.debug("Input mask " + Integer.toBinaryString(idx_mask) + "b");
