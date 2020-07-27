@@ -32,7 +32,7 @@ public class DuPALAnalyzer {
 
     }
 
-    private void guessIOs() {
+    private int guessIOs() {
         logger.info("guessIOs() - starting...");
 
         int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask();
@@ -45,7 +45,7 @@ public class DuPALAnalyzer {
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
 
-            logger.info("guessIOs() -> run " + Integer.toHexString(idx >> 1) + " current guessed outs: " + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+            logger.info("guessIOs() -> run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
 
             for(int i_idx = 0; i_idx <= inmask; i_idx++) {
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
@@ -65,7 +65,9 @@ public class DuPALAnalyzer {
             pulseClock(idx & ~pspecs.getOEPinMask());
         }
 
-        logger.info("guessIOs() - end... I guessed: " + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+        logger.info("guessIOs() - end... I guessed: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+
+        return out_pins;
     }
 
     private void pulseClock(int addr) {
