@@ -4,11 +4,16 @@ import static jssc.SerialPort.*;
 
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortTimeoutException;
 
 public class DuPALManager {
+    private final Logger logger = LoggerFactory.getLogger(DuPALManager.class);
+
     private SerialPort serport = null;
 
 
@@ -65,6 +70,7 @@ public class DuPALManager {
     public void writeCommand(String command) {
         if((serport != null) && serport.isOpened()) {
             try {
+                logger.info("Command -> " + command);
                 serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
                 try { Thread.sleep(25); } catch(InterruptedException e) {}; // Wait a bit for execution and response
             } catch (SerialPortException e) {
@@ -76,7 +82,11 @@ public class DuPALManager {
     public String readResponse() {
          if((serport != null) && serport.isOpened()) {
             try {
-                return serport.readString().trim();
+                String resp = serport.readString().trim();
+                
+                logger.info("Response <- " + resp);
+                
+                return resp;
             } catch (SerialPortException e) {
                 e.printStackTrace();
             }

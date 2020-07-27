@@ -54,14 +54,12 @@ public class DuPALAnalyzer {
 
                 logger.debug("internal loop: " + (i_idx >> 1));
                 
-                dpm.writeCommand(DuPALProto.buildWRITECommand((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() )));
-                dpm.writeCommand(DuPALProto.buildREADCommand());
-                read = DuPALProto.handleREADResponse(dpm.readResponse());
+                writePINs((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask()));
+                read = readPINs();
                 out_pins |= (read ^ pspecs.getIO_READMask()) & pspecs.getIO_READMask();
                 
-                dpm.writeCommand(DuPALProto.buildWRITECommand(i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() | pspecs.getIO_WRITEMask())));
-                dpm.writeCommand(DuPALProto.buildREADCommand());
-                read = DuPALProto.handleREADResponse(dpm.readResponse());
+                writePINs(i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() | pspecs.getIO_WRITEMask()));
+                read = readPINs();
                 out_pins |= ((read ^ ~pspecs.getIO_READMask())) & pspecs.getIO_READMask();
             }
 
@@ -74,11 +72,30 @@ public class DuPALAnalyzer {
     }
 
     private void pulseClock(int addr) {
-        dpm.writeCommand(DuPALProto.buildWRITECommand((addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask())); // Clock high,
-        dpm.writeCommand(DuPALProto.buildWRITECommand(addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask()))); // Clock low
+        logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr));
+        writePINs((addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask()); // Clock high,
+        writePINs(addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask())); // Clock low
     }
 
     private void internal_analisys() {
         logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask)+"b");
+        int pins;
+
+        writePINs(0x00); // Set the address to 0, enable the /OE pin and leave clock to low
+        pins = readPINs();
+
+        int routstate = pins & pspecs.getROUT_READMask();
+        logger.info("Registered output states at start: " + Integer.toBinaryString(routstate) + "b");
+        logger.info("Output states at start: " + Integer.toBinaryString(pins & IOasOUT_Mask) + "b");
+    }
+
+    private int readPINs() {
+        dpm.writeCommand(DuPALProto.buildREADCommand());
+        return DuPALProto.handleREADResponse(dpm.readResponse());
+    }
+
+    private int writePINs(int addr) {
+        dpm.writeCommand(DuPALProto.buildWRITECommand(addr));
+        return DuPALProto.handleWRITEResponse(dpm.readResponse());
     }
 }
