@@ -24,7 +24,7 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() {
-        logger.info("startAnalisys() - Device:" + pspecs + " known IOs? " + (IOasOUT_Mask < 0 ? "Y" : "N"));
+        logger.info("Device:" + pspecs + " known IOs? " + (IOasOUT_Mask < 0 ? "Y" : "N"));
 
         if(IOasOUT_Mask < 0) { // We need to detect the status of the IOs...
             IOasOUT_Mask = guessIOs(); // Try to guess whether IOs are Inputs or Outputs
@@ -34,11 +34,11 @@ public class DuPALAnalyzer {
     }
 
     private int guessIOs() {
-        logger.info("guessIOs() - starting...");
+        logger.info("starting...");
 
         int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask();
 
-        logger.info("guessIOs() - inmask: " + Integer.toHexString(inmask));
+        logger.info("inmask: " + Integer.toHexString(inmask));
 
         int read, out_pins = 0;
         for(int idx = 0; idx <= inmask; idx++) {
@@ -46,13 +46,13 @@ public class DuPALAnalyzer {
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
 
-            logger.debug("guessIOs() -> run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+            logger.debug("run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
 
             for(int i_idx = 0; i_idx <= inmask; i_idx++) {
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
                 if(out_pins == pspecs.getIO_READMask()) break; // Stop checking, we already found that all IOs are outputs...
 
-                logger.debug("guessIOs() -> internal loop: " + (i_idx >> 1));
+                logger.debug("internal loop: " + (i_idx >> 1));
                 
                 dpm.writeCommand(DuPALProto.buildWRITECommand((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() )));
                 dpm.writeCommand(DuPALProto.buildREADCommand());
@@ -68,7 +68,7 @@ public class DuPALAnalyzer {
             pulseClock(idx & ~pspecs.getOEPinMask());
         }
 
-        logger.info("guessIOs() - end... I guessed: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins));
+        logger.info("end... I guessed: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
 
         return out_pins;
     }
@@ -79,6 +79,6 @@ public class DuPALAnalyzer {
     }
 
     private void internal_analisys() {
-        logger.info("internal_analisys() - Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask));
+        logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask)+"b");
     }
 }
