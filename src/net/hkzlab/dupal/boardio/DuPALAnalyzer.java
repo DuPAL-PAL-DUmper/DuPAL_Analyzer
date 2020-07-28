@@ -26,7 +26,7 @@ public class DuPALAnalyzer {
         this.IOasOUT_Mask = IOasOUT_Mask;
 
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
-        logger.info("Provisioning for " +this.mStates.length+" possible macro states");
+        logger.info("Provisioning for " +this.mStates.length+" possible MacroStates");
     } 
     
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs) {
@@ -103,17 +103,17 @@ public class DuPALAnalyzer {
         MacroState nms = null;
 
         mStates[mstate_idx] = ms; // Save it in our Array
-        logger.info("Added " + ms + " at index " + mstate_idx);
+        logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
 
         while(true) {
             nms = analyzeMacroState(ms);
             
             if(nms != null) {
-                logger.info("We moved to state ["+nms+"]");
+                logger.info("We moved to MacroState ["+nms+"]");
                 ms = nms;
                 nms = null;
             } else {
-                logger.info("No more unknown links to follow on ["+ms+"]");
+                logger.info("No more StateLinks to generate in ["+ms+"]");
                 return; // TODO: figure how to move away from this state 
             }
         }
@@ -124,16 +124,16 @@ public class DuPALAnalyzer {
 
     private MacroState analyzeMacroState(MacroState ms) {
         if(!ms.ss_ready) {
-            logger.info("Generating all possible substates for macro state ["+ms+"]");
+            logger.info("Generating all possible SubStates for MacroState ["+ms+"]");
             genAllMSSubStates(ms);
         } else {
-            logger.info("Substates already generated for macro state ["+ms+"]");
+            logger.info("SubStates already generated for MacroStates ["+ms+"]");
         }
 
         int idx_mask = buildInputMask();
         int links_counter = 0;
 
-        logger.info("Now check if we have a link to follow...");
+        logger.info("Now check if we have a new StateLink to try...");
 
         // Check if we have a link to generate
         int maxidx = pspecs.getIO_WRITEMask() | pspecs.getINMask();
@@ -141,7 +141,7 @@ public class DuPALAnalyzer {
             if((idx & idx_mask) != 0) continue; // Skip this run
 
             if(ms.links[links_counter] == null) {
-                logger.info("Generating link at index " + links_counter);
+                logger.info("Generating StateLink at index " + links_counter);
 
                 pulseClock(idx); // Enter the new state
                 int pins = readPINs();
@@ -158,7 +158,7 @@ public class DuPALAnalyzer {
                 sl = new StateLink(ms.tag, idx, writeAddrToBooleans(idx, idx_mask), ss);
                 ms.links[links_counter] = sl;
 
-                logger.info("Connected MS '"+ms+"' with SS '"+ss+"' ["+nms+"] with link '"+sl+"'");
+                logger.info("Connected MS '"+ms+"' with SS '"+ss+"' ["+nms+"] with SL '"+sl+"'");
 
                 return nms;
             }
@@ -220,14 +220,14 @@ public class DuPALAnalyzer {
         int ss_idx = SubState.calculateSubStateIndex(instate);
         int ss_key = SubState.calculateSubStateKey(out_state);
             
-        logger.debug("substate index: " + ss_idx + " key: " + ss_key);
+        logger.debug("SubState index: " + ss_idx + " key: " + ss_key);
 
         ss = ms.ssMap.get(Integer.valueOf(ss_key));
         if(ss == null) {
             ss = new SubState(ms.tag, ms, out_state);
             ms.ssMap.put(Integer.valueOf(ss_key), ss);
         } else {
-            logger.debug("substate index: " + ss_idx + " key: " +ss_key+ " was already present.");
+            logger.debug("SubState index: " + ss_idx + " key: " +ss_key+ " was already present.");
         }
         
         ms.substates[ss_idx] = ss;
@@ -249,7 +249,7 @@ public class DuPALAnalyzer {
 
         ms.ss_ready = true;
 
-        logger.debug("Macrostate ["+ms+"] now has "+ms.ssMap.size()+" substates in array of size " + ms.substates.length);
+        logger.debug("MacroState ["+ms+"] now has "+ms.ssMap.size()+" SubStates in array of size " + ms.substates.length);
 
         writePINs(0);
     }
