@@ -123,7 +123,7 @@ public class DuPALAnalyzer {
     }
 
     private MacroState analyzeMacroState(MacroState ms) {
-        if(ms.ssMap.size() < ms.substates.length) {
+        if(!ms.ss_ready) {
             logger.info("Generating all possible substates for macro state ["+ms+"]");
             genAllMSSubStates(ms);
         } else {
@@ -244,6 +244,10 @@ public class DuPALAnalyzer {
             logger.debug("Testing combination 0x" + Integer.toHexString(idx));
             generateSubState(ms, idx, idx_mask);
         }
+
+        ms.ss_ready = true;
+
+        logger.info("Macrostate ["+ms+"] now has "+ms.ssMap.size()+" substates in array of size " + ms.substates.length);
 
         writePINs(0);
     }

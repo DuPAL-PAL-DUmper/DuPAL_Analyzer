@@ -5,6 +5,8 @@ import java.util.HashMap;
 public class MacroState {
     public static final String MS_PRE_TAG = "MS_";
 
+    public boolean ss_ready = false;
+
     public final String tag;
     public final int rpins;
     public final int rpin_status;
@@ -21,6 +23,8 @@ public class MacroState {
         links = new StateLink[1 << inPins]; // Create space for the future links out of this
         substates = new SubState[1 << inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
         ssMap = new HashMap<>(); // Prepare the hashmap we'll use to avoid substate duplicates
+
+        ss_ready = false;
     }
 
     @Override
