@@ -20,11 +20,13 @@ public class SubState {
         StringBuffer strBuf = new StringBuffer();
         strBuf.append(SS_PRE_TAG+tag+"-");
 
-        for(byte pin : pin_status) {
-            if(pin < 0) strBuf.append('x');
-            else if (pin == 0) strBuf.append(0);
-            else strBuf.append(1);
-        }
+        if(pin_status.length > 0) {
+            for(byte pin : pin_status) {
+                if(pin < 0) strBuf.append('x');
+                else if (pin == 0) strBuf.append(0);
+                else strBuf.append(1);
+            }
+        } else strBuf.append("noout");
 
         return strBuf.toString();
     }
