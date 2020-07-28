@@ -100,18 +100,34 @@ public class DuPALAnalyzer {
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
         MacroState ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
-        
+        MacroState nms = null;
+
         mStates[mstate_idx] = ms; // Save it in our Array
         logger.info("Added " + ms + " at index " + mstate_idx);
 
-        analyzeMacroState(ms);
+        while(true) {
+            nms = analyzeMacroState(ms);
+            
+            if(nms != null) {
+                logger.info("We moved to state ["+nms+"]");
+                ms = nms;
+                nms = null;
+            } else {
+                logger.info("No more unknown links to follow on ["+ms+"]");
+                return; // TODO: figure how to move away from this state 
+            }
+        }
+
+
         // TODO: Now, we have a starting point
     }
 
-    private boolean analyzeMacroState(MacroState ms) {
-        if((ms.substates.length > 0) && (ms.substates[0] == null)) {
+    private MacroState analyzeMacroState(MacroState ms) {
+        if(ms.ssMap.size() < ms.substates.length) {
             logger.info("Generating all possible substates for macro state ["+ms+"]");
             genAllMSSubStates(ms);
+        } else {
+            logger.info("Substates already generated for macro state ["+ms+"]");
         }
 
         int idx_mask = buildInputMask();
@@ -139,18 +155,18 @@ public class DuPALAnalyzer {
                     mStates[mstate_idx] = nms;
                 }
                 ss = generateSubState(nms, idx, idx_mask);
-                sl = new StateLink(ms.tag, writeAddrToBooleans(idx, idx_mask), ss);
+                sl = new StateLink(ms.tag, idx, writeAddrToBooleans(idx, idx_mask), ss);
                 ms.links[links_counter] = sl;
 
                 logger.info("Connected MS '"+ms+"' with SS '"+ss+"' ["+nms+"] with link '"+sl+"'");
 
-                return true;
+                return nms;
             }
 
             links_counter++; // Keep the counter up to date
         }
 
-        return false; // We did not move from the macrostate
+        return null; // We did not move from the macrostate
     }
 
     private int buildInputMask() {

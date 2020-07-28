@@ -6,11 +6,13 @@ public class StateLink {
     public static final String SL_PRE_TAG = "SL_";
 
     public final String tag;
+    public final int raw_addr;
     public final boolean[] inputs;
     public final SubState destSState;
 
-    public StateLink(final String tag, final boolean[] inputs, final SubState destSState) {
+    public StateLink(final String tag, final int raw_addr, final boolean[] inputs, final SubState destSState) {
         this.tag = tag;
+        this.raw_addr = raw_addr;
         this.inputs = inputs;
         this.destSState = destSState;
     }
