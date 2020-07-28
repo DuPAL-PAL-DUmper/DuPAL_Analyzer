@@ -249,7 +249,7 @@ public class DuPALAnalyzer {
 
         ms.ss_ready = true;
 
-        logger.info("Macrostate ["+ms+"] now has "+ms.ssMap.size()+" substates in array of size " + ms.substates.length);
+        logger.debug("Macrostate ["+ms+"] now has "+ms.ssMap.size()+" substates in array of size " + ms.substates.length);
 
         writePINs(0);
     }
