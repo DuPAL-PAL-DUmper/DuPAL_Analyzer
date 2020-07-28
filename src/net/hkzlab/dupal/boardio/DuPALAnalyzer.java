@@ -226,7 +226,9 @@ public class DuPALAnalyzer {
         if(ss == null) {
             ss = new SubState(ms.tag, ms, out_state);
             ms.ssMap.put(Integer.valueOf(ss_key), ss);
-        } 
+        } else {
+            logger.debug("substate index: " + ss_idx + " key: " +ss_key+ " was already present.");
+        }
         
         ms.substates[ss_idx] = ss;
 
