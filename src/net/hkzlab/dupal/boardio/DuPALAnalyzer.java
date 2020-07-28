@@ -106,6 +106,11 @@ public class DuPALAnalyzer {
         logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
 
         while(true) {
+            if(ms == null) {
+                logger.info("There are no more unknown StateLinks we can reach.");
+                return;
+            }
+
             nms = analyzeMacroState(ms);
             
             if(nms != null) {
@@ -114,12 +119,40 @@ public class DuPALAnalyzer {
                 nms = null;
             } else {
                 logger.info("No more StateLinks to generate in ["+ms+"]");
-                return; // TODO: figure how to move away from this state 
+                StateLink[] slPath = findPathToNewStateLinks(ms);
+                
+                if(slPath == null) {
+                    logger.info("Found no paths starting from ["+ms+"]");
+                    ms = null;
+                } else {
+                    // Traverse the path
+                    for(StateLink sl : slPath) pulseClock(sl.raw_addr);
+                    ms = slPath[slPath.length - 1].destSState.macroState; // Mark the new macro state
+                }
+            }
+        }
+    }
+
+    private StateLink[] findPathToNewStateLinks(MacroState start_ms) {
+        // Search for a state that still has unexplored links
+        for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
+            if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
+                for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
+                    if(mStates[ms_idx].links[sl_idx] == null) { // Found an unexplored link, we need to search a path to it
+                        logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
+                        StateLink[] sll = internal_searchPath(start_ms, mStates[ms_idx]);
+                        if(sll != null) return sll; // Ok, we found a path
+                    }
+                }
             }
         }
 
+        return null; // Finding nothing
+    }
 
-        // TODO: Now, we have a starting point
+    private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
+        // TODO: Implement the search protocol
+        return null;
     }
 
     private MacroState analyzeMacroState(MacroState ms) {
