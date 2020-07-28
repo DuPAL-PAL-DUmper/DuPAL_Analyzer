@@ -265,6 +265,6 @@ public class DuPALAnalyzer {
     }
 
     static private String buildTag(int idx) {
-        return "TAG_"+Integer.toHexString(idx);
+        return String.format("%02X", idx);
     }
 }
