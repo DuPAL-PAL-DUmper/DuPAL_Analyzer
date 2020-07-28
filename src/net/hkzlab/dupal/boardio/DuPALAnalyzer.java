@@ -125,9 +125,11 @@ public class DuPALAnalyzer {
                     logger.info("Found no paths starting from ["+ms+"]");
                     ms = null;
                 } else {
+                    ms = slPath[slPath.length - 1].destSState.macroState; // Mark the new macro state
+                    
+                    logger.info("Found a path to another MacroState: ["+ms+"]");
                     // Traverse the path
                     for(StateLink sl : slPath) pulseClock(sl.raw_addr);
-                    ms = slPath[slPath.length - 1].destSState.macroState; // Mark the new macro state
                 }
             }
         }
