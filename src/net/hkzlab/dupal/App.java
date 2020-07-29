@@ -1,5 +1,8 @@
 package net.hkzlab.dupal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.hkzlab.devices.PAL16R4Specs;
 import net.hkzlab.devices.PAL16R6Specs;
 import net.hkzlab.devices.PALSpecs;
@@ -7,11 +10,13 @@ import net.hkzlab.dupal.boardio.DuPALAnalyzer;
 import net.hkzlab.dupal.boardio.DuPALManager;
 
 public class App {
+    private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
+
     public static void main(String[] args) throws Exception {
         DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
-        //PALSpecs pspecs = new PAL16R6Specs();
+        // PALSpecs pspecs = new PAL16R6Specs();
         PALSpecs pspecs = new PAL16R4Specs();
-        //DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
+        // DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
         DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0x80);
 
         if(!dpm.enterRemoteMode()) {
