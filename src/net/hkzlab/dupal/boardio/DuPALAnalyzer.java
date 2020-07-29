@@ -156,6 +156,8 @@ public class DuPALAnalyzer {
     }
 
     private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
+        logger.info("Searching from a path from ["+start+"] to ["+dest+"]");
+
         Stack<StateLink> slStack = new Stack<>();
         Set<MacroState> msSet = new HashSet<>();
         Set<StateLink> slSet = new HashSet<>();
@@ -165,7 +167,14 @@ public class DuPALAnalyzer {
 
         while(curMS != null) {
             if(curMS.equals(dest)) {
-                return slStack.toArray(new StateLink[slStack.size()]);
+                StateLink[] arr = slStack.toArray(new StateLink[slStack.size()]);
+
+                StringBuffer arrbuf = new StringBuffer();
+                arrbuf.append("Found path from ["+start+"] to ["+dest+"] via:\n");
+                for(StateLink sl : arr) arrbuf.append("\t"+sl.toString()+"\n");
+                logger.info(arrbuf.toString());
+
+                return arr;
             }
 
             boolean foundLink = false;
@@ -173,10 +182,13 @@ public class DuPALAnalyzer {
                 if((curMS.links[idx] != null) && !slSet.contains(curMS.links[idx])) { // We have not yet tried this link
                     slSet.add(curMS.links[idx]);
                     if(!msSet.contains(curMS.links[idx].destSState.macroState)) { // And we have not yet tried this macrostate!
+                        logger.info("Moving from ["+curMS+"] to ["+curMS.links[idx].destSState.macroState+"] - via ["+curMS.links[idx]+"]");
+
                         slStack.push(curMS.links[idx]);
                         msSet.add(curMS.links[idx].destSState.macroState);
                         curMS = curMS.links[idx].destSState.macroState;
                         foundLink = true;
+                        
                         break; // Break out of this loop
                     }
                 }
@@ -189,6 +201,8 @@ public class DuPALAnalyzer {
                     if(slStack.size() > 0) {
                         curMS = slStack.peek().destSState.macroState; // Back to the previous node
                     } else curMS = start; // Back at the beginning it seems...
+                    logger.info("Moved back to ["+curMS+"]");
+
                 } else return null; 
                 
                 if(slStack.size() > 0) {
@@ -198,7 +212,6 @@ public class DuPALAnalyzer {
 
         }
 
-        // TODO: Implement the search protocol
         return null;
     }
 
