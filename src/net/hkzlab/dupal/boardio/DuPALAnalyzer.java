@@ -102,11 +102,17 @@ public class DuPALAnalyzer {
         //logger.info("Output states at start: " + String.format("%02X", (pins & IOasOUT_Mask)));
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
-        MacroState ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+        MacroState ms = null;
         MacroState nms = null;
-
-        mStates[mstate_idx] = ms; // Save it in our Array
-        logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
+        
+        if(mStates[mstate_idx] == null) {
+            ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+            mStates[mstate_idx] = ms;
+            logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
+        } else {
+            ms = mStates[mstate_idx];
+            logger.info("Recovered MacroState ["+ms+"] from index " + mstate_idx);
+        }
 
         while(true) {
             if(ms == null) {

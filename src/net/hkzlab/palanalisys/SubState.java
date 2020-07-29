@@ -1,8 +1,11 @@
 package net.hkzlab.palanalisys;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class SubState {
+public class SubState implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final String SS_PRE_TAG = "SS_";
 
     public final String tag;

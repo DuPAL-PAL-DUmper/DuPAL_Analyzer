@@ -1,8 +1,11 @@
 package net.hkzlab.palanalisys;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class StateLink {
+public class StateLink implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final String SL_PRE_TAG = "SL_";
 
     public final String tag;

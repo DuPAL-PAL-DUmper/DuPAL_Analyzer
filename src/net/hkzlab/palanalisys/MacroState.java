@@ -1,8 +1,11 @@
 package net.hkzlab.palanalisys;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class MacroState {
+public class MacroState implements Serializable { 
+    private static final long serialVersionUID = 1L;
+
     public static final String MS_PRE_TAG = "MS_";
 
     public boolean ss_ready = false;
