@@ -98,9 +98,9 @@ public class DuPALAnalyzer {
         logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
         writePINs(addr_noclk);
         writePINs(addr_clk);
-        try { Thread.sleep(10); } catch(InterruptedException e) {};
+        //try { Thread.sleep(10); } catch(InterruptedException e) {};
         writePINs(addr_noclk); // Clock low
-        try { Thread.sleep(5); } catch(InterruptedException e) {};
+        //try { Thread.sleep(5); } catch(InterruptedException e) {};
     }
 
     private void internal_analisys() {
@@ -407,7 +407,10 @@ public class DuPALAnalyzer {
         dpm.writeCommand(DuPALProto.buildWRITECommand(addr));
         res = DuPALProto.handleWRITEResponse(dpm.readResponse());
 
-        if(res < 0) logger.error("writePINs("+String.format("%08X", addr)+" -> FAILED!");
+        if(res < 0) {
+            logger.error("writePINs("+String.format("%08X", addr)+" -> FAILED!");
+            System.exit(-1);
+        }
 
         return res;
     }

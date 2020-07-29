@@ -72,7 +72,7 @@ public class DuPALManager {
             try {
                 logger.debug("Command -> " + command);
                 serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
-                try { Thread.sleep(25); } catch(InterruptedException e) {}; // Wait a bit for execution and response
+                try { Thread.sleep(30); } catch(InterruptedException e) {}; // Wait a bit for execution and response
             } catch (SerialPortException e) {
                 e.printStackTrace();
             }
