@@ -122,6 +122,7 @@ public class DuPALAnalyzer {
                 nms = null;
             } else {
                 logger.info("No more StateLinks to generate in ["+ms+"]");
+
                 StateLink[] slPath = findPathToNewStateLinks(ms);
                 
                 if(slPath == null) {
