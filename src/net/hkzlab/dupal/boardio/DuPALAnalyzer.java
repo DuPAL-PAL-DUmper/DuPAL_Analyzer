@@ -305,18 +305,16 @@ public class DuPALAnalyzer {
         pins_1 = readPINs();
         
         // Check that inputs really are inputs
-        if((pins_1 & pspecs.getIO_READMask() & ~IOasOUT_Mask) != (((idx & pspecs.getIO_WRITEMask()) >> 10) & IOasOUT_Mask)) {
-            logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", 
-            (pins_1 & pspecs.getIO_READMask() & ~IOasOUT_Mask) ^ (((idx & pspecs.getIO_WRITEMask()) >> 10) & IOasOUT_Mask)));
+        if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> 10) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
+            logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", pins_1) + " expected outs: " + String.format("%02X", IOasOUT_Mask));
         }
         
         writePINs(idx | (IOasOUT_Mask << 10));
         pins_2 = readPINs();
 
         // Check that inputs really are inputs
-        if((pins_2 & pspecs.getIO_READMask() & ~IOasOUT_Mask) != (((idx & pspecs.getIO_WRITEMask()) >> 10) & IOasOUT_Mask)) {
-            logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", 
-            (pins_2 & pspecs.getIO_READMask() & ~IOasOUT_Mask) ^ (((idx & pspecs.getIO_WRITEMask()) >> 10) & IOasOUT_Mask)));
+        if((pins_2 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> 10) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
+            logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", pins_2) + " expected outs: " + String.format("%02X", IOasOUT_Mask));
         }
 
         hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
