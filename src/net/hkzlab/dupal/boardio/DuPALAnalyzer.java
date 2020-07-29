@@ -95,7 +95,7 @@ public class DuPALAnalyzer {
     private void pulseClock(int addr) {
         int addr_clk = (addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask();
         int addr_noclk = addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask());
-        logger.info("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
+        logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
         writePINs(addr_noclk);
         writePINs(addr_clk);
         try { Thread.sleep(10); } catch(InterruptedException e) {};
