@@ -147,6 +147,12 @@ public class DuPALAnalyzer {
                     logger.info("Found a path to another MacroState: ["+ms+"]");
                     // Traverse the path
                     for(StateLink sl : slPath) pulseClock(sl.raw_addr);
+
+                    // Check that we got to the right place
+                    int cur_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
+                    if(cur_rpin_status != ms.rpin_status) {
+                        logger.error("Mismatch between the registerd output status ("+String.format("%02X", cur_rpin_status)+") and expected status ("+String.format("%02X", ms.rpin_status)+")");
+                    }
                 }
             }
         }
