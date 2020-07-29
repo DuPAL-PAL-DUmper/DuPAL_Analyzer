@@ -93,9 +93,14 @@ public class DuPALAnalyzer {
     }
 
     private void pulseClock(int addr) {
-        logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr));
-        writePINs((addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask()); // Clock high,
-        writePINs(addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask())); // Clock low
+        int addr_clk = (addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask();
+        int addr_noclk = addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask());
+        logger.info("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
+        writePINs(addr_noclk);
+        writePINs(addr_clk);
+        try { Thread.sleep(10); } catch(InterruptedException e) {};
+        writePINs(addr_noclk); // Clock low
+        try { Thread.sleep(5); } catch(InterruptedException e) {};
     }
 
     private void internal_analisys() {
@@ -142,16 +147,22 @@ public class DuPALAnalyzer {
                     logger.info("Found no paths starting from ["+ms+"]");
                     ms = null;
                 } else {
-                    ms = slPath[slPath.length - 1].destSState.macroState; // Mark the new macro state
+                    int old_rpin_status, cur_rpin_status;
+
+                    old_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
+                    ms = slPath[slPath.length - 1].destMS; // Mark the new macro state
                     
                     logger.info("Found a path to another MacroState: ["+ms+"]");
                     // Traverse the path
-                    for(StateLink sl : slPath) pulseClock(sl.raw_addr);
+                    for(StateLink sl : slPath) {
+                        logger.info("Traversing SL -> " + sl);
+                        pulseClock(sl.raw_addr);
+                    }
 
                     // Check that we got to the right place
-                    int cur_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
+                    cur_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
                     if(cur_rpin_status != ms.rpin_status) {
-                        logger.error("Mismatch between the registerd output status ("+String.format("%02X", cur_rpin_status)+") and expected status ("+String.format("%02X", ms.rpin_status)+")");
+                        logger.error("Mismatch between the registered output status ("+String.format("%02X", cur_rpin_status)+") and expected status ("+String.format("%02X", ms.rpin_status)+"), old rout was " + String.format("%02X", old_rpin_status));
                         System.exit(-1);
                     }
                 }
@@ -202,12 +213,12 @@ public class DuPALAnalyzer {
             for(int idx = 0; idx < curMS.links.length; idx++) {
                 if((curMS.links[idx] != null) && !slSet.contains(curMS.links[idx])) { // We have not yet tried this link
                     slSet.add(curMS.links[idx]);
-                    if(!msSet.contains(curMS.links[idx].destSState.macroState)) { // And we have not yet tried this macrostate!
-                        logger.info("Moving from ["+curMS+"] to ["+curMS.links[idx].destSState.macroState+"] - via ["+curMS.links[idx]+"]");
+                    if(!msSet.contains(curMS.links[idx].destMS)) { // And we have not yet tried this macrostate!
+                        logger.info("Moving from ["+curMS+"] to ["+curMS.links[idx].destMS+"] - via ["+curMS.links[idx]+"]");
 
                         slStack.push(curMS.links[idx]);
-                        msSet.add(curMS.links[idx].destSState.macroState);
-                        curMS = curMS.links[idx].destSState.macroState;
+                        msSet.add(curMS.links[idx].destMS);
+                        curMS = curMS.links[idx].destMS;
                         foundLink = true;
                         
                         break; // Break out of this loop
@@ -218,9 +229,9 @@ public class DuPALAnalyzer {
             // Aleady searched through all this state
             if(!foundLink) {
                 if(slStack.size() > 0) {
-                    msSet.remove(slStack.pop().destSState.macroState); // Remove the last link we followed and remove the macrostate from nodes we visited
+                    msSet.remove(slStack.pop().destMS); // Remove the last link we followed and remove the macrostate from nodes we visited
                     if(slStack.size() > 0) {
-                        curMS = slStack.peek().destSState.macroState; // Back to the previous node
+                        curMS = slStack.peek().destMS; // Back to the previous node
                     } else curMS = start; // Back at the beginning it seems...
                     logger.info("Moved back to ["+curMS+"]");
 
@@ -261,18 +272,16 @@ public class DuPALAnalyzer {
                 int pins = readPINs();
                 int mstate_idx = (pins & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift();
                 MacroState nms = mStates[mstate_idx];
-                SubState ss = null;
                 StateLink sl = null;
 
                 if(nms == null) {
                     nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + pspecs.getNumIOPins() - additionalOUTs));
                     mStates[mstate_idx] = nms;
                 }
-                ss = generateSubState(nms, idx, idx_mask);
-                sl = new StateLink(ms.tag, idx, writeAddrToBooleans(idx, idx_mask), ss);
+                sl = new StateLink(ms.tag, idx, nms);
                 ms.links[links_counter] = sl;
 
-                logger.info("Connected MS '"+ms+"' with SS '"+ss+"' ["+nms+"] with SL '"+sl+"'");
+                logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"'");
 
                 return nms;
             }
@@ -394,8 +403,13 @@ public class DuPALAnalyzer {
     }
 
     private int writePINs(int addr) {
+        int res;
         dpm.writeCommand(DuPALProto.buildWRITECommand(addr));
-        return DuPALProto.handleWRITEResponse(dpm.readResponse());
+        res = DuPALProto.handleWRITEResponse(dpm.readResponse());
+
+        if(res < 0) logger.error("writePINs("+String.format("%08X", addr)+" -> FAILED!");
+
+        return res;
     }
 
     static private String buildTag(int idx) {

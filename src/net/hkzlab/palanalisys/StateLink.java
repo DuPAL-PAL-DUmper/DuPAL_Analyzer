@@ -10,36 +10,22 @@ public class StateLink implements Serializable {
 
     public final String tag;
     public final int raw_addr;
-    public final boolean[] inputs;
-    public final SubState destSState;
+    public final MacroState destMS;
 
-    public StateLink(final String tag, final int raw_addr, final boolean[] inputs, final SubState destSState) {
+    public StateLink(final String tag, final int raw_addr, final MacroState destMS) {
         this.tag = tag;
         this.raw_addr = raw_addr;
-        this.inputs = inputs;
-        this.destSState = destSState;
+        this.destMS = destMS;
     }
 
     @Override
     public String toString() {
-        final StringBuffer strBuf = new StringBuffer();
-        strBuf.append(SL_PRE_TAG + tag + "-");
-
-        for (final boolean in : inputs)
-            strBuf.append(in ? '1' : '0');
-
-        return strBuf.toString();
+        return (SL_PRE_TAG + tag + "-" + String.format("%08X", raw_addr));
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-
-        for (int idx = 0; idx < inputs.length; idx++) {
-            hash ^= ((inputs[idx] ? 1 : 0) << (idx % 32));
-        }
-
-        return hash ^ tag.hashCode();
+        return raw_addr ^ tag.hashCode();
     }
 
     @Override
@@ -52,8 +38,8 @@ public class StateLink implements Serializable {
             return false;
 
         final StateLink ops = (StateLink) o;
+        if(ops.raw_addr != this.raw_addr) return false;
         if(!ops.tag.equals(this.tag)) return false;
-        if(!Arrays.equals(ops.inputs, this.inputs)) return false;
 
         return true;
     }
