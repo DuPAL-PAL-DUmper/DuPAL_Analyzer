@@ -39,7 +39,7 @@ public class PAL16R6Specs implements PALSpecs {
 
     @Override
     public int getIO_WRITEMask() {
-        return getIO_READMask() << 10;
+        return getIO_READMask() << READ_WRITE_SHIFT;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class PAL16R6Specs implements PALSpecs {
 
     @Override
     public int getROUT_WRITEMask() {
-        return getROUT_READMask() << 10;
+        return getROUT_READMask() << READ_WRITE_SHIFT;
     }
 
     @Override

@@ -72,10 +72,10 @@ public class DuPALAnalyzer {
                 write_addr = i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask());
                 writePINs(write_addr);
                 read = readPINs();
-                out_pins |= (read ^ (write_addr >> 10)) & pspecs.getIO_READMask();
+                out_pins |= (read ^ (write_addr >>  PALSpecs.READ_WRITE_SHIFT)) & pspecs.getIO_READMask();
                
                 // Check if we need to update the input mask
-                new_inmask = inmask & ~(out_pins << 10);
+                new_inmask = inmask & ~(out_pins << PALSpecs.READ_WRITE_SHIFT);
                 if(new_inmask != inmask) {
                     inmask = new_inmask;
                     logger.info("Updated input mask, now -> " + String.format("%06X", inmask) + " outs: " + String.format("%02X", out_pins));
@@ -152,6 +152,7 @@ public class DuPALAnalyzer {
                     int cur_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
                     if(cur_rpin_status != ms.rpin_status) {
                         logger.error("Mismatch between the registerd output status ("+String.format("%02X", cur_rpin_status)+") and expected status ("+String.format("%02X", ms.rpin_status)+")");
+                        System.exit(-1);
                     }
                 }
             }
@@ -293,7 +294,7 @@ public class DuPALAnalyzer {
     }
 
     private int buildInputMask() {
-        return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << 10));
+        return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
     }
 
     private boolean[] writeAddrToBooleans(int addr, int mask) {
@@ -323,15 +324,15 @@ public class DuPALAnalyzer {
         pins_1 = readPINs();
         
         // Check that inputs really are inputs
-        if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> 10) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
+        if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
             logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", pins_1) + " expected outs: " + String.format("%02X", IOasOUT_Mask));
         }
         
-        writePINs(idx | (IOasOUT_Mask << 10));
+        writePINs(idx | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
         pins_2 = readPINs();
 
         // Check that inputs really are inputs
-        if((pins_2 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> 10) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
+        if((pins_2 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
             logger.warn("Detected an input that is acting as output when in MS ["+ms+"] -> " + String.format("%02X", pins_2) + " expected outs: " + String.format("%02X", IOasOUT_Mask));
         }
 

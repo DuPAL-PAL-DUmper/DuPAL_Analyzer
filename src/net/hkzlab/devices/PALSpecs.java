@@ -1,6 +1,8 @@
 package net.hkzlab.devices;
 
 public interface PALSpecs {
+    public static final int READ_WRITE_SHIFT = 10;
+
     public int getNumINPins();
     public int getNumIOPins();
     public int getNumROUTPins();
