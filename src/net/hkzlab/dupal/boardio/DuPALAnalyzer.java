@@ -1,6 +1,9 @@
 package net.hkzlab.dupal.boardio;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +156,48 @@ public class DuPALAnalyzer {
     }
 
     private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
+        Stack<StateLink> slStack = new Stack<>();
+        Set<MacroState> msSet = new HashSet<>();
+        Set<StateLink> slSet = new HashSet<>();
+
+        MacroState curMS = start;
+        msSet.add(start);
+
+        while(curMS != null) {
+            if(curMS.equals(dest)) {
+                return slStack.toArray(new StateLink[slStack.size()]);
+            }
+
+            boolean foundLink = false;
+            for(int idx = 0; idx < curMS.links.length; idx++) {
+                if((curMS.links[idx] != null) && !slSet.contains(curMS.links[idx])) { // We have not yet tried this link
+                    slSet.add(curMS.links[idx]);
+                    if(!msSet.contains(curMS.links[idx].destSState.macroState)) { // And we have not yet tried this macrostate!
+                        slStack.push(curMS.links[idx]);
+                        msSet.add(curMS.links[idx].destSState.macroState);
+                        curMS = curMS.links[idx].destSState.macroState;
+                        foundLink = true;
+                        break; // Break out of this loop
+                    }
+                }
+            }
+
+            // Aleady searched through all this state
+            if(!foundLink) {
+                if(slStack.size() > 0) {
+                    msSet.remove(slStack.pop().destSState.macroState); // Remove the last link we followed and remove the macrostate from nodes we visited
+                    if(slStack.size() > 0) {
+                        curMS = slStack.peek().destSState.macroState; // Back to the previous node
+                    } else curMS = start; // Back at the beginning it seems...
+                } else return null; 
+                
+                if(slStack.size() > 0) {
+
+                } else return null; // Found no possible path
+            }
+
+        }
+
         // TODO: Implement the search protocol
         return null;
     }
