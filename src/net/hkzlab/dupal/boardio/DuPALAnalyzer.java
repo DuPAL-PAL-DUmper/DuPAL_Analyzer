@@ -231,7 +231,7 @@ public class DuPALAnalyzer {
 
     private MacroState analyzeMacroState(MacroState ms) {
         if(!ms.ss_ready) {
-            logger.info("Generating all possible SubStates for MacroState ["+ms+"]");
+            logger.info("Generating all ("+ms.substates.length+") possible SubStates for MacroState ["+ms+"]");
             genAllMSSubStates(ms);
         } else {
             logger.info("SubStates already generated for MacroStates ["+ms+"]");
