@@ -54,26 +54,31 @@ public class DuPALAnalyzer {
         logger.info("inmask: " + Integer.toHexString(inmask));
 
         int read, out_pins = 0;
-        for(int idx = 0; idx <= inmask; idx++) {
+        for(int idx = 0; idx <= inmask; idx+=2) { // Pin 1 is the clock and we'll skip it anyway
             if((idx & ~inmask) != 0) continue; // We need to skip this round
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
 
-            logger.debug("run " + Integer.toHexString(idx >> 1) + " current guessed outs: 0x" + Integer.toHexString(out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
+            logger.info("run " + Integer.toHexString(idx >> 1) + " | inmask: 0x"+String.format("%06X", inmask)+" guessed outs: 0x" + String.format("%02X", out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
 
-            for(int i_idx = 0; i_idx <= inmask; i_idx++) {
+            int new_inmask, write_addr;
+            for(int i_idx = 0; i_idx <= inmask; i_idx+=2) {
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
                 if(out_pins == pspecs.getIO_READMask()) break; // Stop checking, we already found that all IOs are outputs...
-
-                logger.debug("internal loop: " + (i_idx >> 1));
                 
-                writePINs((i_idx | pspecs.getIO_WRITEMask()) & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask()));
+                write_addr = i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask());
+                writePINs(write_addr);
                 read = readPINs();
-                out_pins |= (read ^ pspecs.getIO_READMask()) & pspecs.getIO_READMask();
-                
-                writePINs(i_idx & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask() | pspecs.getIO_WRITEMask()));
-                read = readPINs();
-                out_pins |= ((read ^ ~pspecs.getIO_READMask())) & pspecs.getIO_READMask();
+                out_pins |= (read ^ (write_addr >> 10)) & pspecs.getIO_READMask();
+               
+                // Check if we need to update the input mask
+                new_inmask = inmask & ~(out_pins << 10);
+                if(new_inmask != inmask) {
+                    inmask = new_inmask;
+                    logger.info("Updated input mask, now -> " + String.format("%06X", inmask) + " outs: " + String.format("%02X", out_pins));
+                }
+                    
+                logger.debug("internal loop: " + Integer.toBinaryString(i_idx) + " outs:" + String.format("%02X", out_pins));
             }
 
             pulseClock(idx & ~pspecs.getOEPinMask());

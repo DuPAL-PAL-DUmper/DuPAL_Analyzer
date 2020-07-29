@@ -1,5 +1,6 @@
 package net.hkzlab.dupal;
 
+import net.hkzlab.devices.PAL16R4Specs;
 import net.hkzlab.devices.PAL16R6Specs;
 import net.hkzlab.devices.PALSpecs;
 import net.hkzlab.dupal.boardio.DuPALAnalyzer;
@@ -8,7 +9,8 @@ import net.hkzlab.dupal.boardio.DuPALManager;
 public class App {
     public static void main(String[] args) throws Exception {
         DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
-        PALSpecs pspecs = new PAL16R6Specs();
+        //PALSpecs pspecs = new PAL16R6Specs();
+        PALSpecs pspecs = new PAL16R4Specs();
         DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
 
         if(!dpm.enterRemoteMode()) {
