@@ -22,6 +22,7 @@ public class DuPALAnalyzer {
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
     private int IOasOUT_Mask = -1;
+    private int additionalOUTs = 0;
 
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask) {
         this.dpm = dpm;
@@ -42,6 +43,8 @@ public class DuPALAnalyzer {
         if(IOasOUT_Mask < 0) { // We need to detect the status of the IOs...
             IOasOUT_Mask = guessIOs(); // Try to guess whether IOs are Inputs or Outputs
         }
+
+        additionalOUTs = calculateAdditionalOutsFromMask(IOasOUT_Mask);
 
         internal_analisys();
     }
@@ -104,14 +107,13 @@ public class DuPALAnalyzer {
 
         int routstate = pins & pspecs.getROUT_READMask();
         logger.info("Registered outputs at start: " + String.format("%02X", routstate));
-        //logger.info("Output states at start: " + String.format("%02X", (pins & IOasOUT_Mask)));
 
         mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
         MacroState ms = null;
         MacroState nms = null;
         
         if(mStates[mstate_idx] == null) {
-            ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+            ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins()  + pspecs.getNumIOPins() - additionalOUTs));
             mStates[mstate_idx] = ms;
             logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
         } else {
@@ -256,7 +258,7 @@ public class DuPALAnalyzer {
                 StateLink sl = null;
 
                 if(nms == null) {
-                    nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), pspecs.getNumINPins());
+                    nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + pspecs.getNumIOPins() - additionalOUTs));
                     mStates[mstate_idx] = nms;
                 }
                 ss = generateSubState(nms, idx, idx_mask);
@@ -272,6 +274,16 @@ public class DuPALAnalyzer {
         }
 
         return null; // We did not move from the macrostate
+    }
+
+    private int calculateAdditionalOutsFromMask(int mask) {
+        int count = 0;
+
+        for(int idx = 0; idx < 32; idx++) {
+            count += (((mask >> idx) & 0x01) != 0) ? 1 : 0;
+        }
+
+        return count;
     }
 
     private int buildInputMask() {
