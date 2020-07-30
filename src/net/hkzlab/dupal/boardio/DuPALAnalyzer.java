@@ -49,14 +49,14 @@ public class DuPALAnalyzer {
 
     public void saveStatus(final String path) {
         try {
-            logger.info("Saving state to " + path);
-
             FileOutputStream fileOut = new FileOutputStream(path);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
         
             out.writeObject(mStates);
             out.close();
             fileOut.close();
+
+            logger.info("Saved state to " + path);
         } catch (IOException e) {
             logger.warn("Unable to save status to " + path);
             e.printStackTrace();
@@ -71,6 +71,8 @@ public class DuPALAnalyzer {
             mStates = (MacroState[])in.readObject();
             in.close();
             fileIn.close();
+
+            logger.info("Restored state from " + path);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
