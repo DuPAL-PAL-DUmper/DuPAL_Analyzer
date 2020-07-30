@@ -236,7 +236,7 @@ public class DuPALAnalyzer {
                     if(mStates[ms_idx].links[sl_idx] == null) { // Found an unexplored link, we need to search a path to it
                         
                         logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
-                        int path_hash = (start_ms.hashCode() * mStates[ms_idx].hashCode()) ^ start_ms.hashCode();
+                        int path_hash = (start_ms.hashCode() - mStates[ms_idx].hashCode()) ^ start_ms.hashCode();
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
 
                         if(sll == null) {
