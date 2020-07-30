@@ -87,8 +87,9 @@ public class DuPALManager {
                 
                 while((resp == null) && (retries-- > 0)) {
                     resp = serport.readString();
+                    try { Thread.sleep(1); } catch(InterruptedException e) {};
                 }
-                
+
                 if(resp != null) resp = resp.trim();
                 
                 logger.debug("Response <- " + resp);
