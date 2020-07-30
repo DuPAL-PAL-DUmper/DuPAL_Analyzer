@@ -1,5 +1,11 @@
 package net.hkzlab.dupal.boardio;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,24 +23,62 @@ import net.hkzlab.palanalisys.SubState;
 public class DuPALAnalyzer {
     private final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
-    private final MacroState[] mStates;
+    private static final long SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+    private MacroState[] mStates;
 
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
+    private final String serObjPath;
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
 
-    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask) {
+    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask, String serObjPath) {
         this.dpm = dpm;
         this.pspecs = pspecs;
         this.IOasOUT_Mask = IOasOUT_Mask;
+        this.serObjPath = serObjPath;
 
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
         logger.info("Provisioning for " +this.mStates.length+" possible MacroStates");
     } 
     
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs) {
-        this(dpm, pspecs, -1);
+        this(dpm, pspecs, -1, null);
+    }
+
+    public void saveStatus(final String path) {
+        try {
+            logger.info("Saving state to " + path);
+
+            FileOutputStream fileOut = new FileOutputStream(path);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        
+            out.writeObject(mStates);
+            out.close();
+            fileOut.close();
+        } catch (IOException e) {
+            logger.warn("Unable to save status to " + path);
+            e.printStackTrace();
+        }
+    }
+
+    public void restoreStatus(final String path) {
+        try {
+            FileInputStream fileIn = new FileInputStream(path);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+        
+            mStates = (MacroState[])in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            logger.warn("Could not find " + path);
+        } catch (IOException e) {
+            logger.warn("Unable to save status to " + path);
+            e.printStackTrace();
+        }
     }
 
     public void startAnalisys() {
@@ -46,7 +90,9 @@ public class DuPALAnalyzer {
 
         additionalOUTs = calculateAdditionalOutsFromMask(IOasOUT_Mask);
 
+        if(serObjPath != null) restoreStatus(serObjPath);
         internal_analisys();
+        if(serObjPath != null) saveStatus(serObjPath);
     }
 
     private int guessIOs() {
@@ -126,7 +172,14 @@ public class DuPALAnalyzer {
             logger.info("Recovered MacroState ["+ms+"] from index " + mstate_idx);
         }
 
+        long last_save = 0;
         while(true) {
+            long now = System.currentTimeMillis();
+            if(((now - last_save) >= SAVE_INTERVAL) && (serObjPath != null)) {
+                saveStatus(serObjPath);
+                last_save = now;
+            }
+
             if(ms == null) {
                 logger.info("There are no more unknown StateLinks we can reach.");
                 return;
@@ -155,7 +208,7 @@ public class DuPALAnalyzer {
                     logger.info("Found a path to another MacroState: ["+ms+"]");
                     // Traverse the path
                     for(StateLink sl : slPath) {
-                        logger.info("Traversing SL -> " + sl);
+                        logger.trace("Traversing SL -> " + sl);
                         pulseClock(sl.raw_addr);
                     }
 
