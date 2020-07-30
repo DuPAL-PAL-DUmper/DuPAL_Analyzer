@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class MacroState implements Serializable { 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public static final String MS_PRE_TAG = "MS_";
 
@@ -16,6 +16,7 @@ public class MacroState implements Serializable {
 
     public final SubState[] substates;
     public final StateLink[] links;
+    public int link_count;
     public final HashMap<Integer, SubState> ssMap;
 
     public MacroState(final String tag, final int rpin_status, final int rpins, final int inPins) {
@@ -26,6 +27,8 @@ public class MacroState implements Serializable {
         links = new StateLink[1 << inPins]; // Create space for the future links out of this
         substates = new SubState[1 << inPins]; // Create space for substates (each output pin is 3-state, but as they're triggered via input changes, we can have at most 2^inPins)
         ssMap = new HashMap<>(); // Prepare the hashmap we'll use to avoid substate duplicates
+
+        this.link_count = 0;
 
         ss_ready = false;
     }

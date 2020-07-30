@@ -232,11 +232,9 @@ public class DuPALAnalyzer {
         // Search for a state that still has unexplored links
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
-                for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
-                    if(mStates[ms_idx].links[sl_idx] == null) { // Found an unexplored link, we need to search a path to it
-                        
+                if(mStates[ms_idx].link_count != mStates[ms_idx].links.length) {
                         logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
-                        int path_hash = (start_ms.hashCode() - mStates[ms_idx].hashCode()) ^ start_ms.hashCode();
+                        int path_hash = ((start_ms.hashCode() * 31) + mStates[ms_idx].hashCode());
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
 
                         if(sll == null) {
@@ -245,7 +243,6 @@ public class DuPALAnalyzer {
                         }
 
                         if(sll != null) return sll; // Ok, we found a path
-                    }
                 }
             }
         }
@@ -346,6 +343,7 @@ public class DuPALAnalyzer {
                 }
                 sl = new StateLink(ms.tag, idx, nms);
                 ms.links[links_counter] = sl;
+                ms.link_count++;
 
                 logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"'");
 
