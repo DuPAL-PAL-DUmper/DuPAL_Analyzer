@@ -502,13 +502,13 @@ public class DuPALAnalyzer {
             out.write(("MacroState ["+mStates[ms_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
             out.write(("\tPrinting SubStates\n").getBytes(StandardCharsets.US_ASCII));
             for(int ss_idx = 0; ss_idx < mStates[ms_idx].substates.length; ss_idx++) {
-                out.write(("\t\tSubState ["+mStates[ms_idx].substates[ss_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
+                out.write(("\t\tSubState ("+ss_idx+") ["+mStates[ms_idx].substates[ss_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
             }
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
 
             out.write(("\tPrinting StateLinks\n").getBytes(StandardCharsets.US_ASCII));
             for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
-                out.write(("\t\tStateLink ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
+                out.write(("\t\tStateLink ("+sl_idx+") ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
             }
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
         }
