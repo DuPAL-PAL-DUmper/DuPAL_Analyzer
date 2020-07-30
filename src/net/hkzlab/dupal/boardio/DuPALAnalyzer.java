@@ -269,7 +269,7 @@ public class DuPALAnalyzer {
                 if((curMS.links[idx] != null) && !slSet.contains(curMS.links[idx])) { // We have not yet tried this link
                     slSet.add(curMS.links[idx]);
                     if(!msSet.contains(curMS.links[idx].destMS)) { // And we have not yet tried this macrostate!
-                        logger.info("Moving from ["+curMS+"] to ["+curMS.links[idx].destMS+"] - via ["+curMS.links[idx]+"]");
+                        logger.debug("Moving from ["+curMS+"] to ["+curMS.links[idx].destMS+"] - via ["+curMS.links[idx]+"]");
 
                         slStack.push(curMS.links[idx]);
                         msSet.add(curMS.links[idx].destMS);
