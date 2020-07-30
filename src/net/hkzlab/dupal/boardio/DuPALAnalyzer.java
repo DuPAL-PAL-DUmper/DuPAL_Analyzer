@@ -237,6 +237,13 @@ public class DuPALAnalyzer {
                         int path_hash = ((start_ms.rpin_status * 31) + mStates[ms_idx].rpin_status);
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
 
+                        if(sll != null) {
+                            if(sll[sll.length-1].destMS != mStates[ms_idx]) {
+                                logger.warn("Got an hash collision trying to reach ["+mStates[ms_idx]+"] from ["+start_ms+"]");
+                                sll = null;
+                            }
+                        }
+
                         if(sll == null) {
                             sll = internal_searchPath(start_ms, mStates[ms_idx]);
                             if (sll != null) pathMap.put(Integer.valueOf(path_hash), sll);
