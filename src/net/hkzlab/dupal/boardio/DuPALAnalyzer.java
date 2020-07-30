@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -30,6 +31,7 @@ public class DuPALAnalyzer {
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
     private final String serObjPath;
+    private final HashMap<Integer, StateLink[]> pathMap;
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
 
@@ -39,6 +41,7 @@ public class DuPALAnalyzer {
         this.IOasOUT_Mask = IOasOUT_Mask;
         this.serObjPath = serObjPath;
 
+        this.pathMap = new HashMap<>();
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
         logger.info("Provisioning for " +this.mStates.length+" possible MacroStates");
     } 
@@ -231,8 +234,16 @@ public class DuPALAnalyzer {
             if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
                 for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
                     if(mStates[ms_idx].links[sl_idx] == null) { // Found an unexplored link, we need to search a path to it
+                        
                         logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
-                        StateLink[] sll = internal_searchPath(start_ms, mStates[ms_idx]);
+                        int path_hash = (start_ms.hashCode() * mStates[ms_idx].hashCode()) ^ start_ms.hashCode();
+                        StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
+
+                        if(sll == null) {
+                            sll = internal_searchPath(start_ms, mStates[ms_idx]);
+                            if (sll != null) pathMap.put(Integer.valueOf(path_hash), sll);
+                        }
+
                         if(sll != null) return sll; // Ok, we found a path
                     }
                 }
