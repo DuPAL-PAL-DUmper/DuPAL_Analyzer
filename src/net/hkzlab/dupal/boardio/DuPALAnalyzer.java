@@ -232,7 +232,7 @@ public class DuPALAnalyzer {
         // Search for a state that still has unexplored links
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
-                if(mStates[ms_idx].link_count != mStates[ms_idx].links.length) {
+                if(mStates[ms_idx].link_count < mStates[ms_idx].links.length) {
                         logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
                         int path_hash = ((start_ms.hashCode() * 31) + mStates[ms_idx].hashCode());
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
