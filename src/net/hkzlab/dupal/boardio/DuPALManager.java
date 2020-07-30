@@ -16,7 +16,7 @@ public class DuPALManager {
 
     private SerialPort serport = null;
 
-
+    private final static int SERIAL_READ_RETRIES = 5;
     private final static String REMOTE_MODE_STRING = "REMOTE_CONTROL_ENABLED";
 
     public DuPALManager(final String serPort) {
@@ -82,7 +82,14 @@ public class DuPALManager {
     public String readResponse() {
          if((serport != null) && serport.isOpened()) {
             try {
-                String resp = serport.readString().trim();
+                int retries = SERIAL_READ_RETRIES;
+                String resp = null;
+                
+                while((resp == null) && (retries-- > 0)) {
+                    resp = serport.readString();
+                }
+                
+                if(resp != null) resp = resp.trim();
                 
                 logger.debug("Response <- " + resp);
                 
