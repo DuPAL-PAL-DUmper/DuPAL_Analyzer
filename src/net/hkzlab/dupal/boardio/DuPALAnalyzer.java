@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,6 +100,8 @@ public class DuPALAnalyzer {
         if(serObjPath != null) restoreStatus(serObjPath);
         internal_analisys();
         if(serObjPath != null) saveStatus(serObjPath);
+
+        try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
     }
 
     private int guessIOs() {
@@ -488,5 +492,25 @@ public class DuPALAnalyzer {
 
     static private String buildTag(int idx) {
         return String.format("%02X", idx);
+    }
+
+    static private void printStateStructure(OutputStream out, PALSpecs specs, MacroState[] mStates) throws IOException {
+        out.write(("Printing graph structure for " + specs.toString()+"\n").getBytes(StandardCharsets.US_ASCII));
+        for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
+            if(mStates[ms_idx] == null) continue;
+
+            out.write(("MacroState ["+mStates[ms_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
+            out.write(("\tPrinting SubStates\n").getBytes(StandardCharsets.US_ASCII));
+            for(int ss_idx = 0; ss_idx < mStates[ms_idx].substates.length; ss_idx++) {
+                out.write(("\t\tSubState ["+mStates[ms_idx].substates[ss_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
+            }
+            out.write(("\n").getBytes(StandardCharsets.US_ASCII));
+
+            out.write(("\tPrinting StateLinks\n").getBytes(StandardCharsets.US_ASCII));
+            for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
+                out.write(("\t\tStateLink ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
+            }
+            out.write(("\n").getBytes(StandardCharsets.US_ASCII));
+        }
     }
 }
