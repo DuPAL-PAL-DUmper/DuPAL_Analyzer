@@ -17,7 +17,7 @@ public class App {
          PALSpecs pspecs = new PAL16R6Specs();
         //PALSpecs pspecs = new PAL16R4Specs();
         // DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
-        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, -1, "/tmp/dupal.dmp");
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0xC0, "/tmp/dupal.dmp");
         //DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0x80, "/tmp/dupal.dmp");
 
         if(!dpm.enterRemoteMode()) {

@@ -102,8 +102,8 @@ public class DuPALAnalyzer {
         if(serObjPath != null) saveStatus(serObjPath);
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
-        //try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
-        try { printLogicTableREGOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
+        try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
+        //try { printLogicTableREGOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
     }
 
     private int guessIOs() {
@@ -634,40 +634,67 @@ public class DuPALAnalyzer {
 
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             MacroState ms = mStates[ms_idx];
-            if(ms == null) continue; // This state was not filled
-
-            for(int ss_idx = 0; ss_idx < ms.substates.length; ss_idx++) {
-                strBuf.delete(0, strBuf.length());
-                SubState ss = ms.substates[ss_idx];
-
-                // Add the registered outputs as inputs
-                for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                    strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
-                }
-
-                // Add the inputs as inputs
-                for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                    strBuf.append(((ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                }
-
-                strBuf.append(' ');
-
-                // Add the digital outputs as outputs
-                for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
-                    if(ss.pin_status[bit_idx] == 0) strBuf.append('0');
-                    else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
-                    else strBuf.append('-');
-                }
+            if(ms == null) { // This state was not visited, so we're generating the outputs as "don't care"
+                for(int fake_ss_idx = 0; fake_ss_idx < (1<<totInputs); fake_ss_idx++) {
+                    strBuf.delete(0, strBuf.length());
                 
-                // Add the hi-z state as output
-                for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
-                    if(ss.pin_status[bit_idx] >= 0) strBuf.append('1');
-                    else strBuf.append('0');
+                    // Set what the inputs would be
+                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                        strBuf.append(((ms_idx >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                    }
+                
+                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                        strBuf.append(((fake_ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
+                    }
+                
+                    strBuf.append(' ');
+               
+                    // Fake digital outputs
+                    for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
+                        strBuf.append('-');
+                    }
+
+                    // Fake hi-z outputs
+                    for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
+                        strBuf.append('-');
+                    }
+                    
+                    strBuf.append('\n');
+                    out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
                 }
+            } else {
+                for(int ss_idx = 0; ss_idx < ms.substates.length; ss_idx++) {
+                    strBuf.delete(0, strBuf.length());
+                    SubState ss = ms.substates[ss_idx];
 
-                strBuf.append('\n');
+                    // Add the registered outputs as inputs
+                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                        strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                    }
 
-                out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+                    // Add the inputs as inputs
+                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                        strBuf.append(((ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
+                    }
+
+                    strBuf.append(' ');
+
+                    // Add the digital outputs as outputs
+                    for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
+                        if(ss.pin_status[bit_idx] == 0) strBuf.append('0');
+                        else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
+                        else strBuf.append('-');
+                    }
+                    
+                    // Add the hi-z state as output
+                    for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
+                        if(ss.pin_status[bit_idx] >= 0) strBuf.append('1');
+                        else strBuf.append('0');
+                    }
+
+                    strBuf.append('\n');
+                    out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+                }
             }
         }
 
