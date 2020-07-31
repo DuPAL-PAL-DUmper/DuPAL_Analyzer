@@ -523,11 +523,35 @@ public class DuPALAnalyzer {
      * 
      * Outputs for this table will be
      * - Outputs (non-registered) as binary outputs. In case they're hi-z, we'll set the state as ignore ('-')
+     * - OE status for each output
      */
     static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, MacroState[] mStates) throws IOException {
         out.write(("OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
         int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
         StringBuffer strBuf = new StringBuffer();
+
+        out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
+        out.write((".o " + (additionalOUTs*2) + "\n").getBytes(StandardCharsets.US_ASCII)); // * 2 because we get both an output and its OE state
+        
+        strBuf.delete(0, strBuf.length()); // TODO: map the label onto the actual pins instead of a simple incremental number
+        strBuf.append(".ilb ");
+        for(int idx = 0; idx < (totInputs + specs.getNumROUTPins()); idx++) {
+            strBuf.append("i"+idx+" ");
+        }
+        strBuf.append('\n');
+        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+
+        strBuf.delete(0, strBuf.length());
+        strBuf.append(".ob ");
+        for(int idx = 0; idx < additionalOUTs; idx++) {
+            strBuf.append("o"+idx+" ");
+        }
+        for(int idx = 0; idx < additionalOUTs; idx++) {
+            strBuf.append("oe"+idx+" ");
+        }
+        strBuf.append("\n\n");
+
+        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
 
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             MacroState ms = mStates[ms_idx];
@@ -552,10 +576,18 @@ public class DuPALAnalyzer {
                     else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
                     else strBuf.append('-');
                 }
+                
+                for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
+                    if(ss.pin_status[bit_idx] >= 0) strBuf.append('1');
+                    else strBuf.append('0');
+                }
+
                 strBuf.append('\n');
 
                 out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
             }
         }
+
+        out.write(("\n.e\n").getBytes(StandardCharsets.US_ASCII));
     }
 }
