@@ -522,7 +522,7 @@ public class DuPALAnalyzer {
         StringBuffer strBuf = new StringBuffer();
 
         out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
-        out.write((".o " + specs.getNumROUTPins() + "\n").getBytes(StandardCharsets.US_ASCII)); // * 2 because we get both an output and its OE state
+        out.write((".o " + specs.getNumROUTPins() + "\n").getBytes(StandardCharsets.US_ASCII));
         
         // Input labels
         strBuf.delete(0, strBuf.length()); 
