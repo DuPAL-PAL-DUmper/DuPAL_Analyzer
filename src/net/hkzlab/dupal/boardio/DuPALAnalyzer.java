@@ -101,7 +101,8 @@ public class DuPALAnalyzer {
         internal_analisys();
         if(serObjPath != null) saveStatus(serObjPath);
 
-        try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
+        //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
+        try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, mStates); } catch(IOException e){};
     }
 
     private int guessIOs() {
@@ -511,6 +512,50 @@ public class DuPALAnalyzer {
                 out.write(("\t\tStateLink ("+sl_idx+") ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
             }
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
+        }
+    }
+
+    /*
+     * This method will write out a table with all the OUTPUTS states, to be minimized
+     * Inputs for this table will be
+     * - Inputs pins (both normal inputs and IOs as inputs)
+     * - Registered outputs current status (they act as a feed for the output)
+     * 
+     * Outputs for this table will be
+     * - Outputs (non-registered) as binary outputs. In case they're hi-z, we'll set the state as ignore ('-')
+     */
+    static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, MacroState[] mStates) throws IOException {
+        out.write(("OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
+        int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
+        StringBuffer strBuf = new StringBuffer();
+
+        for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
+            MacroState ms = mStates[ms_idx];
+            if(ms == null) continue; // This state was not filled
+
+            for(int ss_idx = 0; ss_idx < ms.substates.length; ss_idx++) {
+                strBuf.delete(0, strBuf.length());
+                SubState ss = ms.substates[ss_idx];
+
+                for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                    strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                }
+
+                for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                    strBuf.append(((ss_idx >> ((totInputs - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                }
+
+                strBuf.append(' ');
+
+                for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
+                    if(ss.pin_status[bit_idx] == 0) strBuf.append('0');
+                    else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
+                    else strBuf.append('-');
+                }
+                strBuf.append('\n');
+
+                out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+            }
         }
     }
 }
