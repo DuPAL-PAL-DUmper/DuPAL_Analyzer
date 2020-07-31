@@ -528,7 +528,7 @@ public class DuPALAnalyzer {
         strBuf.delete(0, strBuf.length()); 
         strBuf.append(".ilb ");
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
-            strBuf.append(specs.getROUT_PinNames()[idx]+"_old ");
+            strBuf.append("o_"+specs.getROUT_PinNames()[idx]+" ");
         }
         for(int idx = 0; idx < specs.getNumINPins(); idx++) {
             strBuf.append(specs.getIN_PinNames()[idx]+" ");

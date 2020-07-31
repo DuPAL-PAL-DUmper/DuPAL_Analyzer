@@ -14,10 +14,11 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
-        // PALSpecs pspecs = new PAL16R6Specs();
-        PALSpecs pspecs = new PAL16R4Specs();
+         PALSpecs pspecs = new PAL16R6Specs();
+        //PALSpecs pspecs = new PAL16R4Specs();
         // DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
-        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0x80, "/tmp/dupal.dmp");
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, -1, "/tmp/dupal.dmp");
+        //DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0x80, "/tmp/dupal.dmp");
 
         if(!dpm.enterRemoteMode()) {
             System.out.println("Unable to enter remote mode!");
