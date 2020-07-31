@@ -561,22 +561,26 @@ public class DuPALAnalyzer {
                 strBuf.delete(0, strBuf.length());
                 SubState ss = ms.substates[ss_idx];
 
+                // Add the registered outputs as inputs
                 for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
                     strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
                 }
 
+                // Add the inputs as inputs
                 for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
                     strBuf.append(((ss_idx >> ((totInputs - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
                 }
 
                 strBuf.append(' ');
 
+                // Add the digital outputs as outputs
                 for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
                     if(ss.pin_status[bit_idx] == 0) strBuf.append('0');
                     else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
                     else strBuf.append('-');
                 }
                 
+                // Add the hi-z state as output
                 for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
                     if(ss.pin_status[bit_idx] >= 0) strBuf.append('1');
                     else strBuf.append('0');
