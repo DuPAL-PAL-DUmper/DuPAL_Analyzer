@@ -102,8 +102,8 @@ public class DuPALAnalyzer {
         if(serObjPath != null) saveStatus(serObjPath);
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
-        try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
-        //try { printLogicTableREGOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
+        //try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
+        try { printLogicTableREGOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
     }
 
     private int guessIOs() {
@@ -553,30 +553,52 @@ public class DuPALAnalyzer {
 
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             MacroState ms = mStates[ms_idx];
-            if(ms == null) continue; // This state was not filled
+            if(ms == null) { // This state was not explored, so we're marking its outputs ad "don't care"
+                    for(int fake_sl_idx = 0; fake_sl_idx < (1 << totInputs); fake_sl_idx++) {
+                        strBuf.delete(0, strBuf.length());
+                    
+                        // Inputs
+                        for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                            strBuf.append(((ms_idx >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                        }
+                        for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                            strBuf.append(((fake_sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
+                        } 
 
-            for(int sl_idx = 0; sl_idx < ms.links.length; sl_idx++) {
-                strBuf.delete(0, strBuf.length());
+                        strBuf.append(' ');
+                        
+                        // Outputs
+                        for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                            strBuf.append('-');
+                        }
 
-                // Add the registered outputs as inputs
-                for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                    strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                        strBuf.append('\n');
+                        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+                    }
+            } else {
+                for(int sl_idx = 0; sl_idx < ms.links.length; sl_idx++) {
+                    strBuf.delete(0, strBuf.length());
+
+                    // Add the registered outputs as inputs
+                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                        strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                    }
+
+                    // Add the inputs as inputs
+                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                        strBuf.append(((sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
+                    }
+
+                    strBuf.append(' ');
+
+                    // Add the registered outputs of the new state as outputs
+                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
+                        strBuf.append(((mStates[ms_idx].links[sl_idx].destMS.rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                    }
+
+                    strBuf.append('\n');
+                    out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
                 }
-
-                // Add the inputs as inputs
-                for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                    strBuf.append(((sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                }
-
-                strBuf.append(' ');
-
-                // Add the registered outputs of the new state as outputs
-                for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                    strBuf.append(((mStates[ms_idx].links[sl_idx].destMS.rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
-                }
-
-                strBuf.append('\n');
-                out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
             }
         }
 
