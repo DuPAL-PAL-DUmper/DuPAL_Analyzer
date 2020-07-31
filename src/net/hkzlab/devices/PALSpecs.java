@@ -16,4 +16,8 @@ public interface PALSpecs {
     public int getROUT_WRITEMask();
 
     public int getROUT_READMaskShift();
+
+    public String[] getROUT_PinNames();
+    public String[] getIN_PinNames();
+    public String[] getIO_PinNames();
 }

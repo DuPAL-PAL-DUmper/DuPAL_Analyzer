@@ -102,7 +102,7 @@ public class DuPALAnalyzer {
         if(serObjPath != null) saveStatus(serObjPath);
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
-        try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, mStates); } catch(IOException e){};
+        try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
     }
 
     private int guessIOs() {
@@ -525,7 +525,7 @@ public class DuPALAnalyzer {
      * - Outputs (non-registered) as binary outputs. In case they're hi-z, we'll set the state as ignore ('-')
      * - OE status for each output
      */
-    static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, MacroState[] mStates) throws IOException {
+    static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
         out.write(("OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
         int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
         StringBuffer strBuf = new StringBuffer();
@@ -535,19 +535,28 @@ public class DuPALAnalyzer {
         
         strBuf.delete(0, strBuf.length()); // TODO: map the label onto the actual pins instead of a simple incremental number
         strBuf.append(".ilb ");
-        for(int idx = 0; idx < (totInputs + specs.getNumROUTPins()); idx++) {
-            strBuf.append("i"+idx+" ");
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
+            strBuf.append(specs.getROUT_PinNames()[idx]+" ");
+        }
+        for(int idx = 0; idx < specs.getNumINPins(); idx++) {
+            strBuf.append(specs.getIN_PinNames()[idx]+" ");
+        }
+        if(totInputs > specs.getNumINPins()) {
+            int ioINMask = specs.getIO_READMask() & ~ioOUTMask;
+            for(int idx = 0; idx < 8; idx++) {
+                if(((ioINMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+            }
         }
         strBuf.append('\n');
         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
 
         strBuf.delete(0, strBuf.length());
         strBuf.append(".ob ");
-        for(int idx = 0; idx < additionalOUTs; idx++) {
-            strBuf.append("o"+idx+" ");
+        for(int idx = 0; idx < 8; idx++) {
+            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
         }
-        for(int idx = 0; idx < additionalOUTs; idx++) {
-            strBuf.append("oe"+idx+" ");
+        for(int idx = 0; idx < 8; idx++) {
+            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + "oe ");
         }
         strBuf.append("\n\n");
 
@@ -568,7 +577,7 @@ public class DuPALAnalyzer {
 
                 // Add the inputs as inputs
                 for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                    strBuf.append(((ss_idx >> ((totInputs - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                    strBuf.append(((ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
                 }
 
                 strBuf.append(' ');
