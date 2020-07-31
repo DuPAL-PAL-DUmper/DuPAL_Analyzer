@@ -533,7 +533,7 @@ public class DuPALAnalyzer {
         out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
         out.write((".o " + (additionalOUTs*2) + "\n").getBytes(StandardCharsets.US_ASCII)); // * 2 because we get both an output and its OE state
         
-        strBuf.delete(0, strBuf.length()); // TODO: map the label onto the actual pins instead of a simple incremental number
+        strBuf.delete(0, strBuf.length()); 
         strBuf.append(".ilb ");
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
             strBuf.append(specs.getROUT_PinNames()[idx]+" ");
