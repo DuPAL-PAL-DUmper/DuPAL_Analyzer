@@ -53,9 +53,9 @@ public class DuPALAnalyzer {
         this.IOasOUT_Mask = IOasOUT_Mask;
         this.outPath = outPath;
 
-        serdump_path = outPath + File.pathSeparator + SERIALIZED_DUMP;
-        tblPath_out = outPath + File.pathSeparator + OUT_TABLE;
-        tblPath_regout = outPath + File.pathSeparator + REGOUT_TABLE;
+        serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
+        tblPath_out = outPath + File.separator + OUT_TABLE;
+        tblPath_regout = outPath + File.separator + REGOUT_TABLE;
 
         this.pathMap = new HashMap<>();
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
