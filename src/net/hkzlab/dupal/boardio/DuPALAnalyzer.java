@@ -116,6 +116,7 @@ public class DuPALAnalyzer {
         if(serdump_path != null) saveStatus(serdump_path);
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
+        printUnvisitedMacroStates(mStates);
         printTables();
     }
 
@@ -529,6 +530,21 @@ public class DuPALAnalyzer {
 
     static private String buildTag(int idx) {
         return String.format("%02X", idx);
+    }
+
+    static private void printUnvisitedMacroStates(MacroState[] mStates) {
+        StringBuffer strBuf = new StringBuffer();
+
+        strBuf.append("The following MacroStates were not visited:\n");
+        for(int idx = 0; idx < mStates.length; idx++) {
+            if(mStates[idx] == null) {
+                strBuf.append("\t " + String.format("\t%02X\n", idx));
+            }
+        }
+
+        strBuf.append('\n');
+
+        logger.info(strBuf.toString());
     }
 
     static private void printStateStructure(OutputStream out, PALSpecs specs, MacroState[] mStates) throws IOException {
