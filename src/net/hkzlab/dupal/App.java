@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import net.hkzlab.devices.PAL16R4Specs;
 import net.hkzlab.devices.PAL16R6Specs;
+import net.hkzlab.devices.PAL16R8Specs;
 import net.hkzlab.devices.PALSpecs;
 import net.hkzlab.dupal.boardio.DuPALAnalyzer;
 import net.hkzlab.dupal.boardio.DuPALManager;
@@ -12,13 +13,24 @@ import net.hkzlab.dupal.boardio.DuPALManager;
 public class App {
     private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
 
+    private static String serialDevice = null;
+    private static PALSpecs pspecs = null;
+    private static int outMask = -1;
+    private static String outDir = null;
+
     public static void main(String[] args) throws Exception {
-        DuPALManager dpm = new DuPALManager("/dev/ttyUSB0");
-         PALSpecs pspecs = new PAL16R6Specs();
-        //PALSpecs pspecs = new PAL16R4Specs();
-        // DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs);
-        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0xC0, "/tmp/dupal.dmp");
-        //DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, 0x80, "/tmp/dupal.dmp");
+        if(args.length < 3) {
+            logger.error("Wrong number of arguments passed.\n"+
+                        "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_outmask]\n" +
+                        "Where <pal_type> can be: 16R8, 16R6, 16R4\n");
+
+            return;
+        }
+
+        parseArgs(args);
+
+        DuPALManager dpm = new DuPALManager(serialDevice);
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, outMask, outDir);
 
         if(!dpm.enterRemoteMode()) {
             System.out.println("Unable to enter remote mode!");
@@ -26,36 +38,30 @@ public class App {
         }
 
         dpan.startAnalisys();
+    }
 
-        /*
-        try {
-            System.out.println(dpm.enterRemoteMode());
-
-            for(int idx = 0; idx <= 0xFFFF; idx++) {
-                dpm.writeCommand(DuPALProto.buildWRITECommand(idx));
-                int addr = DuPALProto.handleWRITEResponse(dpm.readResponse());
-
-                if(addr >= 0) {
-                    System.out.println("idx -> " + idx + " written -> " + addr);
-                } else {
-                    System.out.println("Write error!");
-                    break;
-                }
-
-                dpm.writeCommand(DuPALProto.buildREADCommand());
-                System.out.println("Read ... " + DuPALProto.handleREADResponse(dpm.readResponse()));
-            }
-        } finally {
-            dpm.cleanup();
+    private static void parseArgs(String[] args) {
+        serialDevice = args[0];
+        
+        switch(args[1].toUpperCase()) {
+            case "16R8":
+                pspecs = new PAL16R8Specs();
+                break;
+            case "16R6":
+                pspecs = new PAL16R6Specs();
+                break;
+            case "16R4":
+                pspecs = new PAL16R4Specs();
+                break;
+            default:
+                logger.error("Bad PAL type selected.");
+                System.exit(-1);
         }
-        */
-        //SubState ss = new SubState("TEST", new byte[] {-1, 0, -1, 0, -1, -1});
-        //System.out.println(ss.toString());
-        //System.out.println(ss.hashCode());
 
-        //MacroState ms = new MacroState("TEST", new boolean[] {true, true, false, true}, 3);
-        //System.out.println(ms.toString());
-        //System.out.println(ms.hashCode());
+        outDir = args[2];
 
+        if(args.length >= 4) {
+            outMask = Integer.parseInt(args[3], 16);
+        }
     }
 }

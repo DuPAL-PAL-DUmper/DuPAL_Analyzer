@@ -1,5 +1,6 @@
 package net.hkzlab.dupal.boardio;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,22 +27,35 @@ import net.hkzlab.palanalisys.SubState;
 public class DuPALAnalyzer {
     private final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
+    private static final String SERIALIZED_DUMP = "dupalstat.dmp";
+    private static final String OUT_TABLE = "dupal_outputs.tbl";
+    private static final String REGOUT_TABLE = "dupal_regoutputs.tbl";
+
     private static final long SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
     private MacroState[] mStates;
 
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
-    private final String serObjPath;
+    private final String outPath;
     private final HashMap<Integer, StateLink[]> pathMap;
+    
+    private final String serdump_path;
+    private final String tblPath_out;
+    private final String tblPath_regout;
+    
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
 
-    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask, String serObjPath) {
+    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask, final String outPath) {
         this.dpm = dpm;
         this.pspecs = pspecs;
         this.IOasOUT_Mask = IOasOUT_Mask;
-        this.serObjPath = serObjPath;
+        this.outPath = outPath;
+
+        serdump_path = outPath + File.pathSeparator + SERIALIZED_DUMP;
+        tblPath_out = outPath + File.pathSeparator + OUT_TABLE;
+        tblPath_regout = outPath + File.pathSeparator + REGOUT_TABLE;
 
         this.pathMap = new HashMap<>();
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
@@ -97,13 +111,34 @@ public class DuPALAnalyzer {
 
         additionalOUTs = calculateAdditionalOutsFromMask(IOasOUT_Mask);
 
-        if(serObjPath != null) restoreStatus(serObjPath);
+        if(outPath != null) restoreStatus(serdump_path);
         internal_analisys();
-        if(serObjPath != null) saveStatus(serObjPath);
+        if(serdump_path != null) saveStatus(serdump_path);
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
-        //try { printLogicTableOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
-        try { printLogicTableREGOUTPUTS(System.out, pspecs, additionalOUTs, IOasOUT_Mask, mStates); } catch(IOException e){};
+        printTables();
+    }
+
+    private void printTables() {
+        FileOutputStream fout = null;
+        
+        try {
+            fout = new FileOutputStream(tblPath_out);
+            printLogicTableOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
+            fout.close();
+        } catch(IOException e) {
+            logger.error("Error printing out the outputs table.");
+            e.printStackTrace();
+        }
+        
+        try {
+            fout = new FileOutputStream(tblPath_regout);
+            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
+            fout.close();
+        } catch(IOException e) {
+            logger.error("Error printing out the registered outputs table.");
+            e.printStackTrace();
+        }
     }
 
     private int guessIOs() {
@@ -186,8 +221,8 @@ public class DuPALAnalyzer {
         long last_save = 0;
         while(true) {
             long now = System.currentTimeMillis();
-            if(((now - last_save) >= SAVE_INTERVAL) && (serObjPath != null)) {
-                saveStatus(serObjPath);
+            if(((now - last_save) >= SAVE_INTERVAL) && (serdump_path != null)) {
+                saveStatus(serdump_path);
                 last_save = now;
             }
 
