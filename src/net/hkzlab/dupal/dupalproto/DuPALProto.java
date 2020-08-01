@@ -70,8 +70,9 @@ public class DuPALProto {
     }
 
     public static String[] parseResponse(String response) {
-        ArrayList<String> respString = new ArrayList<>();
+        if(response == null) return null;
 
+        ArrayList<String> respString = new ArrayList<>();        
         response = response.trim();
 
         if(response.equals(CMD_RESP_ERROR)) {
