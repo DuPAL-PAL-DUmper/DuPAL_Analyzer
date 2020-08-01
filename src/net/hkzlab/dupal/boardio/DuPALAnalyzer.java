@@ -520,7 +520,7 @@ public class DuPALAnalyzer {
         res = DuPALProto.handleWRITEResponse(dpm.readResponse());
 
         if(res < 0) {
-            logger.error("writePINs("+String.format("%08X", addr)+" -> FAILED!");
+            logger.error("writePINs("+String.format("%08X", addr)+") -> FAILED!");
             System.exit(-1);
         }
 
