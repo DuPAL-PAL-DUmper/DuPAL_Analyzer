@@ -25,7 +25,7 @@ import net.hkzlab.palanalisys.StateLink;
 import net.hkzlab.palanalisys.SubState;
 
 public class DuPALAnalyzer {
-    private final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
+    private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
     private static final String SERIALIZED_DUMP = "dupalstat.dmp";
     private static final String OUT_TABLE = "dupal_outputs.tbl";
@@ -552,6 +552,8 @@ public class DuPALAnalyzer {
     }
 
     static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
+        logger.info("Printing logic table for registered outputs.");
+
         out.write(("# OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
         int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
         StringBuffer strBuf = new StringBuffer();
@@ -651,6 +653,8 @@ public class DuPALAnalyzer {
      * - OE status for each output
      */
     static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
+        logger.info("Printing logic table for normal outputs.");
+        
         out.write(("# OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
         int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
         StringBuffer strBuf = new StringBuffer();

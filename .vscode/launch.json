@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            //"args": ["/dev/ttyUSB0", "16R6", "/tmp", "C0"]
+            "args": ["/dev/ttyUSB0", "16R6", "/tmp"]
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-App<DuPAL_Analyzer_44ed364>",
+            "request": "launch",
+            "mainClass": "net.hkzlab.dupal.App",
+            "projectName": "DuPAL_Analyzer_44ed364"
+        }
+    ]
+}
