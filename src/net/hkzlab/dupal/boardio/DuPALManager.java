@@ -31,7 +31,7 @@ public class DuPALManager {
 
         if (serport != null) {
             try {
-                serport.setParams(BAUDRATE_38400, DATABITS_8, STOPBITS_1, PARITY_NONE);
+                serport.setParams(BAUDRATE_57600, DATABITS_8, STOPBITS_1, PARITY_NONE);
             } catch (final SerialPortException e) {
                 e.printStackTrace();
                 try {
@@ -72,7 +72,7 @@ public class DuPALManager {
             try {
                 logger.debug("Command -> " + command);
                 serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
-                try { Thread.sleep(30); } catch(InterruptedException e) {}; // Wait a bit for execution and response
+                try { Thread.sleep(15); } catch(InterruptedException e) {}; // Wait a bit for execution and response
             } catch (SerialPortException e) {
                 e.printStackTrace();
             }
