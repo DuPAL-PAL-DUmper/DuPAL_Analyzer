@@ -123,13 +123,17 @@ public class DuPALAnalyzer {
     private void printTables() {
         FileOutputStream fout = null;
         
-        try {
-            fout = new FileOutputStream(tblPath_out);
-            printLogicTableOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
-            fout.close();
-        } catch(IOException e) {
-            logger.error("Error printing out the outputs table.");
-            e.printStackTrace();
+        if(additionalOUTs >= 0) {
+            try {
+                fout = new FileOutputStream(tblPath_out);
+                printLogicTableOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
+                fout.close();
+            } catch(IOException e) {
+                logger.error("Error printing out the outputs table.");
+                e.printStackTrace();
+            }
+        } else {
+            logger.warn("We have 0 outputs, will not print the OUTPUTs table.");
         }
         
         try {
