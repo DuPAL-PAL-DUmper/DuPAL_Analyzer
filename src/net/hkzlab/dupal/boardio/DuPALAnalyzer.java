@@ -349,7 +349,7 @@ public class DuPALAnalyzer {
                     if(slStack.size() > 0) {
                         curMS = slStack.peek().destMS; // Back to the previous node
                     } else curMS = start; // Back at the beginning it seems...
-                    logger.info("Moved back to ["+curMS+"]");
+                    logger.trace("Moved back to ["+curMS+"]");
 
                 } else return null; 
                 
