@@ -9,7 +9,8 @@
             "name": "Debug (Launch) - Current File",
             "request": "launch",
             "mainClass": "${file}",
-            "args": ["/dev/ttyUSB0", "16R6", "/tmp", "C0"]
+            //"args": ["/dev/ttyUSB0", "16R6", "/tmp", "C0"]
+            "args": ["/dev/ttyUSB0", "16R4", "/tmp", "80"]
             //"args": ["/dev/ttyUSB0", "16R6", "/tmp"]
         },
         {

@@ -707,7 +707,7 @@ public class DuPALAnalyzer {
             if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
         }
         for(int idx = 0; idx < 8; idx++) {
-            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + "oe ");
+            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
         }
         strBuf.append("\n\n");
 
