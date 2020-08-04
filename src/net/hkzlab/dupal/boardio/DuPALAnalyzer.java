@@ -559,7 +559,7 @@ public class DuPALAnalyzer {
 
         logger.info(strBuf.toString());
     }
-
+/*
     static private void printStateStructure(OutputStream out, PALSpecs specs, MacroState[] mStates) throws IOException {
         out.write(("Printing graph structure for " + specs.toString()+"\n").getBytes(StandardCharsets.US_ASCII));
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
@@ -579,6 +579,7 @@ public class DuPALAnalyzer {
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
         }
     }
+*/
 
     static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates, boolean includeOUTs) throws IOException {
         logger.info("Printing logic table for registered outputs "+(includeOUTs? "(including outputs)":"(not including outputs)")+" .");
