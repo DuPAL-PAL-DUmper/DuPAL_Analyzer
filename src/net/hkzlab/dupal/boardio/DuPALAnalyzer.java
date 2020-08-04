@@ -648,7 +648,7 @@ public class DuPALAnalyzer {
                         strBuf.append('\n');
                         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
                     }
-            } else {
+            } else { // This was explored
                 for(int sl_idx = 0; sl_idx < ms.links.length; sl_idx++) {
                     strBuf.delete(0, strBuf.length());
 
@@ -658,7 +658,7 @@ public class DuPALAnalyzer {
                     }
 
                     // Add the inputs as inputs
-                    for(int bit_idx = 0; bit_idx < (totInputs - additionalOUTs); bit_idx++) {
+                    for(int bit_idx = 0; bit_idx < (totInputs - (includeOUTs ? additionalOUTs : 0)); bit_idx++) {
                         strBuf.append(((sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
                     }
 
