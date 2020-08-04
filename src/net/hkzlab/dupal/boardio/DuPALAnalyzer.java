@@ -138,10 +138,19 @@ public class DuPALAnalyzer {
         
         try {
             fout = new FileOutputStream(tblPath_regout);
-            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
+            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates, false);
             fout.close();
         } catch(IOException e) {
-            logger.error("Error printing out the registered outputs table.");
+            logger.error("Error printing out the registered outputs table (not including outputs).");
+            e.printStackTrace();
+        }
+
+        try {
+            fout = new FileOutputStream(tblPath_regout+"_outs");
+            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates, true);
+            fout.close();
+        } catch(IOException e) {
+            logger.error("Error printing out the registered outputs table (including outputs).");
             e.printStackTrace();
         }
     }
@@ -571,11 +580,11 @@ public class DuPALAnalyzer {
         }
     }
 
-    static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
-        logger.info("Printing logic table for registered outputs.");
+    static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates, boolean includeOUTs) throws IOException {
+        logger.info("Printing logic table for registered outputs "+(includeOUTs? "(including outputs)":"(not including outputs)")+" .");
 
         out.write(("# OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
-        int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
+        int totInputs = specs.getNumINPins() + (specs.getNumIOPins()  - (includeOUTs ? 0 : additionalOUTs));
         StringBuffer strBuf = new StringBuffer();
 
         out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
@@ -594,6 +603,12 @@ public class DuPALAnalyzer {
             int ioINMask = specs.getIO_READMask() & ~ioOUTMask;
             for(int idx = 0; idx < 8; idx++) {
                 if(((ioINMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+            }
+            
+            if(includeOUTs) {
+                for(int idx = 0; idx < 8; idx++) {
+                    if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+                }
             }
         }
         strBuf.append('\n');
@@ -642,8 +657,16 @@ public class DuPALAnalyzer {
                     }
 
                     // Add the inputs as inputs
-                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
+                    for(int bit_idx = 0; bit_idx < (totInputs - additionalOUTs); bit_idx++) {
                         strBuf.append(((sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
+                    }
+
+                    if(includeOUTs) {
+                        for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
+                            if(mStates[ms_idx].substates[sl_idx].pin_status[bit_idx] == 0) strBuf.append('0');
+                            else if (mStates[ms_idx].substates[sl_idx].pin_status[bit_idx] > 0) strBuf.append('1');
+                            else strBuf.append('-');
+                        }
                     }
 
                     strBuf.append(' ');
