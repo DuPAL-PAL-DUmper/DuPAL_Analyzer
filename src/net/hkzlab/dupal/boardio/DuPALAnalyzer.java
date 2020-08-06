@@ -621,6 +621,11 @@ public class DuPALAnalyzer {
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
             strBuf.append(specs.getROUT_PinNames()[idx]+" ");
         }
+        strBuf.append("\n");
+        strBuf.append(".phase ");
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) { // Set the phase for the reg-outputs. We're considering a PAL L here
+            strBuf.append('0');
+        }
         strBuf.append("\n\n");
         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
 
@@ -732,6 +737,14 @@ public class DuPALAnalyzer {
         }
         for(int idx = 0; idx < 8; idx++) {
             if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
+        }
+        strBuf.append("\n");
+        strBuf.append(".phase ");
+        for(int idx = 0; idx < additionalOUTs; idx++) { // The normal outputs. If we're using a PAL H, just flip these to '1'
+            strBuf.append('0');
+        }
+        for(int idx = 0; idx < additionalOUTs; idx++) { // The OEs
+            strBuf.append('1');
         }
         strBuf.append("\n\n");
 
