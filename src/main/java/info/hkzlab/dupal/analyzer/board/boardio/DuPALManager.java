@@ -1,4 +1,4 @@
-package net.hkzlab.dupal.boardio;
+package info.hkzlab.dupal.analyzer.board.boardio;
 
 import static jssc.SerialPort.*;
 

@@ -1,14 +1,9 @@
-package net.hkzlab.dupal;
+package info.hkzlab.dupal.analyzer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import net.hkzlab.devices.PAL16R4Specs;
-import net.hkzlab.devices.PAL16R6Specs;
-import net.hkzlab.devices.PAL16R8Specs;
-import net.hkzlab.devices.PALSpecs;
-import net.hkzlab.dupal.boardio.DuPALAnalyzer;
-import net.hkzlab.dupal.boardio.DuPALManager;
+import info.hkzlab.dupal.analyzer.board.boardio.*;
+import info.hkzlab.dupal.analyzer.devices.*;
 
 public class App {
     private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);

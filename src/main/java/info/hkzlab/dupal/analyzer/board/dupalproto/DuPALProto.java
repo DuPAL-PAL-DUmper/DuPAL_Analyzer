@@ -1,4 +1,4 @@
-package net.hkzlab.dupal.dupalproto;
+package info.hkzlab.dupal.analyzer.board.dupalproto;
 
 import java.util.ArrayList;
 

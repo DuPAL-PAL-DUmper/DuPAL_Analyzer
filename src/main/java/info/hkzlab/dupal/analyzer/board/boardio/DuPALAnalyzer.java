@@ -1,4 +1,4 @@
-package net.hkzlab.dupal.boardio;
+package info.hkzlab.dupal.analyzer.board.boardio;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,11 +18,9 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.hkzlab.devices.PALSpecs;
-import net.hkzlab.dupal.dupalproto.DuPALProto;
-import net.hkzlab.palanalisys.MacroState;
-import net.hkzlab.palanalisys.StateLink;
-import net.hkzlab.palanalisys.SubState;
+import info.hkzlab.dupal.analyzer.board.dupalproto.DuPALProto;
+import info.hkzlab.dupal.analyzer.devices.*;
+import info.hkzlab.dupal.analyzer.palanalisys.*;
 
 public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);

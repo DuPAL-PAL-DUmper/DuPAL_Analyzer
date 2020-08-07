@@ -1,4 +1,4 @@
-package net.hkzlab.devices;
+package info.hkzlab.dupal.analyzer.devices;
 
 public class PAL16R4Specs implements PALSpecs {
     private static final String[] ROUT_PIN_NAMES = { "ro14", "ro15", "ro16", "ro17" };

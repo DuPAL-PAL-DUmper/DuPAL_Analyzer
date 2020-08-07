@@ -1,4 +1,4 @@
-package net.hkzlab.devices;
+package info.hkzlab.dupal.analyzer.devices;
 
 public interface PALSpecs {
     public static final int READ_WRITE_SHIFT = 10;

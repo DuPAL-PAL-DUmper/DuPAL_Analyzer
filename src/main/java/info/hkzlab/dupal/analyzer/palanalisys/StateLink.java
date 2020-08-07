@@ -1,4 +1,4 @@
-package net.hkzlab.palanalisys;
+package info.hkzlab.dupal.analyzer.palanalisys;
 
 import java.io.Serializable;
 
