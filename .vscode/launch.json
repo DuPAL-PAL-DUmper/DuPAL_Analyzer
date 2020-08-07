@@ -17,8 +17,8 @@
             "type": "java",
             "name": "Debug (Launch)-App<DuPAL_Analyzer_44ed364>",
             "request": "launch",
-            "mainClass": "net.hkzlab.dupal.App",
-            "projectName": "DuPAL_Analyzer_44ed364"
+            "mainClass": "info.hkzlab.dupal.analyzer.App",
+            "projectName": "DuPAL-Analyzer"
         }
     ]
 }
