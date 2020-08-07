@@ -17,6 +17,7 @@ public class MacroState implements Serializable {
     public final SubState[] substates;
     public final StateLink[] links;
     public int link_count;
+    public int last_link_idx;
     public final HashMap<Integer, SubState> ssMap;
 
     public MacroState(final String tag, final int rpin_status, final int rpins, final int inPins) {
@@ -29,6 +30,7 @@ public class MacroState implements Serializable {
         ssMap = new HashMap<>(); // Prepare the hashmap we'll use to avoid substate duplicates
 
         this.link_count = 0;
+        this.last_link_idx = 0;
 
         ss_ready = false;
     }

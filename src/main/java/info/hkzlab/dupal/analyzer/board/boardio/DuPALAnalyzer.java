@@ -45,6 +45,8 @@ public class DuPALAnalyzer {
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
 
+    private int lastUnexploredMS_idx = 0;
+
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask, final String outPath) {
         this.dpm = dpm;
         this.pspecs = pspecs;
@@ -188,9 +190,7 @@ public class DuPALAnalyzer {
         logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
         writePINs(addr_noclk);
         writePINs(addr_clk);
-        //try { Thread.sleep(10); } catch(InterruptedException e) {};
         writePINs(addr_noclk); // Clock low
-        //try { Thread.sleep(5); } catch(InterruptedException e) {};
     }
 
     private void internal_analisys() {
@@ -267,18 +267,36 @@ public class DuPALAnalyzer {
         }
     }
 
+    private int slPathGetHash(MacroState sms, MacroState dms) {
+        return ((sms.rpin_status * 31) + dms.rpin_status);
+    }
+
     private StateLink[] findPathToNewStateLinks(MacroState start_ms) {
+        int precalc_idx = 0;
+
+        if((mStates[lastUnexploredMS_idx].link_count < start_ms.links.length)) {
+            int pathHash = slPathGetHash(start_ms, mStates[lastUnexploredMS_idx]);
+            if(pathMap.containsKey(pathHash)) { 
+                logger.info("Trying to reach MacroState " + String.format("%02X", lastUnexploredMS_idx) + ": it has " + mStates[lastUnexploredMS_idx].link_count + " links.");
+                precalc_idx = lastUnexploredMS_idx;
+            }
+        }
+
         // Search for a state that still has unexplored links
-        for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
+        for(int ms_idx = precalc_idx; ms_idx < mStates.length; ms_idx++) {
             if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
                 if(mStates[ms_idx].link_count < mStates[ms_idx].links.length) {
                         logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
-                        int path_hash = ((start_ms.rpin_status * 31) + mStates[ms_idx].rpin_status);
+
+                        lastUnexploredMS_idx = ms_idx; // Save it for faster search later
+
+                        int path_hash = slPathGetHash(start_ms, mStates[ms_idx]);
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
 
                         if(sll != null) {
                             if(sll[sll.length-1].destMS != mStates[ms_idx]) {
                                 logger.warn("Got an hash collision trying to reach ["+mStates[ms_idx]+"] from ["+start_ms+"]");
+                                lastUnexploredMS_idx = 0;
                                 sll = null;
                             }
                         }
@@ -365,38 +383,38 @@ public class DuPALAnalyzer {
         }
 
         int idx_mask = buildInputMask();
-        int links_counter = 0;
 
         logger.info("Now check if we have a new StateLink to try...");
+        if(ms.link_count == ms.links.length) return null;
 
         // Check if we have a link to generate
+        int links_counter;
         int maxidx = pspecs.getIO_WRITEMask() | pspecs.getINMask();
-        for(int idx = 0; idx <= maxidx; idx+=2) {
-            if((idx & idx_mask) != 0) continue; // Skip this run
+        while (ms.last_link_idx <= maxidx) { // Search for the next valid address
+            if((ms.last_link_idx & idx_mask) != 0) { ms.last_link_idx +=2; continue; } // Skip this run
+            links_counter = ms.link_count;
 
-            if(ms.links[links_counter] == null) {
-                logger.info("Generating StateLink at index " + links_counter);
+            logger.info("Generating StateLink at index " + links_counter);
 
-                pulseClock(idx); // Enter the new state
-                int pins = readPINs();
-                int mstate_idx = (pins & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift();
-                MacroState nms = mStates[mstate_idx];
-                StateLink sl = null;
+            pulseClock(ms.last_link_idx); // Enter the new state
+            int pins = readPINs();
+            int mstate_idx = (pins & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift();
+            MacroState nms = mStates[mstate_idx];
+            StateLink sl = null;
 
-                if(nms == null) {
-                    nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + pspecs.getNumIOPins() - additionalOUTs));
-                    mStates[mstate_idx] = nms;
-                }
-                sl = new StateLink(ms.tag, idx, nms);
-                ms.links[links_counter] = sl;
-                ms.link_count++;
-
-                logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"'");
-
-                return nms;
+            if(nms == null) {
+                nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + pspecs.getNumIOPins() - additionalOUTs));
+                mStates[mstate_idx] = nms;
             }
+            sl = new StateLink(ms.tag, ms.last_link_idx, nms);
+            ms.links[links_counter] = sl;
+            ms.link_count++;
 
-            links_counter++; // Keep the counter up to date
+            logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"'");
+
+            ms.last_link_idx += 2;
+
+            return nms;
         }
 
         return null; // We did not move from the macrostate
