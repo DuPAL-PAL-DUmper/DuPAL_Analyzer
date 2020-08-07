@@ -28,9 +28,8 @@ public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
     private static final String SERIALIZED_DUMP = "dupalstat.dmp";
+    private static final String OUT_TABLE = "dupal_thrtable.tbl";
     private static final String DUPAL_STRUCT = "dupal_struct.txt";
-    private static final String OUT_TABLE = "dupal_outputs.tbl";
-    private static final String REGOUT_TABLE = "dupal_regoutputs.tbl";
 
     private static final long SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -42,8 +41,7 @@ public class DuPALAnalyzer {
     private final HashMap<Integer, StateLink[]> pathMap;
     
     private final String serdump_path;
-    private final String tblPath_out;
-    private final String tblPath_regout;
+    private final String tblPath;
     private final String structPath;
     
     private int IOasOUT_Mask = -1;
@@ -56,8 +54,7 @@ public class DuPALAnalyzer {
         this.outPath = outPath;
 
         serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
-        tblPath_out = outPath + File.separator + OUT_TABLE;
-        tblPath_regout = outPath + File.separator + REGOUT_TABLE;
+        tblPath = outPath + File.separator + OUT_TABLE;
         structPath = outPath + File.separator + DUPAL_STRUCT;
 
         this.pathMap = new HashMap<>();
@@ -134,35 +131,12 @@ public class DuPALAnalyzer {
             logger.error("Error printing out the analisys struct.");
             e.printStackTrace();           
         }
-
-        if(additionalOUTs >= 0) {
-            try {
-                fout = new FileOutputStream(tblPath_out);
-                printLogicTableOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
-                fout.close();
-            } catch(IOException e) {
-                logger.error("Error printing out the outputs table.");
-                e.printStackTrace();
-            }
-        } else {
-            logger.warn("We have 0 outputs, will not print the OUTPUTs table.");
-        }
-        
         try {
-            fout = new FileOutputStream(tblPath_regout);
-            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates, false);
+            fout = new FileOutputStream(tblPath);
+            printLogicTable(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
             fout.close();
         } catch(IOException e) {
             logger.error("Error printing out the registered outputs table (not including outputs).");
-            e.printStackTrace();
-        }
-
-        try {
-            fout = new FileOutputStream(tblPath_regout+"_outs");
-            printLogicTableREGOUTPUTS(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates, true);
-            fout.close();
-        } catch(IOException e) {
-            logger.error("Error printing out the registered outputs table (including outputs).");
             e.printStackTrace();
         }
     }
@@ -573,6 +547,8 @@ public class DuPALAnalyzer {
     }
 
     static private void printStateStructure(OutputStream out, PALSpecs specs, MacroState[] mStates) throws IOException {
+        logger.info("Printing state structure.");
+
         out.write(("Printing graph structure for " + specs.toString()+"\n").getBytes(StandardCharsets.US_ASCII));
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             if(mStates[ms_idx] == null) continue;
@@ -592,80 +568,76 @@ public class DuPALAnalyzer {
         }
     }
 
-    static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates, boolean includeOUTs) throws IOException {
-        logger.info("Printing logic table for registered outputs "+(includeOUTs? "(including outputs)":"(not including outputs)")+" .");
+    static private void printLogicTable(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
+        logger.info("Printing logic table. ");
 
-        out.write(("# OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
-        int totInputs = specs.getNumINPins() + (specs.getNumIOPins()  - (includeOUTs ? 0 : additionalOUTs));
+        out.write(("# "+specs+" logic table\n").getBytes(StandardCharsets.US_ASCII));
+        int totInputs = specs.getNumINPins() + (specs.getNumIOPins()  - additionalOUTs);
         StringBuffer strBuf = new StringBuffer();
-
-        out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
-        out.write((".o " + specs.getNumROUTPins() + "\n").getBytes(StandardCharsets.US_ASCII));
         
+        out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
+        out.write((".o " + (specs.getNumROUTPins() + (additionalOUTs*2)) + "\n").getBytes(StandardCharsets.US_ASCII));
+
         // Input labels
         strBuf.delete(0, strBuf.length()); 
         strBuf.append(".ilb ");
-        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
-            strBuf.append("o_"+specs.getROUT_PinNames()[idx]+" ");
-        }
-        for(int idx = 0; idx < specs.getNumINPins(); idx++) {
-            strBuf.append(specs.getIN_PinNames()[idx]+" ");
-        }
-        if(totInputs > specs.getNumINPins()) {
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append("o_"+specs.getROUT_PinNames()[idx]+" "); // Old registerd states
+        for(int idx = 0; idx < specs.getNumINPins(); idx++) strBuf.append(specs.getIN_PinNames()[idx]+" "); // Inputs
+        if(totInputs > specs.getNumINPins()) { // IOs as inputs
             int ioINMask = specs.getIO_READMask() & ~ioOUTMask;
             for(int idx = 0; idx < 8; idx++) {
                 if(((ioINMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
             }
-            
-            if(includeOUTs) {
-                for(int idx = 0; idx < 8; idx++) {
-                    if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
-                }
-            }
         }
         strBuf.append('\n');
         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
-
+        
         // Output labels
         strBuf.delete(0, strBuf.length());
         strBuf.append(".ob ");
-        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
-            strBuf.append(specs.getROUT_PinNames()[idx]+" ");
-        }
-        strBuf.append("\n");
-        strBuf.append(".phase ");
-        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) { // Set the phase for the reg-outputs. We're considering a PAL L here
-            strBuf.append('0');
-        }
-        strBuf.append("\n\n");
-        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
+        // registered outputs
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append(specs.getROUT_PinNames()[idx]+" ");
+        for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+        for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
 
+        strBuf.append("\n");
+
+        // Phase
+        strBuf.append(".phase ");
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append('0'); // REG outputs
+        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append('0'); // Outputs
+        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append('1'); // OEs
+        strBuf.append("\n\n");
+        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));   
+        
+        // Table
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
             MacroState ms = mStates[ms_idx];
-            if(ms == null) { // This state was not explored, so we're marking its outputs ad "don't care"
+                if(ms == null) { // This state was not explored, so we're marking its outputs ad "don't care"
                     for(int fake_sl_idx = 0; fake_sl_idx < (1 << totInputs); fake_sl_idx++) {
                         strBuf.delete(0, strBuf.length());
                     
-                        // Inputs
+                        // Old registered outputs
                         for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
                             strBuf.append(((ms_idx >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
                         }
-                        for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                            strBuf.append(((fake_sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                        } 
+                        // Inputs
+                        for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) strBuf.append(((fake_sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
 
                         strBuf.append(' ');
                         
-                        // Outputs
-                        for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                            strBuf.append('-');
-                        }
+                        // Fake Outputs
+                        for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) strBuf.append('-');
+                        
+                        // Fake digital outputs + hi-z outputs
+                        for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) strBuf.append("--");
 
                         strBuf.append('\n');
                         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
                     }
-            } else { // This was explored
-                for(int sl_idx = 0; sl_idx < ms.links.length; sl_idx++) {
+            } else { // This state was explored
+                for(int ss_idx = 0; ss_idx < ms.links.length; ss_idx++) {
+                    SubState ss = ms.substates[ss_idx];
                     strBuf.delete(0, strBuf.length());
 
                     // Add the registered outputs as inputs
@@ -674,139 +646,14 @@ public class DuPALAnalyzer {
                     }
 
                     // Add the inputs as inputs
-                    for(int bit_idx = 0; bit_idx < (totInputs - (includeOUTs ? additionalOUTs : 0)); bit_idx++) {
-                        strBuf.append(((sl_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                    }
-
-                    if(includeOUTs) {
-                        for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
-                            if(mStates[ms_idx].substates[sl_idx].pin_status[bit_idx] == 0) strBuf.append('0');
-                            else if (mStates[ms_idx].substates[sl_idx].pin_status[bit_idx] > 0) strBuf.append('1');
-                            else strBuf.append('-');
-                        }
-                    }
+                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) strBuf.append(((ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
 
                     strBuf.append(' ');
 
                     // Add the registered outputs of the new state as outputs
                     for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                        strBuf.append(((mStates[ms_idx].links[sl_idx].destMS.rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
+                        strBuf.append(((mStates[ms_idx].links[ss_idx].destMS.rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
                     }
-
-                    strBuf.append('\n');
-                    out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
-                }
-            }
-        }
-
-        out.write(("\n.e\n").getBytes(StandardCharsets.US_ASCII));
-    }
-
-    /*
-     * This method will write out a table with all the OUTPUTS states, to be minimized
-     * Inputs for this table will be
-     * - Inputs pins (both normal inputs and IOs as inputs)
-     * - Registered outputs current status (they act as a feed for the output)
-     * 
-     * Outputs for this table will be
-     * - Outputs (non-registered) as binary outputs. In case they're hi-z, we'll set the state as ignore ('-')
-     * - OE status for each output
-     */
-    static private void printLogicTableOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
-        logger.info("Printing logic table for normal outputs.");
-        
-        out.write(("# OUTPUT logic table\n").getBytes(StandardCharsets.US_ASCII));
-        int totInputs = specs.getNumINPins() + (specs.getNumIOPins() - additionalOUTs);
-        StringBuffer strBuf = new StringBuffer();
-
-        out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
-        out.write((".o " + (additionalOUTs*2) + "\n").getBytes(StandardCharsets.US_ASCII)); // * 2 because we get both an output and its OE state
-       
-        // Input labels
-        strBuf.delete(0, strBuf.length()); 
-        strBuf.append(".ilb ");
-        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) {
-            strBuf.append(specs.getROUT_PinNames()[idx]+" ");
-        }
-        for(int idx = 0; idx < specs.getNumINPins(); idx++) {
-            strBuf.append(specs.getIN_PinNames()[idx]+" ");
-        }
-        if(totInputs > specs.getNumINPins()) {
-            int ioINMask = specs.getIO_READMask() & ~ioOUTMask;
-            for(int idx = 0; idx < 8; idx++) {
-                if(((ioINMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
-            }
-        }
-        strBuf.append('\n');
-        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
-
-        // Output labels
-        strBuf.delete(0, strBuf.length());
-        strBuf.append(".ob ");
-        for(int idx = 0; idx < 8; idx++) {
-            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
-        }
-        for(int idx = 0; idx < 8; idx++) {
-            if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
-        }
-        strBuf.append("\n");
-        strBuf.append(".phase ");
-        for(int idx = 0; idx < additionalOUTs; idx++) { // The normal outputs. If we're using a PAL H, just flip these to '1'
-            strBuf.append('0');
-        }
-        for(int idx = 0; idx < additionalOUTs; idx++) { // The OEs
-            strBuf.append('1');
-        }
-        strBuf.append("\n\n");
-
-        out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
-
-        for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
-            MacroState ms = mStates[ms_idx];
-            if(ms == null) { // This state was not visited, so we're generating the outputs as "don't care"
-                for(int fake_ss_idx = 0; fake_ss_idx < (1<<totInputs); fake_ss_idx++) {
-                    strBuf.delete(0, strBuf.length());
-                
-                    // Set what the inputs would be
-                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                        strBuf.append(((ms_idx >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
-                    }
-                
-                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                        strBuf.append(((fake_ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                    }
-                
-                    strBuf.append(' ');
-               
-                    // Fake digital outputs
-                    for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
-                        strBuf.append('-');
-                    }
-
-                    // Fake hi-z outputs
-                    for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) {
-                        strBuf.append('-');
-                    }
-                    
-                    strBuf.append('\n');
-                    out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
-                }
-            } else {
-                for(int ss_idx = 0; ss_idx < ms.substates.length; ss_idx++) {
-                    strBuf.delete(0, strBuf.length());
-                    SubState ss = ms.substates[ss_idx];
-
-                    // Add the registered outputs as inputs
-                    for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) {
-                        strBuf.append(((mStates[ms_idx].rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
-                    }
-
-                    // Add the inputs as inputs
-                    for(int bit_idx = 0; bit_idx < totInputs; bit_idx++) {
-                        strBuf.append(((ss_idx >> bit_idx) & 0x01) > 0 ? '1' : '0');
-                    }
-
-                    strBuf.append(' ');
 
                     // Add the digital outputs as outputs
                     for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
@@ -826,7 +673,5 @@ public class DuPALAnalyzer {
                 }
             }
         }
-
-        out.write(("\n.e\n").getBytes(StandardCharsets.US_ASCII));
     }
 }
