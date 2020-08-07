@@ -28,6 +28,7 @@ public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
     private static final String SERIALIZED_DUMP = "dupalstat.dmp";
+    private static final String DUPAL_STRUCT = "dupal_struct.txt";
     private static final String OUT_TABLE = "dupal_outputs.tbl";
     private static final String REGOUT_TABLE = "dupal_regoutputs.tbl";
 
@@ -43,6 +44,7 @@ public class DuPALAnalyzer {
     private final String serdump_path;
     private final String tblPath_out;
     private final String tblPath_regout;
+    private final String structPath;
     
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
@@ -56,6 +58,7 @@ public class DuPALAnalyzer {
         serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
         tblPath_out = outPath + File.separator + OUT_TABLE;
         tblPath_regout = outPath + File.separator + REGOUT_TABLE;
+        structPath = outPath + File.separator + DUPAL_STRUCT;
 
         this.pathMap = new HashMap<>();
         this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
@@ -117,12 +120,21 @@ public class DuPALAnalyzer {
 
         //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
         printUnvisitedMacroStates(mStates);
-        printTables();
+        printAnalisysOutput();
     }
 
-    private void printTables() {
+    private void printAnalisysOutput() {
         FileOutputStream fout = null;
         
+        try {
+            fout = new FileOutputStream(structPath);
+            printStateStructure(fout, pspecs, mStates);
+            fout.close();
+        } catch(IOException e) {
+            logger.error("Error printing out the analisys struct.");
+            e.printStackTrace();           
+        }
+
         if(additionalOUTs >= 0) {
             try {
                 fout = new FileOutputStream(tblPath_out);
@@ -559,7 +571,7 @@ public class DuPALAnalyzer {
 
         logger.info(strBuf.toString());
     }
-/*
+
     static private void printStateStructure(OutputStream out, PALSpecs specs, MacroState[] mStates) throws IOException {
         out.write(("Printing graph structure for " + specs.toString()+"\n").getBytes(StandardCharsets.US_ASCII));
         for(int ms_idx = 0; ms_idx < mStates.length; ms_idx++) {
@@ -579,7 +591,6 @@ public class DuPALAnalyzer {
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
         }
     }
-*/
 
     static private void printLogicTableREGOUTPUTS(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates, boolean includeOUTs) throws IOException {
         logger.info("Printing logic table for registered outputs "+(includeOUTs? "(including outputs)":"(not including outputs)")+" .");
