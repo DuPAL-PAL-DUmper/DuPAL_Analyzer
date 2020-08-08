@@ -45,7 +45,7 @@ public class DuPALAnalyzer {
     private int IOasOUT_Mask = -1;
     private int additionalOUTs = 0;
 
-    private int lastUnexploredMS_idx = 0;
+    private int lastUnexploredMS_idx = -1;
 
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs, final int IOasOUT_Mask, final String outPath) {
         this.dpm = dpm;
@@ -274,7 +274,7 @@ public class DuPALAnalyzer {
     private StateLink[] findPathToNewStateLinks(MacroState start_ms) {
         int precalc_idx = 0;
 
-        if((mStates[lastUnexploredMS_idx].link_count < start_ms.links.length)) {
+        if((lastUnexploredMS_idx >= 0) && (mStates[lastUnexploredMS_idx].link_count < start_ms.links.length)) {
             int pathHash = slPathGetHash(start_ms, mStates[lastUnexploredMS_idx]);
             if(pathMap.containsKey(pathHash)) { 
                 logger.info("Trying to reach MacroState " + String.format("%02X", lastUnexploredMS_idx) + ": it has " + mStates[lastUnexploredMS_idx].link_count + " links.");
@@ -296,7 +296,7 @@ public class DuPALAnalyzer {
                         if(sll != null) {
                             if(sll[sll.length-1].destMS != mStates[ms_idx]) {
                                 logger.warn("Got an hash collision trying to reach ["+mStates[ms_idx]+"] from ["+start_ms+"]");
-                                lastUnexploredMS_idx = 0;
+                                lastUnexploredMS_idx = -1;
                                 sll = null;
                             }
                         }
