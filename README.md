@@ -28,3 +28,9 @@ The following PAL models are supported
 
 ### Command line
 **TODO**
+
+## Dependencies
+Remember to install `jssc` 2.9.2 by [java-native](https://github.com/java-native/jssc) with a command like this:
+```
+mvn install:install-file -Dfile=./lib/jssc-2.9.2.jar -DgroupId=io.github.java-native -DartifactId=jssc -Dversion=2.9.2 -Dpackaging=jar
+```
