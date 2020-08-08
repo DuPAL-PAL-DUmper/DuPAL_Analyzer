@@ -321,7 +321,7 @@ public class DuPALAnalyzer {
     }
 
     private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
-        logger.info("Searching from a path from ["+start+"] to ["+dest+"]");
+        logger.info("Searching for a path from ["+start+"] to ["+dest+"]");
 
         Stack<StateLink> slStack = new Stack<>();
         Set<MacroState> msSet = new HashSet<>();
@@ -368,11 +368,10 @@ public class DuPALAnalyzer {
                     } else curMS = start; // Back at the beginning it seems...
                     logger.trace("Moved back to ["+curMS+"]");
 
-                } else return null; 
-                
-                if(slStack.size() > 0) {
-
-                } else return null; // Found no possible path
+                } else {
+                    logger.info("Found no possible path out of [" + start + "] to another unvisited link.");
+                    return null;  // Found no possible path
+                }
             }
 
         }
