@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import info.hkzlab.dupal.analyzer.board.dupalproto.DuPALProto;
 import info.hkzlab.dupal.analyzer.devices.*;
+import info.hkzlab.dupal.analyzer.exceptions.*;
 import info.hkzlab.dupal.analyzer.palanalisys.*;
 
 public class DuPALAnalyzer {
@@ -102,7 +103,7 @@ public class DuPALAnalyzer {
         }
     }
 
-    public void startAnalisys() {
+    public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
         logger.info("Device:" + pspecs + " known IOs? " + (IOasOUT_Mask >= 0 ? "Y" : "N"));
 
         if(IOasOUT_Mask < 0) { // We need to detect the status of the IOs...
@@ -115,7 +116,6 @@ public class DuPALAnalyzer {
         internal_analisys();
         if(serdump_path != null) saveStatus(serdump_path);
 
-        //try { printStateStructure(System.out, pspecs, mStates); } catch(IOException e){};
         printUnvisitedMacroStates(mStates);
         printAnalisysOutput();
     }
@@ -141,7 +141,7 @@ public class DuPALAnalyzer {
         }
     }
 
-    private int guessIOs() {
+    private int guessIOs() throws DuPALBoardException {
         logger.info("starting...");
 
         int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask();
@@ -184,16 +184,22 @@ public class DuPALAnalyzer {
         return out_pins;
     }
 
-    private void pulseClock(int addr) {
+    private void pulseClock(int addr) throws DuPALBoardException {
         int addr_clk = (addr | pspecs.getCLKPinMask()) & ~pspecs.getOEPinMask();
         int addr_noclk = addr & ~(pspecs.getOEPinMask() | pspecs.getCLKPinMask());
         logger.debug("Pulsing clock with addr: " + Integer.toHexString(addr_clk) + " | " + Integer.toHexString(addr_noclk));
-        writePINs(addr_noclk);
-        writePINs(addr_clk);
-        writePINs(addr_noclk); // Clock low
+        
+        try {
+            writePINs(addr_noclk); // Set the address, but keep CLK pin low
+            writePINs(addr_clk); // Set CLK pin high..
+            writePINs(addr_noclk); // CLK pin low again
+        } catch(DuPALBoardException e) {
+            logger.error("Pulsing clock to get to address " + Integer.toHexString(addr_noclk) + " failed.");
+            throw e;
+        }
     }
 
-    private void internal_analisys() {
+    private void internal_analisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
         logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask)+"b");
         int pins, mstate_idx;
 
@@ -256,11 +262,11 @@ public class DuPALAnalyzer {
                         pulseClock(sl.raw_addr);
                     }
 
-                    // Check that we got to the right place
+                    // Check that we got to the right state
                     cur_rpin_status = ((readPINs() & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift());
                     if(cur_rpin_status != ms.rpin_status) {
-                        logger.error("Mismatch between the registered output status ("+String.format("%02X", cur_rpin_status)+") and expected status ("+String.format("%02X", ms.rpin_status)+"), old rout was " + String.format("%02X", old_rpin_status));
-                        System.exit(-1);
+                        logger.error("Mismatch between the current reg. out state ("+String.format("%02X", cur_rpin_status)+") and expected state ("+String.format("%02X", ms.rpin_status)+"), old reg. out state was " + String.format("%02X", old_rpin_status));
+                        throw new ICStateException("Unexpected registered out state after traversing a state link path.");
                     }
                 }
             }
@@ -374,7 +380,7 @@ public class DuPALAnalyzer {
         return null;
     }
 
-    private MacroState analyzeMacroState(MacroState ms) {
+    private MacroState analyzeMacroState(MacroState ms) throws InvalidIOPinStateException, DuPALBoardException {
         if(!ms.ss_ready) {
             logger.info("Generating all ("+ms.substates.length+") possible SubStates for MacroState ["+ms+"]");
             genAllMSSubStates(ms);
@@ -450,7 +456,8 @@ public class DuPALAnalyzer {
         return barr;
     }
 
-    private SubState generateSubState(MacroState ms, int idx, int idx_mask) {
+    private SubState generateSubState(MacroState ms, int idx, int idx_mask) throws InvalidIOPinStateException,
+            DuPALBoardException {
         SubState ss = null;
         int pins_1, pins_2, hiz_pins;
 
@@ -467,6 +474,7 @@ public class DuPALAnalyzer {
         if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
             int extraOut = (pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) ^ ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask));
             logger.error("Detected an input that is acting as output when in MS ["+ms+"] -> expected outs: " + String.format("%02X", IOasOUT_Mask) + " actual outs: " + String.format("%02X", IOasOUT_Mask | extraOut));
+            throw new InvalidIOPinStateException("Invalid IO State detected. Expected outputs: " + String.format("%02X", IOasOUT_Mask) + " detected: " + String.format("%02X", IOasOUT_Mask | extraOut), IOasOUT_Mask, IOasOUT_Mask | extraOut);
         }
         
         // Write the address to the inputs, this time try to force the outputs to 1
@@ -508,7 +516,7 @@ public class DuPALAnalyzer {
         return ss;
     }
 
-    private void genAllMSSubStates(MacroState ms) {
+    private void genAllMSSubStates(MacroState ms) throws InvalidIOPinStateException, DuPALBoardException {
         int idx_mask = buildInputMask();
         logger.debug("Input mask " + Integer.toBinaryString(idx_mask) + "b");
 
@@ -532,14 +540,14 @@ public class DuPALAnalyzer {
         return DuPALProto.handleREADResponse(dpm.readResponse());
     }
 
-    private int writePINs(int addr) {
+    private int writePINs(int addr) throws DuPALBoardException {
         int res;
         dpm.writeCommand(DuPALProto.buildWRITECommand(addr));
         res = DuPALProto.handleWRITEResponse(dpm.readResponse());
 
         if(res < 0) {
             logger.error("writePINs("+String.format("%08X", addr)+") -> FAILED!");
-            System.exit(-1);
+            throw new DuPALBoardException("writePINs("+String.format("%08X", addr)+") command failed!");
         }
 
         return res;
