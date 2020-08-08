@@ -459,31 +459,33 @@ public class DuPALAnalyzer {
     private SubState generateSubState(MacroState ms, int idx, int idx_mask) throws InvalidIOPinStateException,
             DuPALBoardException {
         SubState ss = null;
-        int pins_1, pins_2, hiz_pins;
+        int pins_1 = 0, pins_2 = 0, hiz_pins = 0;
 
         ArrayList<Byte> pinstate = new ArrayList<>();
         boolean[] instate = null;
 
-        writePINs(idx); // Write the address to the inputs, attempt to force the current outputs to 0
-        pins_1 = readPINs(); // And read back
-        
-        // Check that inputs really are inputs,
-        // We'd expect that what we wrote to the IO pins that we consider inputs is not forced to a different level,
-        // E.g. if we write an address that contains a high level into an input and we detect a low level, it means that what
-        // we considered as an input, is actually behaving as an output. We probably did not detect them correctly.
-        if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
-            int extraOut = (pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) ^ ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask));
-            logger.error("Detected an input that is acting as output when in MS ["+ms+"] -> expected outs: " + String.format("%02X", IOasOUT_Mask) + " actual outs: " + String.format("%02X", IOasOUT_Mask | extraOut));
-            throw new InvalidIOPinStateException("Invalid IO State detected. Expected outputs: " + String.format("%02X", IOasOUT_Mask) + " detected: " + String.format("%02X", IOasOUT_Mask | extraOut), IOasOUT_Mask, IOasOUT_Mask | extraOut);
-        }
-        
-        // Write the address to the inputs, this time try to force the outputs to 1
-        writePINs(idx | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
-        pins_2 = readPINs();
+        if(IOasOUT_Mask != 0) { // Some PALs have no simple outputs or no IO ports, so the following test is useless
+            writePINs(idx); // Write the address to the inputs, attempt to force the current outputs to 0
+            pins_1 = readPINs(); // And read back
+            
+            // Check that inputs really are inputs,
+            // We'd expect that what we wrote to the IO pins that we consider inputs is not forced to a different level,
+            // E.g. if we write an address that contains a high level into an input and we detect a low level, it means that what
+            // we considered as an input, is actually behaving as an output. We probably did not detect them correctly.
+            if((pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) != ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask))) {
+                int extraOut = (pins_1 & (pspecs.getIO_READMask() & ~IOasOUT_Mask)) ^ ((idx >> PALSpecs.READ_WRITE_SHIFT) & (pspecs.getIO_READMask() & ~IOasOUT_Mask));
+                logger.error("Detected an input that is acting as output when in MS ["+ms+"] -> expected outs: " + String.format("%02X", IOasOUT_Mask) + " actual outs: " + String.format("%02X", IOasOUT_Mask | extraOut));
+                throw new InvalidIOPinStateException("Invalid IO State detected. Expected outputs: " + String.format("%02X", IOasOUT_Mask) + " detected: " + String.format("%02X", IOasOUT_Mask | extraOut), IOasOUT_Mask, IOasOUT_Mask | extraOut);
+            }
+            
+            // Write the address to the inputs, this time try to force the outputs to 1
+            writePINs(idx | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
+            pins_2 = readPINs();
 
-        // Check if forcing the outputs has create a difference in the result:
-        // If a difference is detected, it means the pin is in high impedence state.
-        hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
+            // Check if forcing the outputs has create a difference in the result:
+            // If a difference is detected, it means the pin is in high impedence state.
+            hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
+        }
 
         for(int pin_idx = 0; pin_idx < 8; pin_idx++) {
             if(((IOasOUT_Mask >> pin_idx) & 0x01) == 0) continue; // Not an output pin we're interested in
