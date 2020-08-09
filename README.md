@@ -6,6 +6,7 @@ It uses the board's *Remote Control* mode to remotely toggle the pins and read t
 ### What it can do
 This analyzer works in tandem with the DuPAL board to:
 - Do a black-box analisys of a set of **registered** PAL devices and produce a truth table that can be minimized and transformed into logic equations functionally equivalent to those used to program the chip.
+- Can't work quick: we are not simply "reading" the chip here. We're creating a graph of all the reachable states and all the links between them. This means that we need to reconstruct the behaviour of the black box by feeding it with every possible combination of input. For a chip with 6 registered outputs, and 8 inputs, it means that we're going to have 64 possible states, each one with 256 links out of them that we need to explore. And we cannot teleport from a state to another: we need to move through the graph following links until we get to the state we wish to explore! **Analyzing a chip can take from 10 minutes to several hours**.
 
 ### What it can't do
 - Analyze non-registered PAL devices (these can be done directly by the DuPAL board by connecting to its serial port with a terminal emulator)
