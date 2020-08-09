@@ -16,7 +16,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         if(args.length < 3) {
             logger.error("Wrong number of arguments passed.\n"+
-                        "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_outmask]\n" +
+                        "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_output_mask]\n" +
                         "Where <pal_type> can be: 16R8, 16R6, 16R4\n");
 
             return;
