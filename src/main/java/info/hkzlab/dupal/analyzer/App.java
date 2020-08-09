@@ -28,7 +28,7 @@ public class App {
         DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, outMask, outDir);
 
         if(!dpm.enterRemoteMode()) {
-            System.out.println("Unable to enter remote mode!");
+            System.out.println("Unable to put DuPAL board in REMOTE MODE!");
             System.exit(-1);
         }
 
@@ -49,7 +49,7 @@ public class App {
                 pspecs = new PAL16R4Specs();
                 break;
             default:
-                logger.error("Bad PAL type selected.");
+                logger.error("Invalid PAL type selected.");
                 System.exit(-1);
         }
 
