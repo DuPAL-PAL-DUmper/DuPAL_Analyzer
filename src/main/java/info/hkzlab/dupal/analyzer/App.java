@@ -8,12 +8,16 @@ import info.hkzlab.dupal.analyzer.devices.*;
 public class App {
     private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
 
+    private final static String version = App.class.getPackage().getImplementationVersion();
+
     private static String serialDevice = null;
     private static PALSpecs pspecs = null;
     private static int outMask = -1;
     private static String outDir = null;
 
     public static void main(String[] args) throws Exception {
+        System.out.println("DuPAL Analyzer " + version);
+
         if(args.length < 3) {
             logger.error("Wrong number of arguments passed.\n"+
                         "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_output_mask]\n" +
