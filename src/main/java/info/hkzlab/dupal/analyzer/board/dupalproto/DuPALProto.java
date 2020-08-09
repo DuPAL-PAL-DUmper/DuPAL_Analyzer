@@ -6,8 +6,8 @@ public class DuPALProto {
     private final static String CMD_START = ">";
     private final static String CMD_END = "<";
    
-    private final static String RESP_START = "[";
-    private final static String RESP_END = "]";
+    public final static String RESP_START = "[";
+    public final static String RESP_END = "]";
 
     private final static char CMD_WRITE = 'W';
     private final static char CMD_READ = 'R';

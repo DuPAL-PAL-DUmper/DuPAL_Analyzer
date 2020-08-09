@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import info.hkzlab.dupal.analyzer.board.dupalproto.DuPALProto;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortTimeoutException;
@@ -16,7 +17,7 @@ public class DuPALManager {
 
     private SerialPort serport = null;
 
-    private final static int SERIAL_READ_RETRIES = 5;
+    private final static int SERIAL_READ_RETRIES = 20;
     private final static String REMOTE_MODE_STRING = "REMOTE_CONTROL_ENABLED";
 
     public DuPALManager(final String serPort) {
@@ -72,7 +73,6 @@ public class DuPALManager {
             try {
                 logger.debug("Command -> " + command);
                 serport.writeBytes(command.getBytes(StandardCharsets.US_ASCII));
-                try { Thread.sleep(20); } catch(InterruptedException e) {}; // Wait a bit for execution and response
             } catch (SerialPortException e) {
                 e.printStackTrace();
             }
@@ -81,20 +81,25 @@ public class DuPALManager {
 
     public String readResponse() {
          if((serport != null) && serport.isOpened()) {
+            StringBuffer respBuf = new StringBuffer();
+
             try {
                 int retries = SERIAL_READ_RETRIES;
                 String resp = null;
                 
-                while((resp == null) && (retries-- > 0)) {
+                while(retries-- > 0) {
                     resp = serport.readString();
-                    if(resp == null) try { Thread.sleep(5); } catch(InterruptedException e) {};
+                    if(resp == null) { try { Thread.sleep(1); } catch(InterruptedException e) {}; }
+                    else {
+                        respBuf.append(resp);
+                        retries = SERIAL_READ_RETRIES; // Reset the retries counter
+                        if(resp.trim().endsWith(DuPALProto.RESP_END)) break; // If we end with a character that could terminate the response, exit from here
+                    }
                 }
 
-                if(resp != null) resp = resp.trim();
-                
                 logger.debug("Response <- " + resp);
                 
-                return resp;
+                return respBuf.toString().trim();
             } catch (SerialPortException e) {
                 e.printStackTrace();
             }
