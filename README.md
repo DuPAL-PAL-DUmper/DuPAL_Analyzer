@@ -3,15 +3,15 @@
 The **DuPAL Analyzer** is a companion software to the **DuPAL** board.
 It uses the board's *Remote Control* mode to remotely toggle the pins and read the outputs, and is meant to perform **blackbox analisys** on the registered PAL devices, which are a bit too much for the MCU firmware to handle by itself.
 
-### What it can do
+### What it CAN do
 This analyzer works in tandem with the DuPAL board to:
 - Do a black-box analisys of a set of **registered** PAL devices and produce a truth table that can be minimized and transformed into logic equations functionally equivalent to those used to program the chip.
 - Can't work quick: we are not simply "reading" the chip here. We're creating a graph of all the reachable states and all the links between them. This means that we need to reconstruct the behaviour of the black box by feeding it with every possible combination of input. For a chip with 6 registered outputs, and 8 inputs, it means that we're going to have 64 possible states, each one with 256 links out of them that we need to explore. And we cannot teleport from a state to another: we need to move through the graph following links until we get to the state we wish to explore! **Analyzing a chip can take from 10 minutes to several hours**.
 - Can't resurrect dead ICs: You'll need a PAL in working conditions to obtain a good truth table.
 
-### What it can't do
+### What it CAN'T do
 - Analyze non-registered PAL devices (these can be done directly by the DuPAL board by connecting to its serial port with a terminal emulator)
-- Produce logic equations out of the PAL: reiventing the wheel is not an intelligent thing to do, you can feed the truth table to software like `espresso` heuristic logic minimizer and get the equations automatically. You can then further refine them with a tool like **Logic Friday**, if needed. See below.
+- Produce logic equations out of the PAL: reiventing the wheel is not an intelligent thing to do, you can feed the truth table to software like **espresso** heuristic logic minimizer and get the equations automatically. You can then further refine them with a tool like **Logic Friday**, if needed. See below.
 - While the logic equations that are going to be produced by using this + a minimizer are going to be functionally equivalent to those used to program the chip (at least for all the possible inputs), there is a chance they're not going to be identical. This is because the minimizer might further optimize them and because they won't make use of the feedback outputs during optimization. 
     - If the feedback outputs are required (e.g. to further reduce the number of terms so they can fit in a new chip), the equations can be placed into **Logic Friday** and massaged (e.g. factor them, turn them into sums of products, invert them, etc) until a direct substitution with a feedback output becomes easy enough to be performed.
 
@@ -21,10 +21,10 @@ Once this is known, the application will:
 1. Connect to the board, reset it, and enable the *remote mode*
 2. If which I/O pins are actually outputs is not known, the board will try to guess this and print the result. This procedure is not bulletproof (or it would take the same time as the proper analisys: in case it did not detect some outputs, these will be found during the analisys and will halt the procedure, allowing the user to specify them for the next run)
 3. The analisys will start. The status will be saved every 5 minutes, so it can be stopped and resumed at leisure. The procedure can take hours to complete.
-4. A truth table formatted in a way that the `espresso` heuristic logic minimizer likes is saved to a file.
+4. A truth table formatted in a way that the **espresso** heuristic logic minimizer likes is saved to a file.
 
 ### Caveats
-Once the table is obtained, its content should be minimized and equations calculated: `espresso` is a good tool for this.
+Once the truth table is obtained, its content should be minimized and equations calculated: **espresso** is a good tool for this.
 Often, some of the resulting equations for the registered outputs will not fit into a new PAL device.
 There are multiple reasons for this:
 1. To obtain the original equations, one should in theory produce a table where every input is fed to the black box and every output is recorded: with registered devices this is alas impossible: the input of a state depends on the previous state, and not every state can be reached.
