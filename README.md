@@ -18,8 +18,8 @@ This analyzer works in tandem with the DuPAL board to:
 ## The Analyzer
 The analyzer lets the user select which type of registered PAL is inserted in the board's ZIF socket, whether the output pins are known (which saves some time), what is the board's serial interface, and where to save the output files.
 Once this is known, the application will:
-1. Connect to the board, reset it, and enable the *remote mode*
-2. If which I/O pins are actually outputs is not known, the board will try to guess this and print the result. This procedure is not bulletproof (or it would take the same time as the proper analisys: in case it did not detect some outputs, these will be found during the analisys and will halt the procedure, allowing the user to specify them for the next run)
+1. Connect to the board, reset it, and enable the *REMOTE MODE*, so it accepts command from the application.
+2. If which I/O pins are actually outputs is not known, the board will try to guess this and print the result. This procedure is not bulletproof (or it would take the same time as the proper analisys: in case it did not detect some outputs, these will be found during the analisys and will halt the procedure, allowing the user to specify them for the next run).
 3. The analisys will start. The status will be saved every 5 minutes, so it can be stopped and resumed at leisure. The procedure can take hours to complete.
 4. A truth table formatted in a way that the **espresso** heuristic logic minimizer likes is saved to a file.
 
