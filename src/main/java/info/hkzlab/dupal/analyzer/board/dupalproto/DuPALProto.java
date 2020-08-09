@@ -6,8 +6,8 @@ public class DuPALProto {
     private final static String CMD_START = ">";
     private final static String CMD_END = "<";
    
-    public final static String RESP_START = "[";
-    public final static String RESP_END = "]";
+    private final static String RESP_START = "[";
+    private final static String RESP_END = "]";
 
     private final static char CMD_WRITE = 'W';
     private final static char CMD_READ = 'R';
@@ -20,6 +20,11 @@ public class DuPALProto {
         return CMD_START+CMD_READ+CMD_END;
     }
 
+    public static boolean isStringResponseCommand(String cmd) {
+        cmd = cmd.trim();
+        return cmd.startsWith(RESP_START) && cmd.endsWith(RESP_END);
+    }
+
     /**
      * The command will toggle the following pins on the DuPAL, from LSB to MSB
      * 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 (these are connected directly to the PAL)
@@ -27,7 +32,7 @@ public class DuPALProto {
      * @param address the combination of output to compose on the DuPAL
      * @return The generated command
      */
-    public static String buildWRITECommand(int address) {
+    public static String buildWRITECommand(final int address) {
         return ""+CMD_START+CMD_WRITE+" "+String.format("%08X", address & 0x3FFFF)+CMD_END;
     }
 
@@ -45,10 +50,10 @@ public class DuPALProto {
      * @param response String containing the response received by the DuPAL
      * @return Returns an integer containing the state of the PAL pins
      */
-    public static int handleREADResponse(String response) {
+    public static int handleREADResponse(final String response) {
         String[] readRes = parseResponse(response);
 
-        if((readRes == null) || readRes.length != 2 || readRes[0].charAt(0) != CMD_READ) return -1;
+        if((readRes == null) || readRes.length != 2 || !isStringResponseCommand(response) || readRes[0].charAt(0) != CMD_READ) return -1;
         
         try {
             return Integer.parseInt(readRes[1], 16);
@@ -57,10 +62,10 @@ public class DuPALProto {
         }
     }
 
-    public static int handleWRITEResponse(String response) {
+    public static int handleWRITEResponse(final String response) {
          String[] readRes = parseResponse(response);
 
-        if((readRes == null) || readRes.length != 2 || readRes[0].charAt(0) != CMD_WRITE) return -1;
+        if((readRes == null) || readRes.length != 2 || !isStringResponseCommand(response) || readRes[0].charAt(0) != CMD_WRITE) return -1;
         
         try {
             return Integer.parseInt(readRes[1], 16);

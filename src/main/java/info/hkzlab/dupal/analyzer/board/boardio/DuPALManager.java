@@ -93,7 +93,7 @@ public class DuPALManager {
                     else {
                         respBuf.append(resp);
                         retries = SERIAL_READ_RETRIES; // Reset the retries counter
-                        if(resp.trim().endsWith(DuPALProto.RESP_END)) break; // If we end with a character that could terminate the response, exit from here
+                        if(DuPALProto.isStringResponseCommand(respBuf.toString())) break; // If we end with a character that could terminate the response, exit from here
                     }
                 }
 
