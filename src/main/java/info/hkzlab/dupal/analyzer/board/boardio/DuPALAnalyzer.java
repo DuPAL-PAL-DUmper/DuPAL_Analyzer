@@ -492,12 +492,12 @@ public class DuPALAnalyzer {
             logger.info("Generating all ("+ms.substates.length+") possible SubStates for MacroState ["+ms+"]");
             genAllMSSubStates(ms);
         } else {
-            logger.info("SubStates already generated for MacroStates ["+ms+"]");
+            logger.debug("SubStates already generated for MacroStates ["+ms+"]");
         }
 
         int idx_mask = buildInputMask();
 
-        logger.info("Now check if we have a new StateLink to try...");
+        logger.debug("Now check if we have a new StateLink to try...");
         if(ms.link_count == ms.links.length) return null;
 
         // Check if we have a link to generate
@@ -507,7 +507,7 @@ public class DuPALAnalyzer {
             if((ms.last_link_idx & idx_mask) != 0) { ms.last_link_idx +=2; continue; } // Skip this run
             links_counter = ms.link_count;
 
-            logger.info("Generating StateLink at index " + links_counter);
+            logger.debug("Generating StateLink at index " + links_counter);
 
             pulseClock(ms.last_link_idx); // Enter the new state
             int pins = readPINs();
@@ -523,7 +523,7 @@ public class DuPALAnalyzer {
             ms.links[links_counter] = sl;
             ms.link_count++;
 
-            logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"'");
+            logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"' ("+links_counter+")");
 
             ms.last_link_idx += 2;
 
