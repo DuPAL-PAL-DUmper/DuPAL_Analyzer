@@ -353,7 +353,7 @@ public class DuPALAnalyzer {
                             int oldCost = costMap.get(states[msIdx]);
                             if(oldCost > newCost) {
                                 costMap.put(states[msIdx], newCost);
-                                logger.info("cost updated from " + oldCost + " to " + newCost + " to reach " + states[msIdx]);
+                                logger.trace("Cost updated from " + oldCost + " to " + newCost + " to reach " + states[msIdx]);
                             }
                         }
 
@@ -387,7 +387,7 @@ public class DuPALAnalyzer {
             nextSL = null;
 
             if(curMS == dest) {
-                logger.info("Arrived at " + dest);
+                logger.trace("Arrived at " + dest);
                 foundLink = true;
                 break;
             } 
@@ -398,7 +398,7 @@ public class DuPALAnalyzer {
                 MacroState dms = curMS.links[sl_idx].destMS;
 
                 if(costMap.containsKey(dms) && ((cost < 0) || costMap.get(dms) < cost)) {
-                    logger.info("current cost " + cost + " dms:"+dms+" cost:"+costMap.get(dms));
+                    logger.trace("current cost " + cost + " dms:"+dms+" cost:"+costMap.get(dms));
                     cost = costMap.get(dms);
                     nextMS = curMS.links[sl_idx].destMS;
                     nextSL = curMS.links[sl_idx];
