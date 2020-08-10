@@ -239,7 +239,7 @@ public class DuPALAnalyzer {
             nms = analyzeMacroState(ms);
             
             if(nms != null) {
-                logger.info("We moved to MacroState ["+nms+"]");
+                logger.debug("We moved to MacroState ["+nms+"]");
                 ms = nms;
                 nms = null;
             } else {
