@@ -418,7 +418,7 @@ public class DuPALAnalyzer {
             return null;
         } 
     }
-
+/*
     private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
         logger.info("Searching for a path from ["+start+"] to ["+dest+"]");
 
@@ -486,7 +486,7 @@ public class DuPALAnalyzer {
 
         return null;
     }
-
+*/
     private MacroState analyzeMacroState(MacroState ms) throws InvalidIOPinStateException, DuPALBoardException {
         if(!ms.ss_ready) {
             logger.info("Generating all ("+ms.substates.length+") possible SubStates for MacroState ["+ms+"]");
