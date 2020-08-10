@@ -37,7 +37,7 @@ There are multiple reasons for this:
 The following PAL models are supported
 - PAL16R4
 - PAL16R6
-- PAL16R8 **(untested)**
+- PAL16R8
 
 ### Command line
 The format for command line execution is the following:
