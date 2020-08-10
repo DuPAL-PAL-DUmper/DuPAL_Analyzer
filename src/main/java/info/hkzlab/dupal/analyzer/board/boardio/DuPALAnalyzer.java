@@ -523,7 +523,7 @@ public class DuPALAnalyzer {
             ms.links[links_counter] = sl;
             ms.link_count++;
 
-            logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"' ("+links_counter+")");
+            logger.info("Connected MS '"+ms+"' with MS '"+nms+"' by SL '"+sl+"' ("+links_counter+"/"+ms.links.length+")");
 
             ms.last_link_idx += 2;
 
