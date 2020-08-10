@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -308,7 +309,7 @@ public class DuPALAnalyzer {
                         }
 
                         if(sll == null) {
-                            sll = internal_searchPath(start_ms, mStates[ms_idx]);
+                            sll = internal_searchBestPath(start_ms, mStates[ms_idx]);
                             if (sll != null) pathMap.put(Integer.valueOf(path_hash), sll);
                         }
 
@@ -318,6 +319,104 @@ public class DuPALAnalyzer {
         }
 
         return null; // Finding nothing
+    }
+
+    private Map<MacroState, Integer> internal_calculateCostMap(MacroState[] states, MacroState destState) {
+        HashMap<MacroState, Integer> costMap = new HashMap<>();
+        Set<MacroState> msToSearch = new HashSet<>();
+
+        Set<MacroState> searchAdd = new HashSet<>();
+        Set<MacroState> searchDel = new HashSet<>();
+        searchAdd.add(destState);
+
+        costMap.put(destState, 0);
+
+        while(searchAdd.size() > 0) {
+            msToSearch.clear();
+            msToSearch.addAll(searchAdd);
+
+            searchAdd.clear();
+            searchDel.clear();
+
+            // Loop through all the states
+            for(int msIdx = 0; msIdx < states.length; msIdx++) {
+                if((states[msIdx] == null) || msToSearch.contains(states[msIdx])) continue;
+
+                // Loop through all the kinks for this state
+                for(int linkIdx = 0; linkIdx < states[msIdx].links.length; linkIdx++) {
+                    if(states[msIdx].links[linkIdx] == null) continue; // This link was not created, skip
+                    
+                    if(msToSearch.contains(states[msIdx].links[linkIdx].destMS)) { // The destination is between the MacroStates we're searching
+                        if(!costMap.containsKey(states[msIdx])) searchAdd.add(states[msIdx]); // If cost was not calculated for this one
+                        else { // Cost already calculated. Check if we need to update it
+                            int newCost = costMap.get(states[msIdx].links[linkIdx].destMS) + 1;
+                            int oldCost = costMap.get(states[msIdx]);
+                            if(oldCost > newCost) {
+                                costMap.put(states[msIdx], newCost);
+                                logger.info("cost updated from " + oldCost + " to " + newCost + " to reach " + states[msIdx]);
+                            }
+                        }
+
+                        if(states[msIdx].links[linkIdx].destMS == destState) costMap.put(states[msIdx], 1);
+                        else {
+                            int cost = costMap.get(states[msIdx].links[linkIdx].destMS) + 1;
+                            if(!costMap.containsKey(states[msIdx]) || (costMap.get(states[msIdx]) > cost)) costMap.put(states[msIdx], cost);
+                        }
+                    }
+                }
+            }
+        }
+        
+
+        return costMap;
+    }
+
+    private StateLink[] internal_searchBestPath(MacroState start, MacroState dest) {
+        logger.info("Searching for best path from ["+start+"] to ["+dest+"]");
+
+        Stack<StateLink> slStack = new Stack<>();
+        MacroState curMS = start, nextMS;
+        StateLink nextSL;
+
+        Map<MacroState, Integer> costMap = internal_calculateCostMap(mStates, dest);
+        
+        boolean foundLink = false;
+        int cost = -1;
+        while(curMS != null) {
+            nextMS = null;
+            nextSL = null;
+
+            if(curMS == dest) {
+                logger.info("Arrived at " + dest);
+                foundLink = true;
+                break;
+            } 
+
+            for(int sl_idx = 0; sl_idx < curMS.links.length; sl_idx++) {
+                if(curMS.links[sl_idx] == null) continue;
+
+                MacroState dms = curMS.links[sl_idx].destMS;
+
+                if(costMap.containsKey(dms) && ((cost < 0) || costMap.get(dms) < cost)) {
+                    logger.info("current cost " + cost + " dms:"+dms+" cost:"+costMap.get(dms));
+                    cost = costMap.get(dms);
+                    nextMS = curMS.links[sl_idx].destMS;
+                    nextSL = curMS.links[sl_idx];
+                }
+            }
+
+            curMS = nextMS;
+            if(nextSL != null) slStack.push(nextSL);
+        }
+
+        if(foundLink && slStack.size() > 0) {
+            logger.info("Path from ["+start+"] to ["+dest+"] found with cost " + slStack.size());
+            return slStack.toArray(new StateLink[slStack.size()]);
+        } 
+        else {
+            logger.info("No path found between ["+start+"] to ["+dest+"]");
+            return null;
+        } 
     }
 
     private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
