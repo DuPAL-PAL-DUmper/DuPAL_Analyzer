@@ -737,10 +737,10 @@ public class DuPALAnalyzer {
 
         strBuf.append("\n");
 
-        // Phase
+        // Phase, if the chip is active low, we'll be interested in the equations that gives us the OFF-set of the truth table
         strBuf.append(".phase ");
-        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append('0'); // REG outputs
-        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append('0'); // Outputs
+        for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append(specs.isActiveLow() ? '0' : '1'); // REG outputs
+        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append(specs.isActiveLow() ? '0' : '1'); // Outputs
         for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append('1'); // OEs
         strBuf.append("\n\n");
         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));   

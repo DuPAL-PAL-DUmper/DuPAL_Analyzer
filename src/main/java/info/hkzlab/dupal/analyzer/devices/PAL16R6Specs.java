@@ -79,4 +79,9 @@ public class PAL16R6Specs implements PALSpecs {
     public String[] getIO_PinNames() {
         return IO_PIN_NAMES;
     }
+
+    @Override
+    public boolean isActiveLow() {
+        return true;
+    }
 }
