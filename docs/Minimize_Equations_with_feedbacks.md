@@ -153,7 +153,7 @@ It’s perhaps clearer by looking at the expanded equation
 
 ```text
 nio16 = (io14')(i4')(i3')(i2)(io15 & io13');
-nio16 = (io14')(i4')(i3')(i2)((i1 + i5' + i6' + i7' + i8' + io13) & io13' );
+nio16 = (io14')(i4')(i3')(i2)((i1 + i5' + i6' + i7' + i8' + io13) & io13');
 ```
 
 ## Links & References
