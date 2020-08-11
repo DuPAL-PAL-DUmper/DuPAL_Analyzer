@@ -41,6 +41,7 @@ There are multiple reasons for this:
     - The result will be a set of equations functionally identical to the originals, for all the states that can be reached in reality, but one cannot always recover the original equations.
 2. To save products in the PAL circuitry, feedback outputs are used. This means some outputs take their value and feed it back to the network inside the PAL. As all the outputs are fed by the same inputs, the equations will be equivalent, but won't contain this simplification that can save important space on the device.
     - I haven't found a way to do an automatic replacement of these terms, but they're usually apparent when looking at the equations that make use of them. **Logic Friday** is a good tool to put the equations in, and either factorize them, transform the in *sums of products* or *products of sums* until You can spot a member that contains the same operands as one of the feedback outputs. At that point it becomes a matter of doing a simple replacement.
+    - Refer to `docs/Minimize_Equations_with_feedbacks.md` in this repository for additional explanation and examples.
 
 ### Supported devices
 
