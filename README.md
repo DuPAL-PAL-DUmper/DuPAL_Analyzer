@@ -80,11 +80,3 @@ Pay attention to the weird position for pin 19.
 #### Requirements
 
 Make sure you have at least a **Java 1.8** compatible JRE installed and have access to your serial port devices (In linux it's usually sufficient to add your user to the `dialout` group).
-
-## Dependencies
-
-Remember to install `jssc` 2.9.2 by [java-native](https://github.com/java-native/jssc) launching this command inside the project directory after checkout:
-
-```text
-mvn install:install-file -Dfile=/path/to/jssc-2.9.2.jar -DgroupId=io.github.java-native -DartifactId=jssc -Dversion=2.9.2 -Dpackaging=jar
-```
