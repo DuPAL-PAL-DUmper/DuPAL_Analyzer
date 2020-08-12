@@ -836,8 +836,8 @@ public class DuPALAnalyzer {
                     }
 
                     // Add the hi-z state of the outputs
-                    for(int bit_idx = 0; bit_idx < ss.IOpin_status.length; bit_idx++) {
-                        if(ss.IOpin_status[bit_idx] >= 0) strBuf.append('1');
+                    for(int bit_idx = 0; bit_idx < ss.Opin_status.length; bit_idx++) {
+                        if(ss.Opin_status[bit_idx] >= 0) strBuf.append('1');
                         else strBuf.append('0');
                     }
 
