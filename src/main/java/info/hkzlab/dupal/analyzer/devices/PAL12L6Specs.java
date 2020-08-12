@@ -1,50 +1,50 @@
 package info.hkzlab.dupal.analyzer.devices;
 
-public class PAL16R4Specs implements PALSpecs {
-    private static final String[] ROUT_PIN_NAMES = { "ro14", "ro15", "ro16", "ro17" };
-    private static final String[] IN_PIN_NAMES = { null, "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9" };
-    private static final String[] IO_PIN_NAMES = { "io18", null, null, null, null, "io13", "io19", "io12" };
-    private static final String[] OUT_PIN_NAMES = { };
+public class PAL12L6Specs implements PALSpecs {
+    private static final String[] ROUT_PIN_NAMES = { };
+    private static final String[] IN_PIN_NAMES = { "i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9", "i11", null, null, null, null, null, null, "i19", "i12"};
+    private static final String[] IO_PIN_NAMES = { };
+    private static final String[] OUT_PIN_NAMES = { "o18", "o17", "o16", "o15", "o14", "o13", null, null };
 
 
     @Override
     public int getNumINPins() {
-        return 8;
+        return 12;
     }
 
     @Override
     public int getNumIOPins() {
-        return 4;
-    }
-
-    @Override
-    public int getNumROUTPins() {
-        return 4;
-    }
-    
-    @Override
-    public int getNumOUTPins() {
         return 0;
     }
 
     @Override
+    public int getNumROUTPins() {
+        return 0;
+    }
+
+    @Override
+    public int getNumOUTPins() {
+        return 6;
+    }
+    
+    @Override
     public int getCLKPinMask() {
-        return 0x00000001;
+        return 0x00;
     }
 
     @Override
     public int getOEPinMask() {
-        return 0x00000200;
+        return 0x00;
     }
 
     @Override
     public int getINMask() {
-        return 0x000001FE;
+        return 0x000303FF;
     }
 
     @Override
     public int getIO_READMask() {
-        return 0xE1;
+        return 0x00;
     }
 
     @Override
@@ -53,18 +53,8 @@ public class PAL16R4Specs implements PALSpecs {
     }
 
     @Override
-    public int getOUT_READMask() {
-        return 0x00;
-    }
-
-    @Override
-    public int getOUT_WRITEMask() {
-        return getOUT_READMask() << READ_WRITE_SHIFT;
-    }
-
-    @Override
     public int getROUT_READMask() {
-        return 0x1E;
+        return 0x00;
     }
 
     @Override
@@ -73,13 +63,23 @@ public class PAL16R4Specs implements PALSpecs {
     }
 
     @Override
+    public int getOUT_READMask() {
+        return 0x3F;
+    }
+
+    @Override
+    public int getOUT_WRITEMask() {
+        return getOUT_READMask() << READ_WRITE_SHIFT;
+    }
+
+    @Override
     public String toString() {
-        return "PAL16R4";
+        return "PAL12L6";
     }
 
     @Override
     public int getROUT_READMaskShift() {
-        return 1;
+        return 0;
     }
 
     @Override

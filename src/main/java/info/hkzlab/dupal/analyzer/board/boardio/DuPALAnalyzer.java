@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.crypto.spec.PSource.PSpecified;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -744,10 +746,13 @@ public class DuPALAnalyzer {
         strBuf.delete(0, strBuf.length()); 
         strBuf.append(".ilb ");
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append("o_"+specs.getROUT_PinNames()[idx]+" "); // Old registerd states
-        for(int idx = 0; idx < specs.getNumINPins(); idx++) strBuf.append(specs.getIN_PinNames()[idx]+" "); // Inputs
+        for(int idx = 0; idx < specs.getIN_PinNames().length; idx++) {
+            if(((specs.getINMask() >> idx) & 0x01) != 0) strBuf.append(specs.getIN_PinNames()[idx] + " ");
+        }
+
         if(totInputs > specs.getNumINPins()) { // IOs as inputs
             int ioINMask = specs.getIO_READMask() & ~ioOUTMask;
-            for(int idx = 0; idx < 8; idx++) {
+            for(int idx = 0; idx < specs.getIO_PinNames().length; idx++) {
                 if(((ioINMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
             }
         }
@@ -759,10 +764,10 @@ public class DuPALAnalyzer {
         strBuf.append(".ob ");
         // registered outputs
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append(specs.getROUT_PinNames()[idx]+" ");
-        for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
-        for(int idx = 0; idx < 8; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + " ");
-        for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
-        for(int idx = 0; idx < 8; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + ".oe ");
+        for(int idx = 0; idx < specs.getIO_PinNames().length; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+        for(int idx = 0; idx < specs.getOUT_PinNames().length; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + " ");
+        for(int idx = 0; idx < specs.getIO_PinNames().length; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
+        for(int idx = 0; idx < specs.getOUT_PinNames().length; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + ".oe ");
 
         strBuf.append("\n");
 

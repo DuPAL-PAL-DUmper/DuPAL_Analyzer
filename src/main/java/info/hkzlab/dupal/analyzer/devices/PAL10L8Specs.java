@@ -1,9 +1,9 @@
 package info.hkzlab.dupal.analyzer.devices;
 
 public class PAL10L8Specs implements PALSpecs {
-    private static final String[] ROUT_PIN_NAMES = { null, null , null, null, null, null, null, null };
+    private static final String[] ROUT_PIN_NAMES = { };
     private static final String[] IN_PIN_NAMES = { "i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9", "i11" };
-    private static final String[] IO_PIN_NAMES = { null, null, null, null, null, null, null, null };
+    private static final String[] IO_PIN_NAMES = { };
     private static final String[] OUT_PIN_NAMES = { "o18", "o17", "o16", "o15", "o14", "o13", "o19", "o12" };
 
 
