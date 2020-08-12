@@ -1,11 +1,13 @@
 package info.hkzlab.dupal.analyzer.devices;
 
 public class PAL16R4Specs implements PALSpecs {
+
+    public static final String PAL_TYPE = "16R4";
+
     private static final String[] ROUT_PIN_NAMES = { "ro14", "ro15", "ro16", "ro17" };
     private static final String[] IN_PIN_NAMES = { null, "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9" };
     private static final String[] IO_PIN_NAMES = { "io18", null, null, null, null, "io13", "io19", "io12" };
     private static final String[] OUT_PIN_NAMES = { };
-
 
     @Override
     public int getNumINPins() {
@@ -74,7 +76,7 @@ public class PAL16R4Specs implements PALSpecs {
 
     @Override
     public String toString() {
-        return "PAL16R4";
+        return "PAL"+PAL_TYPE;
     }
 
     @Override

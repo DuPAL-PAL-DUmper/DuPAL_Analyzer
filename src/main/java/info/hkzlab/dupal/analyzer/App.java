@@ -1,6 +1,8 @@
 package info.hkzlab.dupal.analyzer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.slf4j.*;
 
@@ -8,6 +10,9 @@ import info.hkzlab.dupal.analyzer.board.boardio.*;
 import info.hkzlab.dupal.analyzer.devices.*;
 
 public class App {
+    public static volatile String[] palTypes = { PAL10L8Specs.PAL_TYPE, PAL12L6Specs.PAL_TYPE, PAL16L8Specs.PAL_TYPE, 
+                                                PAL16R4Specs.PAL_TYPE, PAL16R6Specs.PAL_TYPE, PAL16R8Specs.PAL_TYPE };
+
     private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
 
     private final static String version = App.class.getPackage().getImplementationVersion();
@@ -21,9 +26,15 @@ public class App {
         System.out.println("DuPAL Analyzer " + version);
 
         if (args.length < 3) {
+            StringBuffer supportedPALs = new StringBuffer();
+
+            for(String palT : palTypes) {
+                supportedPALs.append("\t"+palT+"\n");
+            }
+
             logger.error("Wrong number of arguments passed.\n"
                     + "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_output_mask]\n"
-                    + "Where <pal_type> can be: 16R8, 16R6, 16R4, 16L8\n");
+                    + "Where <pal_type> can be:\n" + supportedPALs.toString() + "\n");
 
             return;
         }
