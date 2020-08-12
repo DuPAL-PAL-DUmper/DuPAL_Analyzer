@@ -10,11 +10,11 @@ It uses the board's *REMOTE CONTROL* mode to remotely toggle the pins and read t
 This analyzer works in tandem with the DuPAL board to:
 
 - Do a black-box analisys of a set of **registered** PAL devices and produce a truth table that can be minimized and transformed into logic equations functionally equivalent to those used to program the chip.
+- Do bruteforcing of some **combinatorial** PAL devices and produce a truth table.
 - While my opinion is that **for archival purposes** a **dump of the chip is the best option**, I also think that a working machine beats a dead one any day. So this tool can help you creating a functionally identical PAL device starting from a known-good chip, and also store the data for future use.
 
 ### What it CAN'T do
 
-- Analyze non-registered PAL devices (these can be done directly by the DuPAL board by connecting to its serial port with a terminal emulator)
 - Produce logic equations out of the PAL: reiventing the wheel is not an intelligent thing to do, you can feed the truth table to software like **espresso** heuristic logic minimizer and get the equations automatically. You can then further refine them with a tool like **Logic Friday**, if needed. See below.
 - While the logic equations that are going to be produced by using this + a minimizer are going to be functionally equivalent to those used to program the chip (at least for all the possible inputs), there is a chance they're not going to be identical. This is because the minimizer might further optimize them and because they won't make use of the feedback outputs during optimization.
   - If the feedback outputs are required (e.g. to further reduce the number of terms so they can fit in a new chip), the equations can be placed into **Logic Friday** and massaged (e.g. factor them, turn them into sums of products, invert them, etc) until a direct substitution with a feedback output becomes easy enough to be performed.
@@ -47,6 +47,14 @@ There are multiple reasons for this:
 
 The following PAL models are supported:
 
+#### Combinatorial
+
+- PAL10L8 *(untested)*
+- PAL12L6 *(untested)*
+- PAL16L8
+
+#### Registered
+
 - PAL16R4
 - PAL16R6
 - PAL16R8
@@ -60,10 +68,7 @@ java -jar /path/to/dupal_analyzer.jar <serial_port> <pal_type> <output_directory
 ```
 
 - **serial_port:** is just the serial port to use to connect to the DuPAL board. Connection is hardcoded at **57600bps 8n1** without flow control.
-- **pal_type:** is the type of PAL device that is going to be analyzed. Only registered PALs are supported (non-registered PALs can be dumped directly by the board by accessing the serial interface). Supported types are:
-  - PAL16R4
-  - PAL16R6
-  - PAL16R8
+- **pal_type:** is the type of PAL device that is going to be analyzed.
 - **output_directory:** Where DuPAL Analyzer will output the generated truth table and where it will periodically save the status of the analisys so it can be stopped and recovered later.
 - **hex_output_mask:** This mask (an byte written as an *hex number*) is used to tell the Analyzer which IOs are configured as outputs. If it's not present, the Analyzer will try to guess it by itself. It's usually advisable to let the guessing run for a few minutes, then restart the analisys by specifying the guessed mask. If the mask is wrong, during the analisys an error will be thrown as soon as what was thought as an input is found to be an output. At that point the analisys can be restarted with the new mask.
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support for some combinatorial PAL devices
+
 ## [0.0.3] - 2020-08-12
 
 ### Added
@@ -10,10 +14,16 @@
 
 ### Changed
 
-- New algorithm to search a path between Macrostates in graph
+- New algorithm to search paths between MacroStates in graph
 
 ### Deprecated
 
+- Nothing
+
 ### Removed
 
+- Nothing
+
 ### Fixed
+
+- 
