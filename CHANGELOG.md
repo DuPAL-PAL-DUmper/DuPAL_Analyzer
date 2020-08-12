@@ -1,14 +1,20 @@
 # Changelog
 
-## 0.0.3 (2020-08-12)
+## Unreleased
 
-**Implemented enhancements:**
+## [0.0.3] - 2020-08-12
 
-- New algorithm to search a path between Macrostates in graph
+### Added
+
 - Started tracking changes in a changelog :-P
 
-**Fixed bugs:**
+### Changed
 
-**Closed issues:**
+- New algorithm to search a path between Macrostates in graph
 
-**Merged pull requests:**
+### Deprecated
+
+### Removed
+
+### Fixed
+
