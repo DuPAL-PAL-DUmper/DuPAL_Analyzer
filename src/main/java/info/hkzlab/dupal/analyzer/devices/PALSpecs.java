@@ -5,6 +5,7 @@ public interface PALSpecs {
 
     public int getNumINPins();
     public int getNumIOPins();
+    public int getNumOPins();
     public int getNumROUTPins();
 
     public int getCLKPinMask();
@@ -20,6 +21,7 @@ public interface PALSpecs {
     public String[] getROUT_PinNames();
     public String[] getIN_PinNames();
     public String[] getIO_PinNames();
+    public String[] getO_PinNames();
 
     public boolean isActiveLow();
 }

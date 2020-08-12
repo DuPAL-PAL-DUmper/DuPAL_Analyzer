@@ -4,6 +4,7 @@ public class PAL16R6Specs implements PALSpecs {
     private static final String[] ROUT_PIN_NAMES = { "ro13", "ro14", "ro15", "ro16", "ro17", "ro18" };
     private static final String[] IN_PIN_NAMES = { "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9" };
     private static final String[] IO_PIN_NAMES = { null, null, null, null, null, null, "io19", "io12" };
+    private static final String[] O_PIN_NAMES = { null, null, null, null, null, null, null, null };
 
     @Override
     public int getNumINPins() {
@@ -18,6 +19,11 @@ public class PAL16R6Specs implements PALSpecs {
     @Override
     public int getNumROUTPins() {
         return 6;
+    }
+
+    @Override
+    public int getNumOPins() {
+        return 0;
     }
 
     @Override
@@ -78,6 +84,11 @@ public class PAL16R6Specs implements PALSpecs {
     @Override
     public String[] getIO_PinNames() {
         return IO_PIN_NAMES;
+    }
+
+    @Override
+    public String[] getO_PinNames() {
+        return O_PIN_NAMES;
     }
 
     @Override
