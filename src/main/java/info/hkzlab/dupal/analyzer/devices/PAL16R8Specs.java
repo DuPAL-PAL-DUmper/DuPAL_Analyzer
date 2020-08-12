@@ -63,6 +63,16 @@ public class PAL16R8Specs implements PALSpecs {
     }
 
     @Override
+    public int getO_READMask() {
+        return 0x00;
+    }
+
+    @Override
+    public int getO_WRITEMask() {
+        return getO_READMask() << READ_WRITE_SHIFT;
+    }
+
+    @Override
     public String toString() {
         return "PAL16R8";
     }
