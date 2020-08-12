@@ -111,7 +111,8 @@ public class DuPALAnalyzer {
             IOasOUT_Mask = guessIOs(); // Try to guess whether IOs are Inputs or Outputs
         }
 
-        additionalOUTs = calculateAdditionalOutsFromMask(IOasOUT_Mask);
+        // Given the mask that we have recovered before, find how many additional outputs we have in this PAL
+        additionalOUTs = countHIBits(IOasOUT_Mask);
 
         if(outPath != null) restoreStatus(serdump_path);
         internal_analisys();
@@ -208,7 +209,7 @@ public class DuPALAnalyzer {
     }
 
     private void internal_analisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
-        logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask)+"b");
+        logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask | pspecs.getO_READMask())+"b");
         int pins, mstate_idx;
 
         writePINs(0x00); // Set the address to 0, enable the /OE pin and leave clock to low
@@ -540,9 +541,10 @@ public class DuPALAnalyzer {
         return null; // We did not move from the macrostate
     }
 
-    /* Simply count how many bits set to high we have in the mask
+    /* 
+     * Simply count how many bits set to high we have in the mask
      */
-    private int calculateAdditionalOutsFromMask(int mask) {
+    private int countHIBits(int mask) {
         int count = 0;
 
         for(int idx = 0; idx < 32; idx++) count += ((mask >> idx) & 0x01);
