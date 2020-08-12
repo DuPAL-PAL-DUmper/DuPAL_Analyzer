@@ -145,20 +145,26 @@ public class DuPALAnalyzer {
     private int guessIOs() throws DuPALBoardException {
         logger.info("starting...");
 
-        int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask();
+        int inmask = pspecs.getINMask() | pspecs.getIO_WRITEMask(); // Get a mask for writing the INputs and the IOs (which could be inputs)
 
         logger.info("inmask: " + Integer.toHexString(inmask));
 
+        /* We'll try toggling all inputs combinations in the current state,
+         * Then we'll toggle the clock to try to move to another state, this for all the input combinations, again
+         * 
+         * We won't cover all the possible states, but we're just trying to guess which pins are output here.
+         */
+
         int read, out_pins = 0;
-        for(int idx = 0; idx <= inmask; idx+=2) { // Pin 1 is the clock and we'll skip it anyway
-            if((idx & ~inmask) != 0) continue; // We need to skip this round
+        for(int idx = 0; idx <= inmask; idx+=2) { // Pin 1 (bit 0 of the idx) is the clock and we'd skip it anyway, so we'll increment by 2
+            if((idx & ~inmask) != 0) continue; // We're trying to set a pin that is neither an input nor an IO
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
 
             logger.info("run " + Integer.toHexString(idx >> 1) + " | inmask: 0x"+String.format("%06X", inmask)+" guessed outs: 0x" + String.format("%02X", out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
 
             int new_inmask, write_addr;
-            for(int i_idx = 0; i_idx <= inmask; i_idx+=2) {
+            for(int i_idx = 0; i_idx <= inmask; i_idx+=2) { // Now, try all the input combinations for this state
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
                 if(out_pins == pspecs.getIO_READMask()) break; // Stop checking, we already found that all IOs are outputs...
                 
@@ -177,6 +183,7 @@ public class DuPALAnalyzer {
                 logger.debug("internal loop: " + Integer.toBinaryString(i_idx) + " outs:" + String.format("%02X", out_pins));
             }
 
+            // pulse the clock to try and move to a random new state
             pulseClock(idx & ~pspecs.getOEPinMask());
         }
 
@@ -533,12 +540,12 @@ public class DuPALAnalyzer {
         return null; // We did not move from the macrostate
     }
 
+    /* Simply count how many bits set to high we have in the mask
+     */
     private int calculateAdditionalOutsFromMask(int mask) {
         int count = 0;
 
-        for(int idx = 0; idx < 32; idx++) {
-            count += (((mask >> idx) & 0x01) != 0) ? 1 : 0;
-        }
+        for(int idx = 0; idx < 32; idx++) count += ((mask >> idx) & 0x01);
 
         return count;
     }
