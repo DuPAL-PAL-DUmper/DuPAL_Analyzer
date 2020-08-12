@@ -135,7 +135,7 @@ public class DuPALAnalyzer {
         }
         try {
             fout = new FileOutputStream(tblPath);
-            printLogicTable(fout, pspecs, additionalOUTs, IOasOUT_Mask, mStates);
+            printLogicTable(fout, pspecs, IOasOUT_Mask, mStates);
             fout.close();
         } catch(IOException e) {
             logger.error("Error printing out the registered outputs table (not including outputs).");
@@ -209,18 +209,17 @@ public class DuPALAnalyzer {
     }
 
     private void internal_analisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
-        logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask | pspecs.getO_READMask())+"b");
+        logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask | pspecs.getOUT_READMask())+"b");
         int pins, mstate_idx;
 
         writePINs(0x00); // Set the address to 0, enable the /OE pin and leave clock to low
         pins = readPINs();
 
-        int routstate = pins & pspecs.getROUT_READMask();
-        logger.info("Registered outputs at start: " + String.format("%02X", routstate));
+        int rout_state = pins & pspecs.getROUT_READMask();
+        logger.info("Registered outputs at start: " + String.format("%02X", rout_state));
 
-        mstate_idx = routstate >> pspecs.getROUT_READMaskShift();
-        MacroState ms = null;
-        MacroState nms = null;
+        mstate_idx = rout_state >> pspecs.getROUT_READMaskShift();
+        MacroState ms = null, nms = null;
         
         if(mStates[mstate_idx] == null) {
             ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins()  + pspecs.getNumIOPins() - additionalOUTs));
@@ -544,7 +543,7 @@ public class DuPALAnalyzer {
     /* 
      * Simply count how many bits set to high we have in the mask
      */
-    private int countHIBits(int mask) {
+    static private int countHIBits(int mask) {
         int count = 0;
 
         for(int idx = 0; idx < 32; idx++) count += ((mask >> idx) & 0x01);
@@ -577,10 +576,11 @@ public class DuPALAnalyzer {
         SubState ss = null;
         int pins_1 = 0, pins_2 = 0, hiz_pins = 0;
 
-        ArrayList<Byte> pinstate = new ArrayList<>();
+        ArrayList<Byte> iout_state = new ArrayList<>();
+        ArrayList<Byte> out_state = new ArrayList<>();
         boolean[] instate = null;
 
-        if(IOasOUT_Mask != 0) { // Some PALs have no simple outputs or no IO ports, so the following test is useless
+        if((IOasOUT_Mask != 0) || (pspecs.getNumOUTPins() > 0)) { // Check that we have output ports to actually scan
             writePINs(idx); // Write the address to the inputs, attempt to force the current outputs to 0
             pins_1 = readPINs(); // And read back
             
@@ -595,35 +595,47 @@ public class DuPALAnalyzer {
             }
             
             // Write the address to the inputs, this time try to force the outputs to 1
-            writePINs(idx | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
+            writePINs(idx | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT) | pspecs.getOUT_WRITEMask());
             pins_2 = readPINs();
 
             // Check if forcing the outputs has create a difference in the result:
             // If a difference is detected, it means the pin is in high impedence state.
-            hiz_pins = (pins_1 ^ pins_2) & IOasOUT_Mask;
+            hiz_pins = (pins_1 ^ pins_2) & (IOasOUT_Mask | pspecs.getOUT_READMask());
         }
 
+        // Build a list of the states for IO as outputs
         for(int pin_idx = 0; pin_idx < 8; pin_idx++) {
             if(((IOasOUT_Mask >> pin_idx) & 0x01) == 0) continue; // Not an output pin we're interested in
 
-            if(((hiz_pins >> pin_idx) & 0x01) > 0) pinstate.add((byte)-1);
-            else if (((pins_1 >> pin_idx) & 0x01) > 0) pinstate.add((byte)1);
-            else pinstate.add((byte)0);
+            if(((hiz_pins >> pin_idx) & 0x01) > 0) iout_state.add((byte)-1);
+            else if (((pins_1 >> pin_idx) & 0x01) > 0) iout_state.add((byte)1);
+            else iout_state.add((byte)0);
+        }
+
+        // Build a list of the states for output pins
+        for(int pin_idx = 0; pin_idx < 8; pin_idx++) {
+            if(((pspecs.getOUT_READMask() >> pin_idx) & 0x01) == 0) continue; // Not an output pin we're interested in
+
+            if(((hiz_pins >> pin_idx) & 0x01) > 0) out_state.add((byte)-1);
+            else if (((pins_1 >> pin_idx) & 0x01) > 0) out_state.add((byte)1);
+            else out_state.add((byte)0);
         }
 
         instate = writeAddrToBooleans(idx, idx_mask);
 
-        logger.debug("pinstate len: " + pinstate.size() + " instate len: " + instate.length);
+        logger.debug("iout_state len: " + iout_state.size() + " out_state len: " + out_state.size() + " instate len: " + instate.length);
 
-        Byte[] out_state = pinstate.toArray(new Byte[pinstate.size()]);
+        Byte[] iout_state_arr = iout_state.toArray(new Byte[iout_state.size()]);
+        Byte[] out_state_arr = out_state.toArray(new Byte[out_state.size()]);
+
         int ss_idx = SubState.calculateSubStateIndex(instate);
-        int ss_key = SubState.calculateSubStateKey(out_state);
+        int ss_key = SubState.calculateSubStateKey(iout_state_arr) ^ SubState.calculateSubStateKey(out_state_arr);
             
         logger.debug("SubState index: " + ss_idx + " key: " + ss_key);
 
         ss = ms.ssMap.get(Integer.valueOf(ss_key));
         if(ss == null) {
-            ss = new SubState(ms.tag, ms, out_state);
+            ss = new SubState(ms.tag, ms, iout_state_arr, out_state_arr);
             ms.ssMap.put(Integer.valueOf(ss_key), ss);
         } else {
             logger.debug("SubState index: " + ss_idx + " key: " +ss_key+ " was already present.");
@@ -712,15 +724,17 @@ public class DuPALAnalyzer {
         }
     }
 
-    static private void printLogicTable(OutputStream out, PALSpecs specs, int additionalOUTs, int ioOUTMask, MacroState[] mStates) throws IOException {
+    static private void printLogicTable(OutputStream out, PALSpecs specs, int ioOUTMask, MacroState[] mStates) throws IOException {
         logger.info("Printing logic table. ");
 
+        int pinIOasOUT = countHIBits(ioOUTMask);
+        
         out.write(("# "+specs+" logic table\n").getBytes(StandardCharsets.US_ASCII));
-        int totInputs = specs.getNumINPins() + (specs.getNumIOPins()  - additionalOUTs);
+        int totInputs = specs.getNumINPins() + (specs.getNumIOPins()  - pinIOasOUT);
         StringBuffer strBuf = new StringBuffer();
         
         out.write((".i " + (totInputs + specs.getNumROUTPins()) + "\n").getBytes(StandardCharsets.US_ASCII));
-        out.write((".o " + (specs.getNumROUTPins() + (additionalOUTs*2)) + "\n").getBytes(StandardCharsets.US_ASCII));
+        out.write((".o " + (specs.getNumROUTPins() + (pinIOasOUT + specs.getNumOUTPins()) * 2) + "\n").getBytes(StandardCharsets.US_ASCII));
 
         // Input labels
         strBuf.delete(0, strBuf.length()); 
@@ -742,15 +756,17 @@ public class DuPALAnalyzer {
         // registered outputs
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append(specs.getROUT_PinNames()[idx]+" ");
         for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + " ");
+        for(int idx = 0; idx < 8; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + " ");
         for(int idx = 0; idx < 8; idx++) if(((ioOUTMask >> idx) & 0x01) > 0) strBuf.append(specs.getIO_PinNames()[idx] + ".oe ");
+        for(int idx = 0; idx < 8; idx++) if(((specs.getOUT_READMask() >> idx) & 0x01) > 0) strBuf.append(specs.getOUT_PinNames()[idx] + ".oe ");
 
         strBuf.append("\n");
 
         // Phase, if the chip is active low, we'll be interested in the equations that gives us the OFF-set of the truth table
         strBuf.append(".phase ");
         for(int idx = 0; idx < specs.getNumROUTPins(); idx++) strBuf.append(specs.isActiveLow() ? '0' : '1'); // REG outputs
-        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append(specs.isActiveLow() ? '0' : '1'); // Outputs
-        for(int idx = 0; idx < additionalOUTs; idx++) strBuf.append('1'); // OEs
+        for(int idx = 0; idx < (pinIOasOUT+specs.getNumOUTPins()); idx++) strBuf.append(specs.isActiveLow() ? '0' : '1'); // Outputs
+        for(int idx = 0; idx < (pinIOasOUT+specs.getNumOUTPins()); idx++) strBuf.append('1'); // OEs
         strBuf.append("\n\n");
         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));   
         
@@ -774,7 +790,7 @@ public class DuPALAnalyzer {
                         for(int bit_idx = 0; bit_idx < specs.getNumROUTPins(); bit_idx++) strBuf.append('-');
                         
                         // Fake digital outputs + hi-z outputs
-                        for(int bit_idx = 0; bit_idx < additionalOUTs; bit_idx++) strBuf.append("--");
+                        for(int bit_idx = 0; bit_idx < (pinIOasOUT+specs.getNumOUTPins()); bit_idx++) strBuf.append("--");
 
                         strBuf.append('\n');
                         out.write(strBuf.toString().getBytes(StandardCharsets.US_ASCII));
@@ -799,16 +815,29 @@ public class DuPALAnalyzer {
                         strBuf.append(((mStates[ms_idx].links[ss_idx].destMS.rpin_status >> ((specs.getNumROUTPins() - 1) - bit_idx)) & 0x01) > 0 ? '1' : '0');
                     }
 
-                    // Add the digital outputs as outputs
-                    for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
-                        if(ss.pin_status[bit_idx] == 0) strBuf.append('0');
-                        else if (ss.pin_status[bit_idx] > 0) strBuf.append('1');
+                    // Add the IO as outputs
+                    for(int bit_idx = 0; bit_idx < ss.IOpin_status.length; bit_idx++) {
+                        if(ss.IOpin_status[bit_idx] == 0) strBuf.append('0');
+                        else if (ss.IOpin_status[bit_idx] > 0) strBuf.append('1');
+                        else strBuf.append('-');
+                    }
+
+                    // Add the outputs
+                    for(int bit_idx = 0; bit_idx < ss.Opin_status.length; bit_idx++) {
+                        if(ss.Opin_status[bit_idx] == 0) strBuf.append('0');
+                        else if (ss.Opin_status[bit_idx] > 0) strBuf.append('1');
                         else strBuf.append('-');
                     }
                     
-                    // Add the hi-z state as output
-                    for(int bit_idx = 0; bit_idx < ss.pin_status.length; bit_idx++) {
-                        if(ss.pin_status[bit_idx] >= 0) strBuf.append('1');
+                    // Add the hi-z state of IOs as output
+                    for(int bit_idx = 0; bit_idx < ss.IOpin_status.length; bit_idx++) {
+                        if(ss.IOpin_status[bit_idx] >= 0) strBuf.append('1');
+                        else strBuf.append('0');
+                    }
+
+                    // Add the hi-z state of the outputs
+                    for(int bit_idx = 0; bit_idx < ss.IOpin_status.length; bit_idx++) {
+                        if(ss.IOpin_status[bit_idx] >= 0) strBuf.append('1');
                         else strBuf.append('0');
                     }
 

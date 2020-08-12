@@ -5,7 +5,7 @@ public interface PALSpecs {
 
     public int getNumINPins();
     public int getNumIOPins();
-    public int getNumOPins();
+    public int getNumOUTPins();
     public int getNumROUTPins();
 
     public int getCLKPinMask();
@@ -15,15 +15,15 @@ public interface PALSpecs {
     public int getIO_WRITEMask();
     public int getROUT_READMask();
     public int getROUT_WRITEMask();
-    public int getO_WRITEMask();
-    public int getO_READMask();
+    public int getOUT_WRITEMask();
+    public int getOUT_READMask();
 
     public int getROUT_READMaskShift();
 
     public String[] getROUT_PinNames();
     public String[] getIN_PinNames();
     public String[] getIO_PinNames();
-    public String[] getO_PinNames();
+    public String[] getOUT_PinNames();
 
     public boolean isActiveLow();
 }

@@ -10,12 +10,14 @@ public class SubState implements Serializable {
 
     public final String tag;
     public final MacroState macroState;
-    public final Byte[] pin_status;
+    public final Byte[] IOpin_status;
+    public final Byte[] Opin_status;
 
-    public SubState(final String tag, final MacroState macroState, final Byte[] pin_status) {
+    public SubState(final String tag, final MacroState macroState, final Byte[] IOpin_status, final Byte[] Opin_status) {
         this.tag = tag;
         this.macroState = macroState;
-        this.pin_status = pin_status;
+        this.IOpin_status = IOpin_status;
+        this.Opin_status = Opin_status;
     } 
 
     @Override
@@ -23,20 +25,30 @@ public class SubState implements Serializable {
         StringBuffer strBuf = new StringBuffer();
         strBuf.append(SS_PRE_TAG+tag+"-");
 
-        if(pin_status.length > 0) {
-            for(byte pin : pin_status) {
+        if(IOpin_status.length > 0) {
+            for(byte pin : IOpin_status) {
                 if(pin < 0) strBuf.append('x');
                 else if (pin == 0) strBuf.append(0);
                 else strBuf.append(1);
             }
-        } else strBuf.append("noout");
+        } else strBuf.append("noIO");
+
+        strBuf.append("_");
+        
+        if(Opin_status.length > 0) {
+            for(byte pin : Opin_status) {
+                if(pin < 0) strBuf.append('x');
+                else if (pin == 0) strBuf.append(0);
+                else strBuf.append(1);
+            }
+        } else strBuf.append("noO");
 
         return strBuf.toString();
     }
 
     @Override
     public int hashCode() {
-        return calculateSubStateKey(pin_status) ^ tag.hashCode();
+        return calculateSubStateKey(IOpin_status) ^ calculateSubStateKey(Opin_status) ^ tag.hashCode();
     }
 
     @Override
@@ -47,7 +59,8 @@ public class SubState implements Serializable {
 
         SubState ops = (SubState)o;
         if(!ops.tag.equals(this.tag)) return false;
-        if(!Arrays.equals(ops.pin_status, this.pin_status)) return false;
+        if(!Arrays.equals(ops.IOpin_status, this.IOpin_status)) return false;
+        if(!Arrays.equals(ops.Opin_status, this.Opin_status)) return false;
 
         return true;
     }
