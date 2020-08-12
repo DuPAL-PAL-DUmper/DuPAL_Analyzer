@@ -157,7 +157,7 @@ public class DuPALAnalyzer {
          */
 
         int read, out_pins = 0;
-        for(int idx = 0; idx <= inmask; idx+=2) { // Pin 1 (bit 0 of the idx) is the clock and we'd skip it anyway, so we'll increment by 2
+        for(int idx = 0; idx <= inmask; idx++) { // Try all input combinations
             if((idx & ~inmask) != 0) continue; // We're trying to set a pin that is neither an input nor an IO
 
             if(out_pins == pspecs.getIO_READMask()) break; // Apparently we found that all the IOs are outputs...
@@ -165,7 +165,7 @@ public class DuPALAnalyzer {
             logger.info("run " + Integer.toHexString(idx >> 1) + " | inmask: 0x"+String.format("%06X", inmask)+" guessed outs: 0x" + String.format("%02X", out_pins) + " / " + Integer.toBinaryString(out_pins)+"b");
 
             int new_inmask, write_addr;
-            for(int i_idx = 0; i_idx <= inmask; i_idx+=2) { // Now, try all the input combinations for this state
+            for(int i_idx = 0; i_idx <= inmask; i_idx++) { // Now, try all the input combinations for this state
                 if((i_idx & ~inmask) != 0) continue; // We need to skip this round
                 if(out_pins == pspecs.getIO_READMask()) break; // Stop checking, we already found that all IOs are outputs...
                 
@@ -183,6 +183,9 @@ public class DuPALAnalyzer {
                     
                 logger.debug("internal loop: " + Integer.toBinaryString(i_idx) + " outs:" + String.format("%02X", out_pins));
             }
+
+
+            if(pspecs.getCLKPinMask() == 0) break; // We have lo CLK pin, nothing to pulse, no need to try multiple states
 
             // pulse the clock to try and move to a random new state
             pulseClock(idx & ~pspecs.getOEPinMask());
@@ -212,17 +215,17 @@ public class DuPALAnalyzer {
         logger.info("Device: " + pspecs + " Outs: " + Integer.toBinaryString(IOasOUT_Mask | pspecs.getOUT_READMask())+"b");
         int pins, mstate_idx;
 
-        writePINs(0x00); // Set the address to 0, enable the /OE pin and leave clock to low
+        writePINs(0x00); // Set the pins to to 0, this would leave the /OE pin and clock to low
         pins = readPINs();
 
         int rout_state = pins & pspecs.getROUT_READMask();
-        logger.info("Registered outputs at start: " + String.format("%02X", rout_state));
+        if(pspecs.getNumROUTPins() > 0) logger.info("Registered outputs at start: " + String.format("%02X", rout_state));
 
         mstate_idx = rout_state >> pspecs.getROUT_READMaskShift();
         MacroState ms = null, nms = null;
         
         if(mStates[mstate_idx] == null) {
-            ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins()  + pspecs.getNumIOPins() - additionalOUTs));
+            ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins()  + (pspecs.getNumIOPins() - additionalOUTs)));
             mStates[mstate_idx] = ms;
             logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
         } else {
@@ -504,6 +507,8 @@ public class DuPALAnalyzer {
 
         int idx_mask = buildInputMask();
 
+        if(pspecs.getNumROUTPins() == 0) return null; // We have no registered outputs, no need to check for other MacroStates
+
         logger.debug("Now check if we have a new StateLink to try...");
         if(ms.link_count == ms.links.length) return null;
 
@@ -523,7 +528,7 @@ public class DuPALAnalyzer {
             StateLink sl = null;
 
             if(nms == null) {
-                nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + pspecs.getNumIOPins() - additionalOUTs));
+                nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + (pspecs.getNumIOPins() - additionalOUTs)));
                 mStates[mstate_idx] = nms;
             }
             sl = new StateLink(ms.tag, ms.last_link_idx, nms);
@@ -552,7 +557,7 @@ public class DuPALAnalyzer {
     }
 
     private int buildInputMask() {
-        return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
+        return (pspecs.getROUT_WRITEMask() | pspecs.getOEPinMask() | pspecs.getCLKPinMask() | pspecs.getOUT_WRITEMask() | (IOasOUT_Mask << PALSpecs.READ_WRITE_SHIFT));
     }
 
     private boolean[] writeAddrToBooleans(int addr, int mask) {
@@ -629,7 +634,7 @@ public class DuPALAnalyzer {
         Byte[] out_state_arr = out_state.toArray(new Byte[out_state.size()]);
 
         int ss_idx = SubState.calculateSubStateIndex(instate);
-        int ss_key = SubState.calculateSubStateKey(iout_state_arr) ^ SubState.calculateSubStateKey(out_state_arr);
+        int ss_key = SubState.calculateHashFromArrays(new Byte[][] {iout_state_arr, out_state_arr});
             
         logger.debug("SubState index: " + ss_idx + " key: " + ss_key);
 
@@ -651,10 +656,9 @@ public class DuPALAnalyzer {
         logger.debug("Input mask " + Integer.toBinaryString(idx_mask) + "b");
 
         int maxidx = pspecs.getIO_WRITEMask() | pspecs.getINMask();
-        for(int idx = 0; idx <= maxidx; idx+=2) {
+        for(int idx = 0; idx <= maxidx; idx++) {
             if((idx & idx_mask) != 0) continue; // Skip this run
 
-            logger.debug("Testing combination 0x" + Integer.toHexString(idx));
             generateSubState(ms, idx, idx_mask);
         }
 
@@ -712,13 +716,13 @@ public class DuPALAnalyzer {
             out.write(("MacroState ["+mStates[ms_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
             out.write(("\tPrinting SubStates\n").getBytes(StandardCharsets.US_ASCII));
             for(int ss_idx = 0; ss_idx < mStates[ms_idx].substates.length; ss_idx++) {
-                out.write(("\t\tSubState ("+ss_idx+") ["+mStates[ms_idx].substates[ss_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
+                if(mStates[ms_idx].substates[ss_idx] != null) out.write(("\t\tSubState ("+ss_idx+") ["+mStates[ms_idx].substates[ss_idx]+"]\n").getBytes(StandardCharsets.US_ASCII));
             }
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
 
             out.write(("\tPrinting StateLinks\n").getBytes(StandardCharsets.US_ASCII));
             for(int sl_idx = 0; sl_idx < mStates[ms_idx].links.length; sl_idx++) {
-                out.write(("\t\tStateLink ("+sl_idx+") ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
+                if(mStates[ms_idx].links[sl_idx] != null) out.write(("\t\tStateLink ("+sl_idx+") ["+mStates[ms_idx].links[sl_idx]+"] -> ["+mStates[ms_idx].links[sl_idx].destMS+"]\n").getBytes(StandardCharsets.US_ASCII));
             }
             out.write(("\n").getBytes(StandardCharsets.US_ASCII));
         }
@@ -846,5 +850,7 @@ public class DuPALAnalyzer {
                 }
             }
         }
+
+        out.write(".e\n".getBytes(StandardCharsets.US_ASCII));
     }
 }

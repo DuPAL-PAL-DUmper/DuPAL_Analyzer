@@ -21,7 +21,7 @@ public class App {
         if(args.length < 3) {
             logger.error("Wrong number of arguments passed.\n"+
                         "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_output_mask]\n" +
-                        "Where <pal_type> can be: 16R8, 16R6, 16R4\n");
+                        "Where <pal_type> can be: 16R8, 16R6, 16R4, 16L8\n");
 
             return;
         }
@@ -51,6 +51,9 @@ public class App {
                 break;
             case "16R4":
                 pspecs = new PAL16R4Specs();
+                break;
+            case "16L8":
+                pspecs = new PAL16L8Specs();
                 break;
             default:
                 logger.error("Invalid PAL type selected.");

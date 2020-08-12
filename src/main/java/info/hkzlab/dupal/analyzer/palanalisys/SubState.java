@@ -48,7 +48,19 @@ public class SubState implements Serializable {
 
     @Override
     public int hashCode() {
-        return calculateSubStateKey(IOpin_status) ^ calculateSubStateKey(Opin_status) ^ tag.hashCode();
+        return calculateHashFromArrays(new Byte[][] {IOpin_status, Opin_status});
+    }
+
+    static public int calculateHashFromArrays(Byte[][] arrays) {
+        int hash = 7;
+
+        for(Byte[] arr : arrays) {
+            for(int idx = 0; idx < arr.length; idx++) {
+                hash = hash*31 + arr[idx];
+            }
+        }
+
+        return hash;
     }
 
     @Override
@@ -73,19 +85,5 @@ public class SubState implements Serializable {
         }
 
         return index;
-    }
-
-    /**
-     * 
-     */
-    public static int calculateSubStateKey(final Byte[] out_comb) {
-        int hash = 0;
-
-        for(int idx = 0; idx < out_comb.length; idx++) {
-            int byte_idx = idx % 4;
-            hash ^= (out_comb[idx] & 0xFF) << (8 * byte_idx);
-        }
-
-        return hash;       
     }
 }
