@@ -28,7 +28,7 @@ To summarize and simplify, a registered PAL has the following types of outputs:
 - **Combinatorial outputs**: their state is dependant on the current state of the inputs and on the current state of the registered output feedbacks.
 - **Registered outputs**: these only change when the clock pin is pulsed, and their new state depends on the state of the inputs and on their own state before the pulsing.
 
-### Exploring the Box
+### Unboxing the Box
 
 So, we saw that a registered PAL is a state machine, and that the current state is tied to the flip-flops, which are in turn connected to the registered outputs.
 
