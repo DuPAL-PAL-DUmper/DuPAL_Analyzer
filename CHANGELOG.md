@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.4] - 2020-08-13
+
 ### Added
 
 - Support for some combinatorial PAL devices
