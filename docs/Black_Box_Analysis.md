@@ -47,3 +47,9 @@ From what I wrote above, we can see that for a registered PAL we have:
 - 2^X theoretically possible MacroStates
 - 2^Z combinations of inputs for every MacroState to map them to the 2^Y possible SubStates for that specific MacroState
 - 2^Z combination of inputs for every MacroState to try with a clock-pulse, to see in which MacroState we end up.
+
+Where:
+
+- X is the number of registered outputs
+- Y is the number of outputs
+- Z is the number of inputs
