@@ -430,75 +430,7 @@ public class DuPALAnalyzer {
             return null;
         } 
     }
-/*
-    private StateLink[] internal_searchPath(MacroState start, MacroState dest) {
-        logger.info("Searching for a path from ["+start+"] to ["+dest+"]");
-
-        Stack<StateLink> slStack = new Stack<>();
-        Set<MacroState> msSet = new HashSet<>();
-        Set<StateLink> slSet = new HashSet<>();
-
-        MacroState curMS = start;
-        msSet.add(start);
-
-        // We'll search for a path of links that join "start" and "dest"
-        while(curMS != null) {
-            // The current state we're in is equal to "dest", it means we've found a path!
-            // Convert the stack of links we followed into an array and return it
-            if(curMS.equals(dest)) {
-                StateLink[] arr = slStack.toArray(new StateLink[slStack.size()]);
-
-                StringBuffer arrbuf = new StringBuffer();
-                arrbuf.append("Found path from ["+start+"] to ["+dest+"] via:\n");
-                for(StateLink sl : arr) arrbuf.append("\t"+sl.toString()+"\n");
-                logger.info(arrbuf.toString());
-
-                return arr;
-            }
-
-            // We're still not at our destination, so check every link we have not yet visited in the current macrostate,
-            // and if it ends up in a state we've not yet examined, push the link into the stack, mark that state as visited 
-            // and set it as the next current one to examine to search for a path
-            boolean foundLink = false;
-            for(int idx = 0; idx < curMS.links.length; idx++) {
-                if((curMS.links[idx] != null) && !slSet.contains(curMS.links[idx])) { // We have not yet tried this link
-                    slSet.add(curMS.links[idx]);
-                    if(!msSet.contains(curMS.links[idx].destMS)) { // And we have not yet tried this macrostate!
-                        logger.debug("Moving from ["+curMS+"] to ["+curMS.links[idx].destMS+"] - via ["+curMS.links[idx]+"]");
-
-                        slStack.push(curMS.links[idx]);
-                        msSet.add(curMS.links[idx].destMS);
-                        curMS = curMS.links[idx].destMS;
-                        foundLink = true;
-                        
-                        break; // Break out of this loop
-                    } else { // The MacroState has been visited already, which means that all its links were explored and deemed unsuitable
-                        logger.debug("MacroState ["+curMS.links[idx].destMS+"] has been visited previously, so we can skip it.");
-                    }
-                }
-            }
-
-            // Aleady searched through all this state, we found no link to follow
-            // So, if the stack of links we followed contains an element (which means we moved at least one place through the graph)
-            // then pop this link from the stack and go back to the previous node, so we can continue searching for a path
-            if(!foundLink) {
-                if(slStack.size() > 0) {
-                    slStack.pop(); // Remove the last link, the last macrostate will remain in the list of nodes we visited, so we won't search it twice
-                    if(slStack.size() > 0) {
-                        curMS = slStack.peek().destMS; // Back to the previous node
-                    } else curMS = start; // We ended up back at the beginning
-                    logger.trace("Moved back to ["+curMS+"]");
-                } else { // We were already at the beginning, no possible path found
-                    logger.info("Found no possible path out of [" + start + "] to [" + dest + "].");
-                    return null;  // Found no possible path from start to dest
-                }
-            }
-
-        }
-
-        return null;
-    }
-*/
+    
     private MacroState analyzeMacroState(MacroState ms) throws InvalidIOPinStateException, DuPALBoardException {
         if(!ms.ss_ready) {
             logger.info("Generating all ("+ms.substates.length+") possible SubStates for MacroState ["+ms+"]");
