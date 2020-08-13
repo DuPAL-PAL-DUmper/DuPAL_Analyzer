@@ -1,8 +1,6 @@
 package info.hkzlab.dupal.analyzer;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import org.slf4j.*;
 
