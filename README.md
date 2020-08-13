@@ -81,13 +81,16 @@ java -jar /path/to/dupal_analyzer.jar <serial_port> <pal_type> <output_directory
 #### The output mask format
 
 The output mask is a byte represented as an hex value, where a bit is set when the corrisponding pin is considered an output.
-From LSB to MSB:
+From MSB to LSB:
 
 ```text
-18 17 16 15 14 13 19 12
+   7    6    5    4    3    2    1    0
+.----.----.----.----.----.----.----.----.
+| 12 | 19 | 13 | 14 | 15 | 16 | 17 | 18 |
+'----'----'----'----'----'----'----'----'
 ```
 
-Pay attention to the weird position for pin 19.
+Pay attention to the weird position for pin 19, that position is caused by a desire to save a few lines on the firmware.
 
 #### Requirements
 
