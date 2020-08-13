@@ -21,6 +21,12 @@ This analyzer works in tandem with the DuPAL board to:
 - Can't resurrect dead ICs: You'll need a PAL in working conditions to obtain a good truth table.
 - Can't work quick: we are not simply "reading" the chip here. We're creating a graph of all the reachable states and all the links between them. This means that we need to reconstruct the behaviour of the black box by feeding it with every possible combination of input. For a chip with 6 registered outputs, and 8 inputs, it means that we're going to have 64 possible states, each one with 256 links out of them that we need to explore. And we cannot teleport from a state to another: we need to move through the graph following links until we get to the state we wish to explore! **Analyzing a chip can take from 10 minutes to several hours**.
 
+## Building
+
+Build and packaging this application requires `maven` and a JDK compatible with Java 1.8 .
+
+Once both are installed, you can run `mvn package` from the project root directory and you should end up with a JAR file in `target/`.
+
 ## The Analyzer
 
 The analyzer lets the user select which type of registered PAL is inserted in the board's ZIF socket, whether the output pins are known (which saves some time), what is the board's serial interface, and where to save the output files.
