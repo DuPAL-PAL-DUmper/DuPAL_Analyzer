@@ -28,28 +28,36 @@ To summarize and simplify, a registered PAL has the following types of outputs:
 - **Combinatorial outputs**: their state is dependant on the current state of the inputs and on the current state of the registered output feedbacks.
 - **Registered outputs**: these only change when the clock pin is pulsed, and their new state depends on the state of the inputs and on their own state before the pulsing.
 
-### Unboxing the Box
+### Unboxing the PAL
 
 So, we saw that a registered PAL is a state machine, and that the current state is tied to the flip-flops, which are in turn connected to the registered outputs.
 
-The number of these registered outputs is dependant on the PAL model, but fixed and known, and cannot be changed by flashing the device. From this we can gather that **a registered PAL device has 2^X possible states**, where **X is the number of registered outputs for that model**.
+The number of these registered outputs depends on the PAL model, but is fixed and known for every specific model. From this we can gather that **a registered PAL device has 2^X possible states**, where **X is the number of registered outputs for that model**.
 
-We will call these states defined by the registered outputs **MacroStates**, to distinguish them from the **SubStates** which I'll describe below.
+I will call these states that are defined by the registered outputs "**MacroStates**", to distinguish them from another type of state, the **SubStates**, which I'll describe below.
 
-While the **MacroState** is defined by the status of the registered outputs, we also need to take into account the state of the normal outputs. As we saw before, an output state is purely combinatorial, and dependant on both the inputs and the registered outputs, and changes without the need of pulsing the clock.
+While the **MacroState** is defined by the status of the registered outputs, we also need to take into account the state of the combinatorial outputs. The combinatorial outputs stat, is dependant only on the inputs and the registered outputs, and changes without the need of pulsing the clock.
 
 From this we get that for every MacroState we need to test all the input combinations to find the SubStates corresponding to them. For every MacroState we'll have 2^Y, where Y is the number of the combinatorial outputs, possible SubStates, but we'll have to try 2^Z combinations, where Z is the number of the inputs.
 
 #### Some simple math
 
-From what I wrote above, we can see that for a registered PAL we have:
+We can see that for a registered PAL we have:
 
-- 2^X theoretically possible MacroStates
-- 2^Z combinations of inputs for every MacroState to map them to the 2^Y possible SubStates for that specific MacroState
-- 2^Z combination of inputs for every MacroState to try with a clock-pulse, to see in which MacroState we end up.
+- 2^X theoretically possible MacroStates.
+- 2^Z combinations of inputs for every MacroState, every combination maps one of the 2^Y possible SubStates for that specific MacroState.
+- 2^Z combination of inputs that can bring forth a movement to another MacroState when coupled with a clock pulse.
 
 Where:
 
 - X is the number of registered outputs
-- Y is the number of outputs
+- Y is the number of combinatorial outputs
 - Z is the number of inputs
+
+#### Graphs
+
+The inner workings of a registered PAL can then be represented by a **directed graph** (or **digraph**), where every **vertex** is a **MacroState**, every **edge** is a link between a "starting" and a "destination" MacroState, and this link (which I'll call **StateLink**) is defined by the state of the inputs and the state of the registered outputs from the starting MacroState.
+
+- Every MacroState will have 2^Z StateLinks (edges) coming out of it, some pointing to another MacroState, some pointing back at itself.
+- We will have 2^X MacroStates (vertices) in the graph. Some will be connected to others, some will not be connected at all, depending on the programming of the device.
+- Every MacroState will contain an array of 2^Z SubStates inside, defining all the possible states that the combinatorial outputs can take within that MacroState, by trying different input combinations.
