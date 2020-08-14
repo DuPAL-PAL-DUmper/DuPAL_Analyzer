@@ -66,7 +66,7 @@ Reversing the inner working of the PAL device means that we need to find every p
 
 One this is done, we can use the graph we built to print out a truth table that represents all the possible states of the PAL, and from that, recover the logic equations.
 
-##### Exploring the Graph
+##### Mapping the Graph
 
 We can summarize the algorithm to build the graph this way:
 
