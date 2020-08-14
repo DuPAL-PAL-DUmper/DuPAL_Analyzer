@@ -54,7 +54,7 @@ Where:
 - Y is the number of combinatorial outputs
 - Z is the number of inputs
 
-#### Graphs
+#### PAL as a Graph
 
 The inner workings of a registered PAL can then be represented by a **directed graph** (or **digraph**), where every **vertex** is a **MacroState**, every **edge** is a link between a "starting" and a "destination" MacroState, and this link (which I'll call **StateLink**) is defined by the state of the inputs and the state of the registered outputs from the starting MacroState.
 
@@ -63,3 +63,17 @@ The inner workings of a registered PAL can then be represented by a **directed g
 - Every MacroState will contain an array of 2^Z SubStates inside, defining all the possible states that the combinatorial outputs can take within that MacroState, by trying different input combinations.
 
 Reversing the inner working of the PAL device means that we need to find every possible StateLink (edge) in the digraph, and calculate all the SubStates for every MacroState (vertex) we reach.
+
+One this is done, we can use the graph we built to print out a truth table that represents all the possible states of the PAL, and from that, recover the logic equations.
+
+##### Exploring the Graph
+
+We can summarize the algorithm to build the graph this way:
+
+1. Read the current state of the registered outputs: this will identify our MacroState
+2. If the state was not yet visited, build the array of its substates by trying all the input combinations and registering the outputs.
+3. Check if we have still unvisited StateLinks for this MacroState
+    - If we have unvisited links, pick the first and visit it. Go back to 1.
+    - If we have no unvisited links, search a path in the graph to a visited MacroState with yet unvisited links and follow it. Go back to 3 after following the path.
+        - If no visited MacroStates with unvisited links are found, we completed our mapping.
+
