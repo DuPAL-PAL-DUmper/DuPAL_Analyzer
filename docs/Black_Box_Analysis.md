@@ -76,4 +76,3 @@ We can summarize the algorithm to build the graph this way:
     - If we have unvisited links, pick the first and visit it. Go back to 1.
     - If we have no unvisited links, search a path in the graph to a visited MacroState with yet unvisited links and follow it. Go back to 3 after following the path.
         - If no visited MacroStates with unvisited links are found, we completed our mapping.
-
