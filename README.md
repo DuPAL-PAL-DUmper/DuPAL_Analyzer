@@ -5,6 +5,8 @@
 The **DuPAL Analyzer** is a companion software to the **DuPAL** board.
 It uses the board's *REMOTE CONTROL* mode to remotely toggle the pins and read the outputs, and is meant to perform **blackbox analisys** on the registered PAL devices, which are a bit too much for the MCU firmware to handle by itself.
 
+Please, spend some time to read how the [Black Box Analysis](docs/Black_Box_Analysis.md) works and [how to handle recovered equations](docs/Minimize_Equations_with_feedbacks.md) that don't seem to fit a new PAL.
+
 ### What it CAN do
 
 This analyzer works in tandem with the DuPAL board to:
