@@ -61,3 +61,5 @@ The inner workings of a registered PAL can then be represented by a **directed g
 - Every MacroState will have 2^Z StateLinks (edges) coming out of it, some pointing to another MacroState, some pointing back at itself.
 - We will have 2^X MacroStates (vertices) in the graph. Some will be connected to others, some will not be connected at all, depending on the programming of the device.
 - Every MacroState will contain an array of 2^Z SubStates inside, defining all the possible states that the combinatorial outputs can take within that MacroState, by trying different input combinations.
+
+Reversing the inner working of the PAL device means that we need to find every possible StateLink (edge) in the digraph, and calculate all the SubStates for every MacroState (vertex) we reach.
