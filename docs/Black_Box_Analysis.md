@@ -6,7 +6,7 @@
 
 Combinatorial PAL are built around an ideal internal network of wires, whose interconnections are broken at flashing time. These wires then connect the inputs to an array of AND gates, whose outputs are connected to an array of OR gates (the physical implementation of a sum of products).
 
-Even when the chip lock is set (thus blocking direct reading via a programmer), recovering the functions that then map the internal connections is relatively easy: the output state is a dependant only on the current state of the inputs and nothing else, making the creation of a truth table a trivial matter: just feed the PAL every combination of inputs and record the outputs.
+Even when the chip lock is set (thus blocking direct reading via a programmer), recovering the functions that then map the internal connections is relatively easy: the output state is dependant only on the current state of the inputs and nothing else, making the creation of a truth table a trivial matter: just feed the PAL every combination of inputs and record the outputs.
 
 ### Registered PALs
 
