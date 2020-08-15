@@ -97,3 +97,8 @@ Pay attention to the weird position for pin 19, that position is caused by a des
 #### Requirements
 
 Make sure you have at least a **Java 1.8** compatible JRE installed and have access to your serial port devices (In linux it's usually sufficient to add your user to the `dialout` group).
+
+## Credits
+
+- Thanks to [jammarcade.net](https://www.jammarcade.net/) for hosting all those PAL dumps, I used a lot of them to test my implementation.
+- Thanks to @mesillo for taking time to read my documentation and pointing out possible improvements.
