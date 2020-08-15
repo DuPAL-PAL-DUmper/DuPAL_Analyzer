@@ -33,7 +33,7 @@ public class DuPALAnalyzer {
 
     private static final long SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-    private MacroState[] mStates;
+    private StatesContainer psContainer; 
 
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
@@ -60,8 +60,10 @@ public class DuPALAnalyzer {
         structPath = outPath + File.separator + DUPAL_STRUCT;
 
         this.pathMap = new HashMap<>();
-        this.mStates = new MacroState[1 << pspecs.getNumROUTPins()];
-        logger.info("Provisioning for " +this.mStates.length+" possible MacroStates");
+        
+        // Create a container with space for 2^X MacroStates, where X is the number of registered outputs
+        this.psContainer = new StatesContainer((1 << pspecs.getNumROUTPins()), pspecs.toString());
+        logger.info("Provisioning for " +psContainer.mStates.length+" possible MacroStates");
     } 
     
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs) {
@@ -73,7 +75,7 @@ public class DuPALAnalyzer {
             FileOutputStream fileOut = new FileOutputStream(path);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
         
-            out.writeObject(mStates);
+            out.writeObject(psContainer);
             out.close();
             fileOut.close();
 
@@ -84,16 +86,21 @@ public class DuPALAnalyzer {
         }
     }
 
-    public void restoreStatus(final String path) {
+    public void restoreStatus(final String path, final PALSpecs specs) {
         try {
             FileInputStream fileIn = new FileInputStream(path);
             ObjectInputStream in = new ObjectInputStream(fileIn);
         
-            mStates = (MacroState[])in.readObject();
+            psContainer = (StatesContainer)in.readObject();
             in.close();
             fileIn.close();
 
-            logger.info("Restored state from " + path);
+            if(!psContainer.palName.equals(specs.toString())) {
+                logger.error("The state that was restored was dumped from a different type of PAL. Ignoring.");
+                psContainer = null;
+            } else {
+                logger.info("Restored state from " + path);
+            }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -114,11 +121,11 @@ public class DuPALAnalyzer {
         // Given the mask that we have recovered before, find how many additional outputs we have in this PAL
         additionalOUTs = countHIBits(IOasOUT_Mask);
 
-        if(outPath != null) restoreStatus(serdump_path);
+        if(outPath != null) restoreStatus(serdump_path, pspecs);
         internal_analisys();
         if(serdump_path != null) saveStatus(serdump_path);
 
-        printUnvisitedMacroStates(mStates);
+        printUnvisitedMacroStates(psContainer.mStates);
         printAnalisysOutput();
     }
 
@@ -127,7 +134,7 @@ public class DuPALAnalyzer {
         
         try {
             fout = new FileOutputStream(structPath);
-            printStateStructure(fout, pspecs, mStates);
+            printStateStructure(fout, pspecs, psContainer.mStates);
             fout.close();
         } catch(IOException e) {
             logger.error("Error printing out the analisys struct.");
@@ -135,7 +142,7 @@ public class DuPALAnalyzer {
         }
         try {
             fout = new FileOutputStream(tblPath);
-            printLogicTable(fout, pspecs, IOasOUT_Mask, mStates);
+            printLogicTable(fout, pspecs, IOasOUT_Mask, psContainer.mStates);
             fout.close();
         } catch(IOException e) {
             logger.error("Error printing out the registered outputs table (not including outputs).");
@@ -224,12 +231,12 @@ public class DuPALAnalyzer {
         mstate_idx = rout_state >> pspecs.getROUT_READMaskShift();
         MacroState ms = null, nms = null;
         
-        if(mStates[mstate_idx] == null) {
+        if(psContainer.mStates[mstate_idx] == null) {
             ms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins()  + (pspecs.getNumIOPins() - additionalOUTs)));
-            mStates[mstate_idx] = ms;
+            psContainer.mStates[mstate_idx] = ms;
             logger.info("Added MacroState [" + ms + "] at index " + mstate_idx);
         } else {
-            ms = mStates[mstate_idx];
+            ms = psContainer.mStates[mstate_idx];
             logger.info("Recovered MacroState ["+ms+"] from index " + mstate_idx);
         }
 
@@ -291,35 +298,35 @@ public class DuPALAnalyzer {
     private StateLink[] findPathToNewStateLinks(MacroState start_ms) {
         int precalc_idx = 0;
 
-        if((lastUnexploredMS_idx >= 0) && (mStates[lastUnexploredMS_idx].link_count < start_ms.links.length)) {
-            int pathHash = slPathGetHash(start_ms, mStates[lastUnexploredMS_idx]);
+        if((lastUnexploredMS_idx >= 0) && (psContainer.mStates[lastUnexploredMS_idx].link_count < start_ms.links.length)) {
+            int pathHash = slPathGetHash(start_ms, psContainer.mStates[lastUnexploredMS_idx]);
             if(pathMap.containsKey(pathHash)) { 
-                logger.info("Trying to reach MacroState " + String.format("%02X", lastUnexploredMS_idx) + ": it has " + mStates[lastUnexploredMS_idx].link_count + " links.");
+                logger.info("Trying to reach MacroState " + String.format("%02X", lastUnexploredMS_idx) + ": it has " + psContainer.mStates[lastUnexploredMS_idx].link_count + " links.");
                 precalc_idx = lastUnexploredMS_idx;
             }
         }
 
         // Search for a state that still has unexplored links
-        for(int ms_idx = precalc_idx; ms_idx < mStates.length; ms_idx++) {
-            if((mStates[ms_idx] != null) && (mStates[ms_idx] != start_ms)) {
-                if(mStates[ms_idx].link_count < mStates[ms_idx].links.length) {
-                        logger.info("Found unexplored link in ["+mStates[ms_idx]+"]");
+        for(int ms_idx = precalc_idx; ms_idx < psContainer.mStates.length; ms_idx++) {
+            if((psContainer.mStates[ms_idx] != null) && (psContainer.mStates[ms_idx] != start_ms)) {
+                if(psContainer.mStates[ms_idx].link_count < psContainer.mStates[ms_idx].links.length) {
+                        logger.info("Found unexplored link in ["+psContainer.mStates[ms_idx]+"]");
 
                         lastUnexploredMS_idx = ms_idx; // Save it for faster search later
 
-                        int path_hash = slPathGetHash(start_ms, mStates[ms_idx]);
+                        int path_hash = slPathGetHash(start_ms, psContainer.mStates[ms_idx]);
                         StateLink[] sll = pathMap.get(Integer.valueOf(path_hash));
 
                         if(sll != null) {
-                            if(sll[sll.length-1].destMS != mStates[ms_idx]) {
-                                logger.warn("Got an hash collision trying to reach ["+mStates[ms_idx]+"] from ["+start_ms+"]");
+                            if(sll[sll.length-1].destMS != psContainer.mStates[ms_idx]) {
+                                logger.warn("Got an hash collision trying to reach ["+psContainer.mStates[ms_idx]+"] from ["+start_ms+"]");
                                 lastUnexploredMS_idx = -1;
                                 sll = null;
                             }
                         }
 
                         if(sll == null) {
-                            sll = internal_searchBestPath(start_ms, mStates[ms_idx]);
+                            sll = internal_searchBestPath(start_ms, psContainer.mStates[ms_idx]);
                             if (sll != null) pathMap.put(Integer.valueOf(path_hash), sll);
                         }
 
@@ -388,7 +395,7 @@ public class DuPALAnalyzer {
         MacroState curMS = start, nextMS;
         StateLink nextSL;
 
-        Map<MacroState, Integer> costMap = internal_calculateCostMap(mStates, dest);
+        Map<MacroState, Integer> costMap = internal_calculateCostMap(psContainer.mStates, dest);
         
         boolean foundLink = false;
         int cost = -1;
@@ -456,12 +463,12 @@ public class DuPALAnalyzer {
             pulseClock(ms.last_link_idx); // Enter the new state
             int pins = readPINs();
             int mstate_idx = (pins & pspecs.getROUT_READMask()) >> pspecs.getROUT_READMaskShift();
-            MacroState nms = mStates[mstate_idx];
+            MacroState nms = psContainer.mStates[mstate_idx];
             StateLink sl = null;
 
             if(nms == null) {
                 nms = new MacroState(buildTag(mstate_idx), mstate_idx, pspecs.getNumROUTPins(), (pspecs.getNumINPins() + (pspecs.getNumIOPins() - additionalOUTs)));
-                mStates[mstate_idx] = nms;
+                psContainer.mStates[mstate_idx] = nms;
             }
             sl = new StateLink(ms.tag, ms.last_link_idx, nms);
             ms.links[links_counter] = sl;
