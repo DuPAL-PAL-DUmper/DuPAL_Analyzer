@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## [0.0.5] - 2020-08-15
+
 ### Added
+
+- Check whether a restored partial dump belongs to a different PAL type
 
 ## [0.0.4] - 2020-08-13
 
