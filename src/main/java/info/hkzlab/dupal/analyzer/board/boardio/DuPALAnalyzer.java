@@ -37,7 +37,6 @@ public class DuPALAnalyzer {
 
     private final DuPALManager dpm;
     private final PALSpecs pspecs;
-    private final String outPath;
     private final HashMap<Integer, StateLink[]> pathMap;
     
     private final String serdump_path;
@@ -53,7 +52,6 @@ public class DuPALAnalyzer {
         this.dpm = dpm;
         this.pspecs = pspecs;
         this.IOasOUT_Mask = IOasOUT_Mask;
-        this.outPath = outPath;
 
         serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
         tblPath = outPath + File.separator + OUT_TABLE;
@@ -61,9 +59,16 @@ public class DuPALAnalyzer {
 
         this.pathMap = new HashMap<>();
         
-        // Create a container with space for 2^X MacroStates, where X is the number of registered outputs
-        this.psContainer = new StatesContainer((1 << pspecs.getNumROUTPins()), pspecs.toString());
-        logger.info("Provisioning for " +psContainer.mStates.length+" possible MacroStates");
+
+        if(outPath != null) psContainer = restoreStatus(serdump_path, pspecs);
+
+        if (psContainer == null) {
+            // Create a container with space for 2^X MacroStates, where X is the number of registered outputs
+            this.psContainer = new StatesContainer((1 << pspecs.getNumROUTPins()), pspecs.toString());
+            logger.info("Provisioning for " +psContainer.mStates.length+" possible MacroStates");
+        } else {
+            logger.info("State was restored from previous serialized dump. PAL Model: " + psContainer.palName);
+        }
     } 
     
     public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs pspecs) {
@@ -86,20 +91,23 @@ public class DuPALAnalyzer {
         }
     }
 
-    public void restoreStatus(final String path, final PALSpecs specs) {
+    public StatesContainer restoreStatus(final String path, final PALSpecs specs) {
         try {
             FileInputStream fileIn = new FileInputStream(path);
             ObjectInputStream in = new ObjectInputStream(fileIn);
         
-            psContainer = (StatesContainer)in.readObject();
+            StatesContainer psc = (StatesContainer)in.readObject();
             in.close();
             fileIn.close();
 
-            if(!psContainer.palName.equals(specs.toString())) {
-                logger.error("The state that was restored was dumped from a different type of PAL. Ignoring.");
-                psContainer = null;
+            if(!psc.palName.equals(specs.toString())) {
+                logger.error("The state that was restored was dumped from a different type of PAL ("+psc.palName+"). Ignoring.");
+
+                return null;
             } else {
                 logger.info("Restored state from " + path);
+
+                return psc;
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -109,6 +117,8 @@ public class DuPALAnalyzer {
             logger.warn("Unable to save status to " + path);
             e.printStackTrace();
         }
+
+        return null;
     }
 
     public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
@@ -121,7 +131,6 @@ public class DuPALAnalyzer {
         // Given the mask that we have recovered before, find how many additional outputs we have in this PAL
         additionalOUTs = countHIBits(IOasOUT_Mask);
 
-        if(outPath != null) restoreStatus(serdump_path, pspecs);
         internal_analisys();
         if(serdump_path != null) saveStatus(serdump_path);
 
