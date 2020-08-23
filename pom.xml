@@ -26,22 +26,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.github.java-native</groupId>
-      <artifactId>jssc-javadoc</artifactId>
-      <version>2.9.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jssc-2.9.2-javadoc.jar</systemPath>
-    </dependency>
-
-    <dependency>
-      <groupId>io.github.java-native</groupId>
-      <artifactId>jssc-sources</artifactId>
-      <version>2.9.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jssc-2.9.2-sources.jar</systemPath>
-    </dependency>
-
-    <dependency>
      <groupId>org.slf4j</groupId>
      <artifactId>slf4j-api</artifactId>
      <version>1.7.30</version>
