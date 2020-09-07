@@ -62,7 +62,7 @@ public class DuPALManager {
     private void purgeRX() {
         if(serport != null && serport.isOpened()) {
             while(true) {
-                try { serport.readString(10, 100); }
+                try { serport.readString(50, 200); }
                 catch (SerialPortTimeoutException | SerialPortException e) { break; }
             }
         }
@@ -125,7 +125,7 @@ public class DuPALManager {
                 final String response = serport.readString();
 
                 if ((response != null)) {
-                    if (response.trim().equals(REMOTE_MODE_STRING))
+                    if (response.trim().endsWith(REMOTE_MODE_STRING))
                         return true;
                     else
                         return false;

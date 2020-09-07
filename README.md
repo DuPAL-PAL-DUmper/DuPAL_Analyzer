@@ -7,7 +7,7 @@ It uses the board's *REMOTE CONTROL* mode to remotely toggle the pins and read t
 
 Please, spend some time to read how the [Black Box Analysis](docs/Black_Box_Analysis.md) works and [how to handle recovered equations](docs/Minimize_Equations_with_feedbacks.md) that don't seem to fit a new PAL.
 
-**WARNING:** Currently, PALs that feeds the output of an equation back into the equation itself are **NOT** supported.
+**WARNING:** Currently, PALs that feeds the output of an equation back into the equation itself are **NOT** supported by the analisys algorithm.
 Example:
 
 ```text
