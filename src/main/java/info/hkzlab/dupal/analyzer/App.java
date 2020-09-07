@@ -8,8 +8,7 @@ import info.hkzlab.dupal.analyzer.board.boardio.*;
 import info.hkzlab.dupal.analyzer.devices.*;
 
 public class App {
-    public static volatile String[] palTypes = { PAL10L8Specs.PAL_TYPE, PAL12L6Specs.PAL_TYPE, PAL16L8Specs.PAL_TYPE, 
-                                                PAL16R4Specs.PAL_TYPE, PAL16R6Specs.PAL_TYPE, PAL16R8Specs.PAL_TYPE };
+    public static volatile String[] palTypes = { PAL16L8Specs.PAL_TYPE };
 
     private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
 

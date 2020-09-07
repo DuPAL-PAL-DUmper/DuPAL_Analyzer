@@ -1,29 +1,41 @@
 package info.hkzlab.dupal.analyzer.devices;
 
 public interface PALSpecs {
-    public static final int READ_WRITE_SHIFT = 10;
+    public int getPinCount_IN();
+    public int getPinCount_IO();
+    public int getPinCount_O();
+    public int getPinCount_RO();
 
-    public int getNumINPins();
-    public int getNumIOPins();
-    public int getNumOUTPins();
-    public int getNumROUTPins();
+    public int getMask_CLK();
+    public int getMask_OE();
+    public int getMask_IN();
+    public int getMask_IO_R();
+    public int getMask_IO_W();
+    public int getMask_RO_R();
+    public int getMask_RO_W();
+    public int getMask_O_R();
+    public int getMask_O_W();
 
-    public int getCLKPinMask();
-    public int getOEPinMask();
-    public int getINMask();
-    public int getIO_READMask();
-    public int getIO_WRITEMask();
-    public int getROUT_READMask();
-    public int getROUT_WRITEMask();
-    public int getOUT_WRITEMask();
-    public int getOUT_READMask();
-
-    public int getROUT_READMaskShift();
-
-    public String[] getROUT_PinNames();
-    public String[] getIN_PinNames();
-    public String[] getIO_PinNames();
-    public String[] getOUT_PinNames();
+    public String[] getLabels_RO();
+    public String[] getLabels_O();
+    public String[] getLabels_IO();
+    public String[] getLabels_IN();
 
     public boolean isActiveLow();
+
+    public int minimumBoardRev();
+
+    static public int consolidateField(int field, int mask) {
+        int data = 0;
+        int shift = 0;
+
+        for(int idx = 0; idx < 32; idx++) {
+            if(((mask >> idx) & 0x01) != 0) {
+                data |= (field >> (idx-shift)) & (1 << shift);
+                shift++;
+            }
+        }
+
+        return data;
+    }
 }
