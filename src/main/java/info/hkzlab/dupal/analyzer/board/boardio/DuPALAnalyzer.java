@@ -41,19 +41,30 @@ public class DuPALAnalyzer {
         logger.info("Starting IO type detection... This could take a while.");
         logger.info("Highest address for input pins: " + String.format("%06X", maxINVal-1));
 
-        for(int idx = 0; idx < (maxINVal-extraOutputs); idx++) {
-            if(ioAsOutMask == dpci.palSpecs.getMask_IO_R()) break; // All the IOs we already found to be outputs, no need to continue
+        int writeAddr, o_write_mask;
+        for(int idx = 0; idx < maxINVal; idx++) {
+            for(int sub_idx = 0; sub_idx < maxINVal; sub_idx++) {
+                if(ioAsOutMask == dpci.palSpecs.getMask_IO_R()) break; // All the IOs we already found to be outputs, no need to continue
 
-            int writeAddr = BitUtils.scatterBitField(idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField((idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_W());
-            int o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, dpci.palSpecs.getMask_IO_R()), dpci.palSpecs.getMask_IO_W());
-            if((writeAddr & o_write_mask) != 0) continue; // Skip this run as we're setting a pin that we already found as output
-            
-            dpci.write(writeAddr);
-            int pinstat = dpci.read();
+                o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, (dpci.palSpecs.getMask_IO_R())), dpci.palSpecs.getMask_IO_W());
+                writeAddr = BitUtils.scatterBitField(sub_idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField(sub_idx >> dpci.palSpecs.getPinCount_IN(), dpci.palSpecs.getMask_IO_W());
+                if((writeAddr & o_write_mask) != 0) continue;
+                
+                dpci.write(writeAddr);
+                int pinstat = dpci.read();
 
-            ioAsOutMask |= (pinstat ^ BitUtils.scatterBitField((idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_R())) & dpci.palSpecs.getMask_IO_R();
-            
-            logger.info(String.format("idx: C(%06X) -> S(%06X) | M[%06X]", idx, writeAddr, ioAsOutMask));
+                ioAsOutMask |= (pinstat ^ BitUtils.scatterBitField((sub_idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_R())) & dpci.palSpecs.getMask_IO_R();
+                
+                logger.info(String.format("idx: C(%06X) -> S(%06X) | M[%06X]", sub_idx, writeAddr, ioAsOutMask));
+            }
+
+            if(dpci.palSpecs.getPinCount_RO() == 0) break; // No need to try multiple registered states
+
+            o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, (dpci.palSpecs.getMask_IO_R())), dpci.palSpecs.getMask_IO_W());
+            writeAddr = BitUtils.scatterBitField(idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField((idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_W());
+            if((writeAddr & o_write_mask) != 0) continue;
+
+            dpci.writeAndPulseClock(writeAddr);
         }
 
         return ioAsOutMask;
