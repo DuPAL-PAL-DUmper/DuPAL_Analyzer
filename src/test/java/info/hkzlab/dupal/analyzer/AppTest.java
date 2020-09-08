@@ -8,6 +8,7 @@ import org.junit.Test;
 import info.hkzlab.dupal.analyzer.board.boardio.DuPALCmdInterface;
 import info.hkzlab.dupal.analyzer.board.boardio.DuPALManager;
 import info.hkzlab.dupal.analyzer.devices.PAL16L8Specs;
+import info.hkzlab.dupal.analyzer.exceptions.DuPALBoardException;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 
 /**
@@ -31,13 +32,14 @@ public class AppTest
         assertEquals("0b01011111 with a scatter mask 0xF0 should be scattered into 0b11110000", 0xF0, BitUtils.scatterBitField(0x5F, 0xF0));
     }
 
-    public void commandInterfaceShouldBuildCorrectCommands() {
+    @Test
+    public void commandInterfaceShouldBuildCorrectCommands() throws DuPALBoardException {
         DuPALManager dpmMock = mock(DuPALManager.class);
         DuPALCmdInterface dpci = new DuPALCmdInterface(dpmMock, new PAL16L8Specs());
 
         when(dpmMock.readResponse()).thenReturn("[R 57]");
         assertEquals("Issuing a read command via DPCI should return us the correct value", 0x57, dpci.read());
-        when(dpmMock.readResponse()).thenReturn("[W 00AABBCCDD]");
-        assertEquals("Issuing a write command via DPCI should return us the same value as written", 0xAABBCCDD, dpci.write(0xAABBCCDD));
+        when(dpmMock.readResponse()).thenReturn("[W 00BBCCDD]");
+        assertEquals("Issuing a write command via DPCI should return us the same value as written", 0xBBCCDD, dpci.write(0xBBCCDD));
     }
 }
