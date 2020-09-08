@@ -10,9 +10,13 @@ public class OutState {
     private final int[] status;
     private final OutLink[] links;
 
-    public OutState(int o_state, int io_state, int hiz_state, int totLinks) {
+    private int lastOutLinkIdx;
+
+    public OutState(int o_state, int io_state, int hiz_state, int maxLinks) {
         status = new int[]{o_state, io_state, hiz_state};
-        links = new OutLink[totLinks];
+        links = new OutLink[maxLinks];
+
+        lastOutLinkIdx = 0;
     }
 
     public int[] getStatus() {
@@ -23,7 +27,20 @@ public class OutState {
         return links[idx];
     }
 
-    public boolean setOutLinkAtIdx(OutLink link, int idx) {
+    public int addOutLink(OutLink link) {
+        int idx = lastOutLinkIdx;
+        lastOutLinkIdx++;
+
+        setOutLinkAtIdx(link, idx);
+
+        return idx;
+    }
+
+    public int getMaxLinks() {
+        return links.length;
+    }
+
+    private boolean setOutLinkAtIdx(OutLink link, int idx) {
         if(links[idx] != null) return false;
         links[idx] = link;
 
