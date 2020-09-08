@@ -2,6 +2,16 @@ package info.hkzlab.dupal.analyzer.utilities;
 
 public class BitUtils {
     private BitUtils() {};
+   
+    static public int countBits(int mask) {
+        int tot = 0;
+
+        for(int idx = 0; idx < 32; idx++) {
+            if((mask & (0x01 << idx)) > 0) tot++;
+        }
+
+        return tot;
+    }
     
     static public int consolidateBitField(int field, int mask) {
         int data = 0;

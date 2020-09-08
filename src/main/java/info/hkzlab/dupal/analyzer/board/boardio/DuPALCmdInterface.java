@@ -37,6 +37,21 @@ public class DuPALCmdInterface {
         return res;
     }
 
+    public void writeAndPulseClock(int data) throws DuPALBoardException {
+        int data_clk = data | palSpecs.getMask_CLK();
+        int data_noclk = data & ~palSpecs.getMask_CLK();
+
+        try {
+            write(data_noclk);
+            write(data_clk);
+            write(data_noclk);
+        } catch(DuPALBoardException e) {
+            logger.error("Pulsing clock to insert data " + String.format("%06X", data) + " failed.");
+            throw e;
+        }
+
+    }
+
     public int build_WData(int in, int io, boolean clk, boolean oe) {
         int data = 0;
 

@@ -44,7 +44,7 @@ public class App {
         if (!dpm.enterRemoteMode()) {
             System.out.println("Unable to put DuPAL board in REMOTE MODE!");
             System.exit(-1);
-        }
+        } 
 
         dpan.startAnalisys();
     }
