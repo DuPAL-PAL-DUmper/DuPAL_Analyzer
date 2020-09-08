@@ -1,5 +1,7 @@
 package info.hkzlab.dupal.analyzer.palanalisys;
 
+import java.util.Arrays;
+
 public class OutState {
     public final static int IDX_O = 0;
     public final static int IDX_IO = 1;
@@ -42,4 +44,15 @@ public class OutState {
         return "OS["+String.format("%08X", status[0])+"|"+String.format("%08X", status[1])+"|"+String.format("%08X", status[2])+"]";
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (this.getClass() != o.getClass())
+            return false;
+
+        return Arrays.equals(this.status, ((OutState) o).getStatus());
+    }
 }
