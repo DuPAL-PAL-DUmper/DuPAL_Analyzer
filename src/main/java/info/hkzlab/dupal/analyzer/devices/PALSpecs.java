@@ -24,18 +24,4 @@ public interface PALSpecs {
     public boolean isActiveLow();
 
     public int minimumBoardRev();
-
-    static public int consolidateField(int field, int mask) {
-        int data = 0;
-        int shift = 0;
-
-        for(int idx = 0; idx < 32; idx++) {
-            if(((mask >> idx) & 0x01) != 0) {
-                data |= (field >> (idx-shift)) & (1 << shift);
-                shift++;
-            }
-        }
-
-        return data;
-    }
 }
