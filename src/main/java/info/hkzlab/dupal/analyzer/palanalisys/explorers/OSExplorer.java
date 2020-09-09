@@ -15,26 +15,36 @@ public class OSExplorer {
 
     private OSExplorer() {};
 
-    public static void exploreOutStates(final DuPALCmdInterface dpci, int ioAsOutMask) throws DuPALBoardException {
+    public static void exploreOutStates(final DuPALCmdInterface dpci, final int ioAsOutMask) throws DuPALBoardException {
         PALSpecs pSpecs = dpci.palSpecs;
         int maxLinks = 1 << (pSpecs.getPinCount_IN() + (pSpecs.getPinCount_IO()-BitUtils.countBits(ioAsOutMask)));
-        int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
-        int pinState_A, pinState_B;
-        OutStatePins osp;
         OutState curState;
 
-        dpci.write(0); // Set every input pin (and I/Os too) to low
-        pinState_A = dpci.read();
-        dpci.write(pSpecs.getMask_O_W() | ioAsOut_W);
-        pinState_B = dpci.read();
-        osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
-
-        curState = new OutState(osp, maxLinks);
+        curState = generateOutStateForIdx(dpci, 0, ioAsOutMask, maxLinks);
         logger.info("exploreOutStates() -> Initial state: " + curState);
 
         //while(curState != null) {
 
         //}
+    }
+
+    private static OutState generateOutStateForIdx(final DuPALCmdInterface dpci, final int idx, final int ioAsOutMask, int maxLinks)
+            throws DuPALBoardException {
+        PALSpecs pSpecs = dpci.palSpecs;
+        int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
+        int pinState_A, pinState_B;
+
+        int w_idx = BitUtils.scatterBitField(idx, dpci.palSpecs.getMask_IN());
+        w_idx |= BitUtils.scatterBitField((idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_W() & ~ioAsOut_W);
+
+        dpci.write(w_idx);
+        pinState_A = dpci.read();
+        dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W);
+        pinState_B = dpci.read();
+
+        OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
+
+        return new OutState(osp, maxLinks);
     }
 
     private static OutStatePins extractOutPinStates(PALSpecs pSpecs, int ioAsOutMask, int read_a, int read_b) {

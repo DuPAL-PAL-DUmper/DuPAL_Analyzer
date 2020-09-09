@@ -31,6 +31,10 @@ public class OutState implements GraphState {
         return links.length;
     }
 
+    public int getNextLinkIdx() {
+        return lastOutLinkIdx;
+    }
+
     private boolean setOutLinkAtIdx(OutLink link, int idx) {
         if(links[idx] != null) return false;
         links[idx] = link;
