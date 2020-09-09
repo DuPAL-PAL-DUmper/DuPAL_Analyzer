@@ -3,24 +3,16 @@ package info.hkzlab.dupal.analyzer.palanalisys.graph;
 import java.util.Arrays;
 
 public class OutState {
-    public final static int IDX_O = 0;
-    public final static int IDX_IO = 1;
-    public final static int IDX_HIZ = 2;
-
-    private final int[] status;
+    public final OutStatePins pins;
     private final OutLink[] links;
 
     private int lastOutLinkIdx;
 
-    public OutState(int o_state, int io_state, int hiz_state, int maxLinks) {
-        status = new int[]{o_state, io_state, hiz_state};
+    public OutState(OutStatePins pins, int maxLinks) {
+        this.pins = pins;
         links = new OutLink[maxLinks];
 
         lastOutLinkIdx = 0;
-    }
-
-    public int[] getStatus() {
-        return status.clone();
     }
 
     public OutLink getOutLinkAtIdx(int idx) {
@@ -51,14 +43,14 @@ public class OutState {
     public int hashCode() {
         int hash = 7;
 
-        for(int s : status) hash = hash*31 + s;
+        hash = pins.hashCode()*31 + links.length;
 
         return hash;
     }
 
     @Override
     public String toString() {
-        return "OS["+String.format("%08X", status[0])+"|"+String.format("%08X", status[1])+"|"+String.format("%08X", status[2])+"]";
+        return "OS["+String.format("%08X", pins.out)+"|"+String.format("%08X", pins.hiz)+"]";
     }
 
     @Override
@@ -70,6 +62,6 @@ public class OutState {
         if (this.getClass() != o.getClass())
             return false;
 
-        return Arrays.equals(this.status, ((OutState) o).getStatus());
+        return this.pins.equals(((OutState)o).pins);
     }
 }
