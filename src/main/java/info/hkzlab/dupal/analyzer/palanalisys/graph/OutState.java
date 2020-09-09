@@ -1,8 +1,8 @@
 package info.hkzlab.dupal.analyzer.palanalisys.graph;
 
-import java.util.Arrays;
+import info.hkzlab.dupal.analyzer.exceptions.DuPALAnalyzerException;
 
-public class OutState {
+public class OutState implements GraphState {
     public final OutStatePins pins;
     private final OutLink[] links;
 
@@ -15,12 +15,11 @@ public class OutState {
         lastOutLinkIdx = 0;
     }
 
-    public OutLink getOutLinkAtIdx(int idx) {
-        return links[idx];
-    }
-
-    public int addOutLink(OutLink link) {
+    public int addOutLink(OutLink link) throws DuPALAnalyzerException {
         int idx = lastOutLinkIdx;
+
+        if(idx >= links.length) throw new DuPALAnalyzerException("Tried to insert a link above maximum possible for this State " + this.toString());
+
         lastOutLinkIdx++;
 
         setOutLinkAtIdx(link, idx);
@@ -50,7 +49,7 @@ public class OutState {
 
     @Override
     public String toString() {
-        return "OS["+String.format("%08X", pins.out)+"|"+String.format("%08X", pins.hiz)+"]";
+        return "OS[O:"+String.format("%08X", pins.out)+"|Z:"+String.format("%08X", pins.hiz)+"]";
     }
 
     @Override
@@ -63,5 +62,20 @@ public class OutState {
             return false;
 
         return this.pins.equals(((OutState)o).pins);
+    }
+
+    @Override
+    public OutStatePins getInternalState() {
+        return pins;
+    }
+
+    @Override
+    public boolean isStateFull() {
+        return links.length == lastOutLinkIdx;
+    }
+
+    @Override
+    public GraphLink[] getLinks() {
+        return links;
     }
 }

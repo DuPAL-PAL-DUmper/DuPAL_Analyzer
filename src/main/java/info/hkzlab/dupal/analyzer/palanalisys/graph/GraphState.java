@@ -1,7 +1,7 @@
 package info.hkzlab.dupal.analyzer.palanalisys.graph;
 
 public interface GraphState {
-    public int[] getInternalState();
+    public OutStatePins getInternalState();
     public boolean isStateFull();
     public GraphLink[] getLinks();
 }

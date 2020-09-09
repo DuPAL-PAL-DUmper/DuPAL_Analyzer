@@ -1,11 +1,11 @@
 package info.hkzlab.dupal.analyzer.palanalisys.graph;
 
-public class OutLink {
+public class OutLink implements GraphLink {
 
    public final int inputs;
-   public final OutLink src, dest;
+   public final OutState src, dest;
    
-   public OutLink(OutLink src, OutLink dest, int inputs) {
+   public OutLink(OutState src, OutState dest, int inputs) {
        this.src = src;
        this.dest = dest;
        this.inputs = inputs;
@@ -25,5 +25,20 @@ public class OutLink {
     @Override
     public String toString() {
         return "<"+src+">-OL["+String.format("%08X", inputs)+"]-<"+dest+">";
+    }
+
+    @Override
+    public int getLinkInputs() {
+        return inputs;
+    }
+
+    @Override
+    public GraphState getSourceState() {
+        return src;
+    }
+
+    @Override
+    public GraphState getDestinationState() {
+        return dest;
     }
 }
