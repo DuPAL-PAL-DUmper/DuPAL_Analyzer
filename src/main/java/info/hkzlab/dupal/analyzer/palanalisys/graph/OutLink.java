@@ -1,4 +1,4 @@
-package info.hkzlab.dupal.analyzer.palanalisys;
+package info.hkzlab.dupal.analyzer.palanalisys.graph;
 
 public class OutLink {
 

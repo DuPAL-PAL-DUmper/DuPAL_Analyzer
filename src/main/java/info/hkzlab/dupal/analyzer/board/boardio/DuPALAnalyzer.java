@@ -37,8 +37,8 @@ public class DuPALAnalyzer {
         int ioAsOutMask = 0;
         int maxINVal = 1 << (dpci.palSpecs.getPinCount_IN() + dpci.palSpecs.getPinCount_IO());
 
-        logger.info("Starting IO type detection... This could take a while.");
-        logger.info("Highest address for input pins: " + String.format("%06X", maxINVal-1));
+        logger.info("detectIOTypeMask -> Starting IO type detection... This could take a while.");
+        logger.info("detectIOTypeMask -> Highest address for input pins: " + String.format("%06X", maxINVal-1));
 
         for(int idx = 0; idx < maxINVal; idx++) {
 
@@ -60,12 +60,12 @@ public class DuPALAnalyzer {
 
                 ioAsOutMask |= (pinstat ^ BitUtils.scatterBitField((sub_idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_R())) & dpci.palSpecs.getMask_IO_R();
                 
-                logger.info(String.format("idx: C(%06X) -> S(%06X) | M[%06X]", sub_idx, sub_writeAddr, ioAsOutMask));
+                logger.info(String.format("detectIOTypeMask -> idx: C(%06X) -> S(%06X) | M[%06X]", sub_idx, sub_writeAddr, ioAsOutMask));
             }
 
             if(dpci.palSpecs.getPinCount_RO() == 0) break; // No need to try multiple registered states
 
-            logger.info("Pulsing clock with address " + String.format("%06X", writeAddr));
+            logger.info("detectIOTypeMask -> Pulsing clock with address " + String.format("%06X", writeAddr));
             dpci.writeAndPulseClock(writeAddr);
         }
 
@@ -80,7 +80,7 @@ public class DuPALAnalyzer {
         if(ioAsOutMask < 0) {
             ioAsOutMask = detectIOTypeMask(dpci);
 
-            logger.info("Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
+            logger.info("detectIOTypeMask -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
         }
     }
 }
