@@ -4,6 +4,6 @@ public interface GraphState {
     public int[] getInternalState();
 
     public boolean isStateFull();
-    public GraphLink getLinkAtIdx(int idx);
+    public GraphLink[] getLinks();
     public int getMaxLinks();
 }
