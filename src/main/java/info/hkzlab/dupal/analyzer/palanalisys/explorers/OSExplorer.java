@@ -24,7 +24,7 @@ public class OSExplorer {
 
     private OSExplorer() {};
 
-    public static void exploreOutStates(final DuPALCmdInterface dpci, final int ioAsOutMask) throws DuPALBoardException, DuPALAnalyzerException {
+    public static OutState[] exploreOutStates(final DuPALCmdInterface dpci, final int ioAsOutMask) throws DuPALBoardException, DuPALAnalyzerException {
         Map<Integer, OutState> statesMap = new HashMap<>();
         PALSpecs pSpecs = dpci.palSpecs;
         int maxLinks = 1 << (pSpecs.getPinCount_IN() + (pSpecs.getPinCount_IO()-BitUtils.countBits(ioAsOutMask)));
@@ -54,8 +54,6 @@ public class OSExplorer {
                 } else break; // We're done: can't move to anywhere else
             }
 
-
-
             int nextIdx = curState.getNextLinkIdx();
             OutState nOutState = getOutStateForIdx(dpci, nextIdx, ioAsOutMask, maxLinks, statesMap);
 
@@ -64,6 +62,8 @@ public class OSExplorer {
 
             curState = nOutState;
         }
+
+        return statesMap.values().toArray(new OutState[statesMap.size()]);
     }
 
     private static int calcolateWriteINFromIdx(int idx, PALSpecs pSpecs, int ioAsOutMask) {
