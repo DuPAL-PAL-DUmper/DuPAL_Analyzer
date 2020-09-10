@@ -77,7 +77,8 @@ public class DuPALAnalyzer {
         this(dpm, palSpecs, -1, null);
     }
 
-    public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException {
+    public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException,
+            DuPALAnalyzerException {
         if(ioAsOutMask < 0) {
             ioAsOutMask = detectIOTypeMask(dpci);
             logger.info("detectIOTypeMask -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));

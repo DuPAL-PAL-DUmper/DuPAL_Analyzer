@@ -36,6 +36,7 @@ public class OSExplorer {
         while(curState != null) {
             // If we ended up in a state where all the links have already been explored...
             if(curState.isStateFull()) {
+                logger.info("exploreOutStates() -> " + curState + " is full.");
                 ArrayList<GraphLink> linkPath = PathFinder.findPathToNearestUnfilledState(curState);
                 if(linkPath != null && !linkPath.isEmpty()) {
                     for(GraphLink l : linkPath) dpci.write(l.getLinkInputs()); // Walk the path to the new state
@@ -47,7 +48,7 @@ public class OSExplorer {
                     int expected_pins = ((curState.pins.out & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask));
                     if(pins != expected_pins) {
                         logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|A:%02X", pins, expected_pins)+") after walink path to state " + curState);
-                        throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState)
+                        throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState);
                     }
                     continue; // Loop again
 
@@ -58,7 +59,10 @@ public class OSExplorer {
             OutState nOutState = getOutStateForIdx(dpci, nextIdx, ioAsOutMask, maxLinks, statesMap);
 
             int w_idx = calcolateWriteINFromIdx(nextIdx, pSpecs, ioAsOutMask);
-            curState.addOutLink(new OutLink(curState, nOutState, w_idx));
+            OutLink ol = new OutLink(curState, nOutState, w_idx);
+            curState.addOutLink(ol);
+
+            logger.info("Creating a link - " + ol);
 
             curState = nOutState;
         }
