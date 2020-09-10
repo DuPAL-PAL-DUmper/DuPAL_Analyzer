@@ -62,7 +62,7 @@ public class OSExplorer {
             OutLink ol = new OutLink(curState, nOutState, w_idx);
             curState.addOutLink(ol);
 
-            logger.info("Creating link ["+nextIdx+"/"+maxLinks+"] - " + ol);
+            logger.info("Creating link ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
 
             curState = nOutState;
         }
