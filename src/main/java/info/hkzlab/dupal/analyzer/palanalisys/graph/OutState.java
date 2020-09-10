@@ -53,7 +53,7 @@ public class OutState implements GraphState {
 
     @Override
     public String toString() {
-        return "OS[O:"+String.format("%08X", pins.out)+"|Z:"+String.format("%08X", pins.hiz)+"]";
+        return "OS[O:"+String.format("%02X", pins.out)+"|Z:"+String.format("%02X", pins.hiz)+"]";
     }
 
     @Override

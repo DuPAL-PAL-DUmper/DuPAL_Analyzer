@@ -24,7 +24,7 @@ public class OutLink implements GraphLink {
 
     @Override
     public String toString() {
-        return "("+src+")->OL["+String.format("%08X", inputs)+"]->("+dest+")";
+        return "("+src+")->OL["+String.format("%06X", inputs)+"]->("+dest+")";
     }
 
     @Override
