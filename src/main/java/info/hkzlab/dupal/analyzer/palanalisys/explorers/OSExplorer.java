@@ -39,15 +39,19 @@ public class OSExplorer {
                 logger.info("exploreOutStates() -> " + curState + " is full.");
                 ArrayList<GraphLink> linkPath = PathFinder.findPathToNearestUnfilledState(curState);
                 if(linkPath != null && !linkPath.isEmpty()) {
-                    for(GraphLink l : linkPath) dpci.write(l.getLinkInputs()); // Walk the path to the new state
+                    for(GraphLink l : linkPath) {
+                        logger.info("exploreOutStates() -> Walking link " + l);
+                        dpci.write(l.getLinkInputs()); // Walk the path to the new state
+                        //try { Thread.sleep(1); } catch(InterruptedException e) {};
+                    }
                     curState = (OutState) (linkPath.get(linkPath.size() - 1)).getDestinationState();
                     logger.info("exploreOutStates() -> walked path to state " + curState);
 
-                    // Do some doublecheckin
-                    int pins = (dpci.read() & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask);
+                    // Do some doublechecking
+                    int pins = (dpci.read() & (ioAsOutMask | pSpecs.getMask_O_R())) & ~curState.pins.hiz;
                     int expected_pins = ((curState.pins.out & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask));
                     if(pins != expected_pins) {
-                        logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|A:%02X", pins, expected_pins)+") after walink path to state " + curState);
+                        logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|A:%02X", expected_pins, pins)+") after walking path to state " + curState);
                         throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState);
                     }
                     continue; // Loop again
@@ -62,7 +66,7 @@ public class OSExplorer {
             OutLink ol = new OutLink(curState, nOutState, w_idx);
             curState.addOutLink(ol);
 
-            logger.info("Creating link ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
+            logger.info("exploreOutStates() -> Creating link ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
 
             curState = nOutState;
         }
@@ -74,7 +78,6 @@ public class OSExplorer {
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
         int w_idx = BitUtils.scatterBitField(idx, pSpecs.getMask_IN());
         w_idx |= BitUtils.scatterBitField((idx >> pSpecs.getPinCount_IN()), pSpecs.getMask_IO_W() & ~ioAsOut_W);
-
 
         return w_idx;
     }
@@ -88,9 +91,13 @@ public class OSExplorer {
         int w_idx = calcolateWriteINFromIdx(idx, pSpecs, ioAsOutMask);
 
         dpci.write(w_idx);
+        //try { Thread.sleep(5); } catch(InterruptedException e) {};
         pinState_A = dpci.read();
         dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
+        //try { Thread.sleep(5); } catch(InterruptedException e) {};
         pinState_B = dpci.read();
+
+        logger.info("getOutStateForIdx() -> pinstate " + String.format("%02X", pinState_A) + " | w: " + String.format("%02X", w_idx));
 
         // TODO: Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
 

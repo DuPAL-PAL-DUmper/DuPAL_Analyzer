@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import info.hkzlab.dupal.analyzer.devices.*;
 import info.hkzlab.dupal.analyzer.exceptions.*;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.OSExplorer;
+import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 
 public class DuPALAnalyzer {
@@ -81,9 +82,12 @@ public class DuPALAnalyzer {
             DuPALAnalyzerException {
         if(ioAsOutMask < 0) {
             ioAsOutMask = detectIOTypeMask(dpci);
-            logger.info("detectIOTypeMask -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
+            logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
         }
 
-        OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+        OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+
+        logger.info("Got " + osArray.length + " output states!");
+        for(OutState os : osArray) logger.info(os.toString());
     }
 }

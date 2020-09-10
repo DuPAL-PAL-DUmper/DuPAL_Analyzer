@@ -46,7 +46,8 @@ public class OutState implements GraphState {
     public int hashCode() {
         int hash = 7;
 
-        hash = pins.hashCode()*31 + links.length;
+        hash = hash*31 + pins.hashCode();
+        hash = hash*31 + links.length;
 
         return hash;
     }
