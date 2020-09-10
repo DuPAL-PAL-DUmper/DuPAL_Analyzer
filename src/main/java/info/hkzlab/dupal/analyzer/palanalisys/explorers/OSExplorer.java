@@ -40,7 +40,7 @@ public class OSExplorer {
                 ArrayList<GraphLink> linkPath = PathFinder.findPathToNearestUnfilledState(curState);
                 if(linkPath != null && !linkPath.isEmpty()) {
                     for(GraphLink l : linkPath) dpci.write(l.getLinkInputs()); // Walk the path to the new state
-                    curState = (OutState) linkPath.get(linkPath.size() - 1);
+                    curState = (OutState) (linkPath.get(linkPath.size() - 1)).getDestinationState();
                     logger.info("exploreOutStates() -> walked path to state " + curState);
 
                     // Do some doublecheckin
@@ -62,7 +62,7 @@ public class OSExplorer {
             OutLink ol = new OutLink(curState, nOutState, w_idx);
             curState.addOutLink(ol);
 
-            logger.info("Creating a link - " + ol);
+            logger.info("Creating link ["+nextIdx+"] - " + ol);
 
             curState = nOutState;
         }
