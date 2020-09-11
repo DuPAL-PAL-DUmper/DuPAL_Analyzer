@@ -1,6 +1,6 @@
 package info.hkzlab.dupal.analyzer.board.boardio;
 
-import org.slf5j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import info.hkzlab.dupal.analyzer.devices.*;

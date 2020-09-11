@@ -5,13 +5,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import info.hkzlab.dupal.analyzer.devices.PAL16L8Specs;
-import info.hkzlab.dupal.analyzer.exceptions.DuPALBoardException;
 import info.hkzlab.dupal.analyzer.palanalisys.formatter.EspressoFormatter;
 
 public class FormattersTest 
 {
     @Test
-    public void espressoFormatterShouldBuildCorrect16L8Header() throws DuPALBoardException {
+    public void espressoFormatterShouldBuildCorrect16L8Header() {
         PAL16L8Specs pSpecs = new PAL16L8Specs();
         int ioAsOutMask = 0x03;
         String header = EspressoFormatter.formatEspressoTableHeader(pSpecs, ioAsOutMask);
