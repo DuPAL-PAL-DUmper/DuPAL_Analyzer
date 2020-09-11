@@ -1,7 +1,6 @@
 package info.hkzlab.dupal.analyzer.palanalisys.explorers;
 
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +46,8 @@ public class OSExplorer {
                     logger.info("exploreOutStates() -> walked path to state " + curState);
 
                     // Do some doublechecking
-                    int pins = (dpci.read() & (ioAsOutMask | pSpecs.getMask_O_R())) & ~curState.pins.hiz;
-                    int expected_pins = ((curState.pins.out & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask));
+                    int pins = (dpci.read() & (ioAsOutMask | pSpecs.getMask_O_R() | pSpecs.getMask_RO_R())) & ~curState.pins.hiz;
+                    int expected_pins = ((curState.pins.out & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask | pSpecs.getMask_RO_R()));
                     if(pins != expected_pins) {
                         logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|A:%02X", expected_pins, pins)+") after walking path to state " + curState);
                         throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState);
@@ -110,8 +109,8 @@ public class OSExplorer {
     private static OutStatePins extractOutPinStates(PALSpecs pSpecs, int ioAsOutMask, int read_a, int read_b) {
         int out, hiz;
 
-        hiz = (read_a ^ read_b) & (ioAsOutMask | pSpecs.getMask_O_R());
-        out = (read_a & (ioAsOutMask | pSpecs.getMask_O_R())) & ~hiz;
+        hiz = (read_a ^ read_b) & (ioAsOutMask | pSpecs.getMask_O_R()); // Registered Outputs cannot be high impedence (controlled by /OE)
+        out = (read_a & (ioAsOutMask | pSpecs.getMask_O_R() | pSpecs.getMask_RO_R())) & ~hiz;
 
         return new OutStatePins(out, hiz);
     }
