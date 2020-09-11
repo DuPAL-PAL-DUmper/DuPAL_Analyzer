@@ -1,8 +1,6 @@
 package info.hkzlab.dupal.analyzer.board.boardio;
 
-import java.io.File;
-
-import org.slf4j.Logger;
+import org.slf5j.Logger;
 import org.slf4j.LoggerFactory;
 
 import info.hkzlab.dupal.analyzer.devices.*;
@@ -14,14 +12,14 @@ import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
-    private static final String SERIALIZED_DUMP = "dupalstat.dmp";
-    private static final String OUT_TABLE = "dupal_thrtable.tbl";
-    private static final String DUPAL_STRUCT = "dupal_struct.txt";
+    //private static final String SERIALIZED_DUMP = "dupalstat.dmp";
+    //private static final String OUT_TABLE = "dupal_thrtable.tbl";
+    //private static final String DUPAL_STRUCT = "dupal_struct.txt";
 
     
-    private final String serdump_path;
-    private final String tblPath;
-    private final String structPath;
+    //private final String serdump_path;
+    //private final String tblPath;
+    //private final String structPath;
 
     private final DuPALCmdInterface dpci;
     private int ioAsOutMask;
@@ -30,9 +28,9 @@ public class DuPALAnalyzer {
         this.dpci = new DuPALCmdInterface(dpm, palSpecs);
         this.ioAsOutMask = ioAsOutMask;
 
-        serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
-        tblPath = outPath + File.separator + OUT_TABLE;
-        structPath = outPath + File.separator + DUPAL_STRUCT;
+        //serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
+        //tblPath = outPath + File.separator + OUT_TABLE;
+        //structPath = outPath + File.separator + DUPAL_STRUCT;
     } 
 
     public int detectIOTypeMask(final DuPALCmdInterface dpci) throws DuPALBoardException {
