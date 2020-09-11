@@ -80,6 +80,21 @@ public class DuPALAnalyzer {
 
     public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException,
             DuPALAnalyzerException {
+
+        DuPALCmdInterface.DuPAL_LED led;
+        
+        switch(dpci.palSpecs.slotNumber()) {
+            default:
+            case 0:
+                led = DuPALCmdInterface.DuPAL_LED.P20_LED;
+                break;
+            case 1:
+                 led = DuPALCmdInterface.DuPAL_LED.P24_LED;               
+                break;
+        }
+
+        dpci.setLED(led, true);
+        
         if(ioAsOutMask < 0) {
             ioAsOutMask = detectIOTypeMask(dpci);
             logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
@@ -89,5 +104,7 @@ public class DuPALAnalyzer {
 
         logger.info("Got " + osArray.length + " output states!");
         for(OutState os : osArray) logger.info(os.toString());
+        
+        dpci.setLED(led, false);
     }
 }
