@@ -81,7 +81,7 @@ public class OSExplorer {
     }
 
     private static OutState getOutStateForIdx(final DuPALCmdInterface dpci, final int idx, final int ioAsOutMask, final int maxLinks, final Map<Integer, OutState> statesMap)
-            throws DuPALBoardException {
+            throws DuPALBoardException, DuPALAnalyzerException {
         PALSpecs pSpecs = dpci.palSpecs;
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
         int pinState_A, pinState_B;
@@ -93,7 +93,18 @@ public class OSExplorer {
         dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
         pinState_B = dpci.read();
 
-        // TODO: Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
+        // Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
+        int io_in_r = BitUtils.consolidateBitField(pinState_A, pSpecs.getMask_IO_R() & ~ioAsOutMask);
+        int io_in_w = BitUtils.consolidateBitField(w_idx, pSpecs.getMask_IO_W() & ~ioAsOut_W);
+        if(io_in_r != io_in_w) {
+                int newMask = BitUtils.scatterBitField(io_in_r, pSpecs.getMask_IO_R() ^ BitUtils.scatterBitField(io_in_w, pSpecs.getMask_IO_R()));
+                newMask |= ioAsOutMask;
+
+                logger.error("");
+
+               throw new DuPALAnalyzerException("");
+           }
+
 
         OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
 
