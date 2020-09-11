@@ -97,13 +97,12 @@ public class OSExplorer {
         int io_in_r = BitUtils.consolidateBitField(pinState_A, pSpecs.getMask_IO_R() & ~ioAsOutMask);
         int io_in_w = BitUtils.consolidateBitField(w_idx, pSpecs.getMask_IO_W() & ~ioAsOut_W);
         if(io_in_r != io_in_w) {
-                int newMask = BitUtils.scatterBitField(io_in_r, pSpecs.getMask_IO_R() ^ BitUtils.scatterBitField(io_in_w, pSpecs.getMask_IO_R()));
-                newMask |= ioAsOutMask;
+            int newMask = BitUtils.scatterBitField(io_in_r, pSpecs.getMask_IO_R() ^ BitUtils.scatterBitField(io_in_w, pSpecs.getMask_IO_R()));
+            newMask |= ioAsOutMask;
 
-                logger.error("");
-
-               throw new DuPALAnalyzerException("");
-           }
+            logger.error("An IO pin marked as input is behaving as an output. New IO mask: " + String.format("%02X", newMask));
+            throw new DuPALAnalyzerException("IO pin marked as input is behaving as output.");
+        }
 
 
         OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
