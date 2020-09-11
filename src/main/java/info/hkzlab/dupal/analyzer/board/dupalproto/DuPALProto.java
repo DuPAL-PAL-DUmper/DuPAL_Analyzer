@@ -3,6 +3,10 @@ package info.hkzlab.dupal.analyzer.board.dupalproto;
 import java.util.ArrayList;
 
 public class DuPALProto {
+    public static enum DuPAL_LED {
+        P20_LED, P24_LED
+    }
+
     private final static String CMD_START = ">";
     private final static String CMD_END = "<";
    
@@ -11,13 +15,34 @@ public class DuPALProto {
 
     private final static char CMD_WRITE = 'W';
     private final static char CMD_READ = 'R';
+    private final static char CMD_MODEL = 'M';
+    private final static char CMD_LED = 'L';
     private final static char CMD_EXIT = 'X';
     private final static char CMD_RESET = 'K';
 
     private final static String CMD_RESP_ERROR = "CMD_ERROR";
 
+    public static String buildMODELCommand() {
+        return CMD_START+CMD_MODEL+CMD_END;
+    }
+
     public static String buildREADCommand() {
         return CMD_START+CMD_READ+CMD_END;
+    }
+
+    public static String buildLEDCommand(DuPAL_LED led, boolean enabled) {
+        int led_status = enabled ? 1 : 0;
+
+        switch(led) {
+            case P20_LED:
+                led_status |= 0x02;
+                break;
+            case P24_LED:
+                led_status |= 0x04;
+                break;
+        }
+
+        return ""+CMD_START+CMD_LED+" "+String.format("%02X", led_status & 0xFF)+CMD_END;
     }
 
     public static boolean isStringResponseCommand(String cmd) {
@@ -62,6 +87,10 @@ public class DuPALProto {
         }
     }
 
+    public static int handleMODELResponse(final String response) {
+        return handleREADResponse(response);
+    }
+
     public static int handleWRITEResponse(final String response) {
          String[] readRes = parseResponse(response);
 
@@ -86,6 +115,7 @@ public class DuPALProto {
             response = response.substring(1, response.length()-1).trim();
             char command = response.charAt(0);
             switch(command) {
+                case CMD_MODEL:
                 case CMD_READ: 
                 case CMD_WRITE: {
                         String[] cmd_comp = response.split(" ");

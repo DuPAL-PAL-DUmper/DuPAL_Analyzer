@@ -108,4 +108,9 @@ public class PAL16L8Specs implements PALSpecs {
     public int minimumBoardRev() {
         return 1;
     }
+
+    @Override
+    public int slotNumber() {
+        return 0;
+    }
 }

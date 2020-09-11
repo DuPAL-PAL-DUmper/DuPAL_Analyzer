@@ -24,4 +24,6 @@ public interface PALSpecs {
     public boolean isActiveLow();
 
     public int minimumBoardRev();
+
+    public int slotNumber();
 }
