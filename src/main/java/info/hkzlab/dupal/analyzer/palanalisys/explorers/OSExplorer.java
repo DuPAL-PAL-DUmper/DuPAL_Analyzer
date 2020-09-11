@@ -42,7 +42,6 @@ public class OSExplorer {
                     for(GraphLink l : linkPath) {
                         logger.info("exploreOutStates() -> Walking link " + l);
                         dpci.write(l.getLinkInputs()); // Walk the path to the new state
-                        //try { Thread.sleep(1); } catch(InterruptedException e) {};
                     }
                     curState = (OutState) (linkPath.get(linkPath.size() - 1)).getDestinationState();
                     logger.info("exploreOutStates() -> walked path to state " + curState);
@@ -91,13 +90,9 @@ public class OSExplorer {
         int w_idx = calcolateWriteINFromIdx(idx, pSpecs, ioAsOutMask);
 
         dpci.write(w_idx);
-        //try { Thread.sleep(5); } catch(InterruptedException e) {};
         pinState_A = dpci.read();
         dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
-        //try { Thread.sleep(5); } catch(InterruptedException e) {};
         pinState_B = dpci.read();
-
-        logger.info("getOutStateForIdx() -> pinstate " + String.format("%02X", pinState_A) + " | w: " + String.format("%02X", w_idx));
 
         // TODO: Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
 
