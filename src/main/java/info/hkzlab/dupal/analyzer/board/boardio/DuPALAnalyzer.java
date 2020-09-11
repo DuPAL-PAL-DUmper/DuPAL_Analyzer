@@ -94,17 +94,21 @@ public class DuPALAnalyzer {
         }
 
         dpci.setLED(led, true);
-        
-        if(ioAsOutMask < 0) {
-            ioAsOutMask = detectIOTypeMask(dpci);
-            logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
+
+        try {
+            if(ioAsOutMask < 0) {
+                ioAsOutMask = detectIOTypeMask(dpci);
+                logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
+            }
+
+            OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+
+            logger.info("Got " + osArray.length + " output states!");
+            for(OutState os : osArray) logger.info(os.toString());
+        } catch(Exception e) {
+            throw e;
+        } finally {
+            dpci.setLED(led, false);
         }
-
-        OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
-
-        logger.info("Got " + osArray.length + " output states!");
-        for(OutState os : osArray) logger.info(os.toString());
-        
-        dpci.setLED(led, false);
     }
 }
