@@ -23,6 +23,20 @@ public class OutLink implements GraphLink {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (this.getClass() != o.getClass())
+            return false;
+
+        return  (this.src.equals(((OutLink)o).src)) &&
+                (this.dest.equals(((OutLink)o).dest)) &&
+                (this.inputs == ((OutLink)o).inputs);
+    }
+
+    @Override
     public String toString() {
         return "("+src+")->OL["+String.format("%06X", inputs)+"]->("+dest+")";
     }

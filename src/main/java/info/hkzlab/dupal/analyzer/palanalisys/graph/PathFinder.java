@@ -10,7 +10,7 @@ public class PathFinder {
    private PathFinder() {};
 
    @SuppressWarnings("unchecked")
-   public static ArrayList<GraphLink> findPathToNearestUnfilledState(GraphState start) {
+   public static GraphLink[] findPathToNearestUnfilledState(GraphState start) {
        Map<Integer, ArrayList<GraphLink>> pathMap = new HashMap<>();
        Queue<GraphState> statesQueue = new LinkedList<>();
        ArrayList<GraphLink> linkStack = null;
@@ -20,7 +20,7 @@ public class PathFinder {
 
        while(currentState != null) {
            linkStack = pathMap.get(currentState.hashCode()); // Get the map to the current state
-           if(!currentState.isStateFull()) return linkStack; // Ok, we found a state where we need to map other links
+           if(!currentState.isStateFull()) return linkStack.toArray(new GraphLink[linkStack.size()]); // Ok, we found a state where we need to map other links
        
            GraphLink[] stateLinks = currentState.getLinks(); // Get links present in the current state
 

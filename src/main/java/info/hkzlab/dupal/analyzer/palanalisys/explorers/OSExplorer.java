@@ -1,6 +1,5 @@
 package info.hkzlab.dupal.analyzer.palanalisys.explorers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,13 +35,13 @@ public class OSExplorer {
             // If we ended up in a state where all the links have already been explored...
             if(curState.isStateFull()) {
                 logger.info("exploreOutStates() -> " + curState + " is full.");
-                ArrayList<GraphLink> linkPath = PathFinder.findPathToNearestUnfilledState(curState);
-                if(linkPath != null && !linkPath.isEmpty()) {
+                GraphLink[] linkPath = PathFinder.findPathToNearestUnfilledState(curState);
+                if(linkPath != null && linkPath.length > 0) {
                     for(GraphLink l : linkPath) {
                         logger.info("exploreOutStates() -> Walking link " + l);
                         dpci.write(l.getLinkInputs()); // Walk the path to the new state
                     }
-                    curState = (OutState) (linkPath.get(linkPath.size() - 1)).getDestinationState();
+                    curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());
                     logger.info("exploreOutStates() -> walked path to state " + curState);
 
                     // Do some doublechecking
