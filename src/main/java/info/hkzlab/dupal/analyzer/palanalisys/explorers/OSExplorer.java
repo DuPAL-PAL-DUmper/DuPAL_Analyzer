@@ -8,13 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import info.hkzlab.dupal.analyzer.board.boardio.DuPALCmdInterface;
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
-import info.hkzlab.dupal.analyzer.exceptions.DuPALAnalyzerException;
-import info.hkzlab.dupal.analyzer.exceptions.DuPALBoardException;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.GraphLink;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutLink;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutStatePins;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.PathFinder;
+import info.hkzlab.dupal.analyzer.exceptions.*;
+import info.hkzlab.dupal.analyzer.palanalisys.graph.*;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 
 public class OSExplorer {
@@ -82,7 +77,7 @@ public class OSExplorer {
     private static OutState getOutStateForIdx(final DuPALCmdInterface dpci, final int idx, final int ioAsOutMask, final int maxLinks, final Map<Integer, OutState> statesMap)
             throws DuPALBoardException, DuPALAnalyzerException {
         PALSpecs pSpecs = dpci.palSpecs;
-        int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
+        int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W()); // Generate IO as output mask for writing
         int pinState_A, pinState_B;
 
         int w_idx = calcolateWriteINFromIdx(idx, pSpecs, ioAsOutMask);
@@ -103,9 +98,7 @@ public class OSExplorer {
             throw new DuPALAnalyzerException("IO pin marked as input is behaving as output.");
         }
 
-
         OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
-
         OutState os = new OutState(osp, maxLinks);
 
         // Check if we already visited this state, in which case, recover that state, otherwise save the state in the map

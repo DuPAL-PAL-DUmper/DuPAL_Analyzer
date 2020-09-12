@@ -1,21 +1,21 @@
 package info.hkzlab.dupal.analyzer.palanalisys.graph;
 
-public class RegState implements GraphState {
+public class RegLink implements GraphLink {
 
     @Override
-    public OutStatePins getInternalState() {
+    public int getLinkInputs() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public GraphState getSourceState() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean isStateFull() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public GraphLink[] getLinks() {
+    public GraphState getDestinationState() {
         // TODO Auto-generated method stub
         return null;
     }
