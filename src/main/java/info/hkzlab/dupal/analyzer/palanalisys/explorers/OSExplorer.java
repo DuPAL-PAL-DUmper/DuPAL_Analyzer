@@ -34,8 +34,9 @@ public class OSExplorer {
                 if(linkPath != null && linkPath.length > 0) {
                     for(GraphLink l : linkPath) {
                         logger.info("exploreOutStates() -> Walking link " + l);
-                        if(l.isFarLink()) dpci.writeAndPulseClock(l.getLinkInputs());
-                        else dpci.write(l.getLinkInputs()); // Walk the path to the new state
+                        // Now let's walk the path, with proper actions depending on the type of link
+                        if(l.isFarLink()) dpci.writeAndPulseClock(l.getLinkInputs()); 
+                        else dpci.write(l.getLinkInputs()); 
                     }
                     curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());
                     logger.info("exploreOutStates() -> walked path to state " + curState);
@@ -119,7 +120,7 @@ public class OSExplorer {
         }
 
         OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
-        OutState os = new OutState(osp, maxLinks);
+        OutState os = new OutState(osp, maxLinks, (pSpecs.getPinCount_RO() > 0));
 
         // Check if we already visited this state, in which case, recover that state, otherwise save the state in the map
         if(statesMap.containsKey(os.hashCode())) os = statesMap.get(os.hashCode());

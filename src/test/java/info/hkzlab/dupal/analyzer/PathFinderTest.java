@@ -49,8 +49,8 @@ public class PathFinderTest {
         OutState os_b = new OutState(new OutStatePins(0x01, 0x00), 3);
         OutState os_c = new OutState(new OutStatePins(0x02, 0x00), 3);
         OutState os_d = new OutState(new OutStatePins(0x03, 0x00), 3);
-        OutState os_e = new OutState(new OutStatePins(0x04, 0x00), 3, 1);
-        OutState os_f = new OutState(new OutStatePins(0x05, 0x00), 3, 1);
+        OutState os_e = new OutState(new OutStatePins(0x04, 0x00), 3, true);
+        OutState os_f = new OutState(new OutStatePins(0x05, 0x00), 3, true);
 
         os_a.addOutLink(new OutLink(os_a, os_a, 0x10));
         os_a.addOutLink(new OutLink(os_a, os_b, 0x20));
@@ -71,15 +71,16 @@ public class PathFinderTest {
         os_e.addOutLink(new OutLink(os_e, os_a, 0x10));
         os_e.addOutLink(new OutLink(os_e, os_d, 0x20));
         os_e.addOutLink(new OutLink(os_e, os_e, 0x20));
-        os_e.addRegLink(new RegLink(os_e, os_e, os_f, 0x20));
+        os_e.addRegLink(new RegLink(os_e, os_e, os_f, 0x10));
+        os_e.addRegLink(new RegLink(os_e, os_e, os_e, 0x20));
+        os_e.addRegLink(new RegLink(os_e, os_e, os_e, 0x30));
         
         os_f.addOutLink(new OutLink(os_f, os_f, 0x10));
         os_f.addOutLink(new OutLink(os_f, os_f, 0x20));
         os_f.addRegLink(new RegLink(os_f, os_f, os_a, 0x20));
 
         GraphLink[] path = PathFinder.findPathToNearestUnfilledState(os_a);
-        for(GraphLink p : path) System.out.println(p);
-        GraphLink[] expectedPath = new GraphLink[] { new OutLink(os_a, os_b, 0x20), new OutLink(os_b, os_e, 0x20), new RegLink(os_e, os_e, os_f, 0x20) }; // a->b->e=>f
+        GraphLink[] expectedPath = new GraphLink[] { new OutLink(os_a, os_b, 0x20), new OutLink(os_b, os_e, 0x20), new RegLink(os_e, os_e, os_f, 0x10) }; // a->b->e=>f
 
         assertArrayEquals("PathFinder should find the shortest path between a node and an incomplete one even if regLinks are involved", expectedPath, path);
     }

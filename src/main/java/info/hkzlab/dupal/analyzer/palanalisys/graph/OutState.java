@@ -10,14 +10,14 @@ public class OutState implements GraphState {
     private int lastOutLinkIdx;
     private int lastRegLinkIdx;
 
-    public OutState(OutStatePins pins, int maxLinks) {
-        this(pins, maxLinks, 0);
+    public OutState(final OutStatePins pins, final int maxLinks) {
+        this(pins, maxLinks, false);
     }
 
-    public OutState(OutStatePins pins, int maxLinks, int maxRegLinks) {
+    public OutState(final OutStatePins pins, final int maxLinks, final boolean addRegLinks) {
         this.pins = pins;
         outLinks = new OutLink[maxLinks];
-        regLinks = new RegLink[maxRegLinks];
+        regLinks = new RegLink[addRegLinks ? maxLinks : 0];
 
         lastOutLinkIdx = 0;
         lastRegLinkIdx = 0;
