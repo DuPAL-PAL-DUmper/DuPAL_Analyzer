@@ -5,7 +5,7 @@ public class OutLink implements GraphLink {
    public final int inputs;
    public final OutState src, dest;
    
-   public OutLink(OutState src, OutState dest, int inputs) {
+   public OutLink(final OutState src, final OutState dest, final int inputs) {
        this.src = src;
        this.dest = dest;
        this.inputs = inputs;
