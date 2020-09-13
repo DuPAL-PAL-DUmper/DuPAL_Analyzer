@@ -6,12 +6,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import info.hkzlab.dupal.analyzer.exceptions.DuPALAnalyzerException;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.GraphLink;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutLink;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.OutStatePins;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.PathFinder;
-import info.hkzlab.dupal.analyzer.palanalisys.graph.RegLink;
+import info.hkzlab.dupal.analyzer.palanalisys.graph.*;
 
 public class PathFinderTest {
     @Test

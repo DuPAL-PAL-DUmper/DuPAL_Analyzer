@@ -57,7 +57,7 @@ public class OutLink implements GraphLink {
     }
 
     @Override
-    public boolean isLongLink() {
+    public boolean isFarLink() {
         return false;
     }
 }

@@ -5,5 +5,5 @@ public interface GraphLink {
     public GraphState getSourceState();
     public GraphState getDestinationState();
 
-    public boolean isLongLink(); // If true, we will require a "clock" pulse to perform a long jump
+    public boolean isFarLink(); // If true, we will require a "clock" pulse to perform a long jump
 }

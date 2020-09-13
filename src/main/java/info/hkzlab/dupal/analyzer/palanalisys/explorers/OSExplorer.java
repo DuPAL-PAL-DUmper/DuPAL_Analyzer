@@ -34,7 +34,7 @@ public class OSExplorer {
                 if(linkPath != null && linkPath.length > 0) {
                     for(GraphLink l : linkPath) {
                         logger.info("exploreOutStates() -> Walking link " + l);
-                        if(l.isLongLink()) dpci.writeAndPulseClock(l.getLinkInputs());
+                        if(l.isFarLink()) dpci.writeAndPulseClock(l.getLinkInputs());
                         else dpci.write(l.getLinkInputs()); // Walk the path to the new state
                     }
                     curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());

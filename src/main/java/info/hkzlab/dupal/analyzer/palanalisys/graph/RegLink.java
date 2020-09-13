@@ -64,7 +64,7 @@ public class RegLink implements GraphLink {
     }
 
     @Override
-    public boolean isLongLink() {
+    public boolean isFarLink() {
         return true;
     }
     
