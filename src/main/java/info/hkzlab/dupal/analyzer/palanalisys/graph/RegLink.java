@@ -62,5 +62,10 @@ public class RegLink implements GraphLink {
     public GraphState getDestinationState() {
         return dest;
     }
+
+    @Override
+    public boolean isLongLink() {
+        return true;
+    }
     
 }

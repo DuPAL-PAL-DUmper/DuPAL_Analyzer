@@ -55,4 +55,9 @@ public class OutLink implements GraphLink {
     public GraphState getDestinationState() {
         return dest;
     }
+
+    @Override
+    public boolean isLongLink() {
+        return false;
+    }
 }
