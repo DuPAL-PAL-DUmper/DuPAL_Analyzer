@@ -34,7 +34,8 @@ public class OSExplorer {
                 if(linkPath != null && linkPath.length > 0) {
                     for(GraphLink l : linkPath) {
                         logger.info("exploreOutStates() -> Walking link " + l);
-                        dpci.write(l.getLinkInputs()); // Walk the path to the new state
+                        if(l.isLongLink()) dpci.writeAndPulseClock(l.getLinkInputs());
+                        else dpci.write(l.getLinkInputs()); // Walk the path to the new state
                     }
                     curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());
                     logger.info("exploreOutStates() -> walked path to state " + curState);
@@ -51,6 +52,7 @@ public class OSExplorer {
                 } else break; // We're done: can't move to anywhere else
             }
 
+            // TODO: Handle creating long links
             int nextIdx = curState.getNextLinkIdx();
             OutState nOutState = getOutStateForIdx(dpci, nextIdx, ioAsOutMask, maxLinks, statesMap);
 
