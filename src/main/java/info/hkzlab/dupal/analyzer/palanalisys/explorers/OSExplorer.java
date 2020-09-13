@@ -52,7 +52,6 @@ public class OSExplorer {
                 } else break; // We're done: can't move to anywhere else
             }
 
-            // TODO: Handle creating long links
             int nextIdx;
             OutState nOutState;
 
