@@ -23,7 +23,7 @@ public class OSExplorer {
         int maxLinks = 1 << (pSpecs.getPinCount_IN() + (pSpecs.getPinCount_IO()-BitUtils.countBits(ioAsOutMask)));
         OutState curState;
 
-        curState = getOutStateForIdx(dpci, 0, ioAsOutMask, maxLinks, statesMap);
+        curState = getOutStateForIdx(dpci, 0, false, ioAsOutMask, maxLinks, statesMap);
         logger.info("exploreOutStates() -> Initial state: " + curState);
 
         while(curState != null) {
@@ -53,14 +53,26 @@ public class OSExplorer {
             }
 
             // TODO: Handle creating long links
-            int nextIdx = curState.getNextLinkIdx();
-            OutState nOutState = getOutStateForIdx(dpci, nextIdx, ioAsOutMask, maxLinks, statesMap);
+            int nextIdx;
+            OutState nOutState;
 
-            int w_idx = calcolateWriteINFromIdx(nextIdx, pSpecs, ioAsOutMask);
-            OutLink ol = new OutLink(curState, nOutState, w_idx);
-            curState.addOutLink(ol);
+            if(!curState.isStateFullOutLinks()) { // We can build a normal OutLink
+                nextIdx = curState.getNextLinkIdx();
+                nOutState = getOutStateForIdx(dpci, nextIdx, false, ioAsOutMask, maxLinks, statesMap);
+                int w_idx = calcolateWriteINFromIdx(nextIdx, pSpecs, ioAsOutMask);
+                OutLink ol = new OutLink(curState, nOutState, w_idx);
+                curState.addOutLink(ol);
+            
+                logger.info("exploreOutStates() -> Creating OutLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
+            } else { // We'll get a RegLink
+                nextIdx = curState.getNextRegLinkIdx();
+                nOutState = getOutStateForIdx(dpci, nextIdx, true, ioAsOutMask, maxLinks, statesMap);
+                int w_idx = calcolateWriteINFromIdx(nextIdx, pSpecs, ioAsOutMask);
+                RegLink rl = new RegLink(curState, curState.getOutLinks()[nextIdx].dest, nOutState, w_idx);
+                curState.addRegLink(rl);
+                logger.info("exploreOutStates() -> Creating RegLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + rl);
+            }
 
-            logger.info("exploreOutStates() -> Creating link ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
 
             curState = nOutState;
         }
@@ -76,7 +88,7 @@ public class OSExplorer {
         return w_idx;
     }
 
-    private static OutState getOutStateForIdx(final DuPALCmdInterface dpci, final int idx, final int ioAsOutMask, final int maxLinks, final Map<Integer, OutState> statesMap)
+    private static OutState getOutStateForIdx(final DuPALCmdInterface dpci, final int idx, final boolean pulseClock, final int ioAsOutMask, final int maxLinks, final Map<Integer, OutState> statesMap)
             throws DuPALBoardException, DuPALAnalyzerException {
         PALSpecs pSpecs = dpci.palSpecs;
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W()); // Generate IO as output mask for writing
@@ -84,10 +96,17 @@ public class OSExplorer {
 
         int w_idx = calcolateWriteINFromIdx(idx, pSpecs, ioAsOutMask);
 
-        dpci.write(w_idx);
-        pinState_A = dpci.read();
-        dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
-        pinState_B = dpci.read();
+        if(!pulseClock) { // Normal Link
+            dpci.write(w_idx);
+            pinState_A = dpci.read();
+            dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
+            pinState_B = dpci.read();
+        } else { // Pulse the clock
+            dpci.writeAndPulseClock(w_idx);
+            pinState_A = dpci.read();
+            dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
+            pinState_B = dpci.read();
+        }
 
         // Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
         int io_in_r = BitUtils.consolidateBitField(pinState_A, pSpecs.getMask_IO_R() & ~ioAsOutMask);

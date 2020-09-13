@@ -105,8 +105,16 @@ public class OutState implements GraphState {
 
     @Override
     public boolean isStateFull() {
-        return  (outLinks.length == lastOutLinkIdx) &&
-                (regLinks.length == lastRegLinkIdx);
+        return  isStateFullOutLinks() &&
+                isStateFullRegLinks();
+    }
+
+    public boolean isStateFullOutLinks() {
+        return outLinks.length == lastOutLinkIdx;
+    }
+    
+    public boolean isStateFullRegLinks() {
+        return regLinks.length == lastRegLinkIdx;
     }
 
     @Override
@@ -116,5 +124,9 @@ public class OutState implements GraphState {
         System.arraycopy(regLinks, 0, linkArray, outLinks.length, regLinks.length);
 
         return linkArray;
+    }
+
+    public OutLink[] getOutLinks() {
+        return outLinks.clone();
     }
 }
