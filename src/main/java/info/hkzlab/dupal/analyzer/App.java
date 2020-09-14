@@ -47,7 +47,12 @@ public class App {
             System.exit(-1);
         } 
 
-        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                dpci.reset();
+            }
+        });
 
         dpan.startAnalisys();
     }

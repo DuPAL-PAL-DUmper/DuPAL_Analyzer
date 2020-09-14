@@ -23,6 +23,10 @@ public class DuPALCmdInterface {
         this.palSpecs = palSpecs;
     }
 
+    public void reset() {
+        dpm.writeCommand(DuPALProto.buildRESETCommand());
+    }
+
     public int read() {
         dpm.writeCommand(DuPALProto.buildREADCommand());
         return DuPALProto.handleREADResponse(dpm.readResponse());
