@@ -89,7 +89,7 @@ public class EspressoFormatter {
                     boolean io_pin_hiz = ((io_outs_hiz >> idx) & 0x01) != 0;
                     strBuf.append(io_pin_hiz ? '-' : (char)(((io_outs >> idx) & 0x01) + 0x30));
                 }
-                for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append('-');
+                for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append('-'); // Ignore the destination Registered Outputs for this type of link, as they can't change
                 // Print the outputs (hiz flags)
                 for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) strBuf.append((char)(((outs_hiz >> idx) & 0x01) + 0x30));
                 for(int idx = 0; idx < io_outs_count; idx++) strBuf.append((char)(((io_outs_hiz >> idx) & 0x01) + 0x30));
@@ -102,7 +102,38 @@ public class EspressoFormatter {
             for(RegLink rl : regLinks) {
                 strBuf.delete(0, strBuf.length());
 
-                // TODO
+                ins = BitUtils.consolidateBitField(rl.inputs, pSpecs.getMask_IN()); // inputs
+                io_ins = BitUtils.consolidateBitField(rl.inputs, pSpecs.getMask_IO_W() & ~ioAsOut_W); // IOs as inputs
+                io_fio = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks)
+                io_fio_hiz = BitUtils.consolidateBitField(rl.middle.pins.hiz, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks) - hiz flags
+                ro_ps = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_RO_R()); // Old Registered Outputs
+
+                outs = 0x00; // Outputs, Ignore, we'll set them as don't care for this type of link, these will be set by outlinks
+                outs_hiz = 0x00;
+                io_outs = 0x00;
+                io_outs_hiz = 0x00; 
+                ro = BitUtils.consolidateBitField(rl.dest.pins.out, pSpecs.getMask_RO_R()); // Registered outputs
+
+                // Print the inputs
+                int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
+                int io_fio_count = BitUtils.countBits(pSpecs.getMask_IO_R() & ioAsOutMask);
+                for(int idx = 0; idx < pSpecs.getPinCount_IN(); idx++) strBuf.append((char)(((ins >> idx) & 0x01) + 0x30));
+                for(int idx = 0; idx < io_ins_count; idx++) strBuf.append((char)(((io_ins >> idx) & 0x01) + 0x30));
+                for(int idx = 0; idx < io_fio_count; idx++) {
+                    boolean fio_pin_hiz = ((io_fio_hiz >> idx) & 0x01) != 0;
+                    strBuf.append(fio_pin_hiz ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
+                }
+                for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro_ps >> idx) & 0x01) + 0x30));
+                
+                strBuf.append(' ');
+
+                // Print the outputs
+                int io_outs_count = BitUtils.countBits(ioAsOutMask);
+                for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) strBuf.append('-');
+                for(int idx = 0; idx < io_outs_count; idx++) strBuf.append('-');
+                for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro >> idx) & 0x01) + 0x30));
+                // Print the outputs (hiz flags)
+                for(int idx = 0; idx < pSpecs.getPinCount_O()+io_outs_count; idx++) strBuf.append('-');
 
                 strBuf.append('\n');
                 tableRows.add(strBuf.toString());

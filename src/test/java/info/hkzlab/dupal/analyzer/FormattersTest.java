@@ -49,9 +49,6 @@ public class FormattersTest {
 
         String[] rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states);
 
-        System.out.print(EspressoFormatter.formatEspressoTableHeader(pSpecs, ioAsOutMask));
-        for(String row : rows) System.out.print(row);
-
         String[] expected = new String[] {
             "0000000000000111 --11111000\n",
             "0000000000011111 0110-00001\n",
