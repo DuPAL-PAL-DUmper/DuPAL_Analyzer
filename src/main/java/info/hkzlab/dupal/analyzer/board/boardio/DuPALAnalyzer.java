@@ -131,6 +131,8 @@ public class DuPALAnalyzer {
     private void saveTableToFile(String destination, String header, String[] rows, String footer) throws IOException {
         FileOutputStream fout = null;
         
+        logger.info("saveTableToFile() -> Saving to " + destination);
+
         try {
             fout = new FileOutputStream(tblPath);
 
