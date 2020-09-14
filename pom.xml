@@ -6,11 +6,10 @@
 
   <groupId>info.hkzlab.dupal.analyzer</groupId>
   <artifactId>dupal-analyzer</artifactId>
-  <version>0.0.5</version>
+  <version>0.1.0</version>
 
   <name>dupal-analyzer</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://github.com/DuPAL-PAL-DUmper</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

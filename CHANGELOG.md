@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.1.0] - unknown
+
+- Rewrite of PAL analisys algorithm
+
 ## [0.0.5] - 2020-08-15
 
 ### Added
