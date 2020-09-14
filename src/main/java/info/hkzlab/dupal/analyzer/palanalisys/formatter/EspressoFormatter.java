@@ -37,7 +37,7 @@ public class EspressoFormatter {
         strBuf.append("\n");
        
         strBuf.append(".phase ");
-        for(int idx = 0; idx < outCount; idx++) strBuf.append(pSpecs.isActiveLow() ? '0' : '1');
+        for(int idx = 0; idx < outCount+pSpecs.getPinCount_RO(); idx++) strBuf.append(pSpecs.isActiveLow() ? '0' : '1');
         for(int idx = 0; idx < outCount; idx++) strBuf.append('1');
         strBuf.append("\n\n");
         
@@ -102,6 +102,10 @@ public class EspressoFormatter {
             for(RegLink rl : regLinks) {
                 strBuf.delete(0, strBuf.length());
 
+                // TODO
+
+                strBuf.append('\n');
+                tableRows.add(strBuf.toString());
             }
         }
 

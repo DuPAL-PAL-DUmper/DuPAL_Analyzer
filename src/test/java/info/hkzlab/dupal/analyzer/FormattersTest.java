@@ -52,6 +52,20 @@ public class FormattersTest {
         System.out.print(EspressoFormatter.formatEspressoTableHeader(pSpecs, ioAsOutMask));
         for(String row : rows) System.out.print(row);
 
-        assertArrayEquals("EspressoFormatter should build the correct truth table for specified states", new String[3], rows);
+        String[] expected = new String[] {
+            "0000000000000111 --11111000\n",
+            "0000000000011111 0110-00001\n",
+            "0010000000000111 0000000000\n",
+            
+            "000000000000010- --11111000\n",
+            "111000000000010- 0110-00001\n",
+            "001000000000010- 0000000000\n",
+            
+            "1001000000000000 0000000000\n",
+            "0000000000010000 0110-00001\n",
+            "0010000000000000 0110-00001\n",
+        };
+
+        assertArrayEquals("EspressoFormatter should build the correct truth table for specified states", expected, rows);
     }
 }
