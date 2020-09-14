@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import info.hkzlab.dupal.analyzer.exceptions.*;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.OSExplorer;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.SimpleExplorer;
+import info.hkzlab.dupal.analyzer.palanalisys.formatter.EspressoFormatter;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
 import info.hkzlab.dupal.analyzer.palanalisys.simple.SimpleState;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
@@ -94,20 +95,29 @@ public class DuPALAnalyzer {
 
         dpci.setLED(led, true);
 
+        String header = null;
+        String[] table = null;
+        String footer = null;
+
+        footer = EspressoFormatter.formatEspressoFooter();
+
         try {
             if((dpci.palSpecs.getPinCount_IO() == 0) && (dpci.palSpecs.getPinCount_RO() == 0)) { // Purely combinatorial and no feedbacks, we can perform simple bruteforcing
                 SimpleState[] ssArray = SimpleExplorer.exploreStates(dpci);
-                for(SimpleState ss : ssArray) logger.info(ss.toString());
+                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ssArray);
+                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, 0);
+                
+                logger.info("Got " + ssArray.length + " output states!");
             } else { // Either registered, or with feedbacks
                 if(ioAsOutMask < 0) {
                     ioAsOutMask = detectIOTypeMask(dpci);
                     logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
                 }
-
+                
+                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
 
                 logger.info("Got " + osArray.length + " output states!");
-                for(OutState os : osArray) logger.info(os.toString());
             }
         } catch(Exception e) {
             throw e;

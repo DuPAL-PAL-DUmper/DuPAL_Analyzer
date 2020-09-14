@@ -1,6 +1,10 @@
 package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
+import java.util.ArrayList;
+
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
+import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
+import info.hkzlab.dupal.analyzer.palanalisys.simple.SimpleState;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 
 public class EspressoFormatter {
@@ -38,5 +42,43 @@ public class EspressoFormatter {
         
         return strBuf.toString();
     }
-    
+   
+    public static String[] formatEspressoTable(PALSpecs pSpecs, OutState[] states) {
+        ArrayList<String> tableRows = new ArrayList<>();
+
+        for(OutState ss : states) {
+
+        }
+
+        return tableRows.toArray(new String[tableRows.size()]);
+    }
+
+    public static String[] formatEspressoTable(PALSpecs pSpecs, SimpleState[] states) {
+        ArrayList<String> tableRows = new ArrayList<>();
+
+        StringBuffer strBuf = new StringBuffer();
+        for(SimpleState ss : states) {
+            strBuf.delete(0, strBuf.length());
+            
+            int inputs = BitUtils.consolidateBitField(ss.input, pSpecs.getMask_IN());
+            int output = BitUtils.consolidateBitField(ss.output, pSpecs.getMask_O_R());
+            int hiz = BitUtils.consolidateBitField(ss.hiz, pSpecs.getMask_O_R());
+            for(int idx = 0; idx < pSpecs.getPinCount_IN(); idx++) strBuf.append((char)(((inputs >> idx) & 0x01) + 0x30));
+            strBuf.append(' ');
+            for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) {
+                boolean hiz_pin = ((hiz >> idx) & 0x01) != 0;
+                strBuf.append(hiz_pin ? '-' : (char)(((output >> idx) & 0x01) + 0x30));
+            }
+            for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) strBuf.append((char)(((hiz >> idx) & 0x01) + 0x30));
+            strBuf.append('\n');
+
+            tableRows.add(strBuf.toString());
+        }
+
+        return tableRows.toArray(new String[tableRows.size()]);
+    }
+
+    public static String formatEspressoFooter() {
+        return ".e\n\n";
+    }
 }
