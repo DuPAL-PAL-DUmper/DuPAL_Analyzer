@@ -114,8 +114,9 @@ public class DuPALAnalyzer {
                     logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
                 }
                 
-                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
+                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray);
 
                 logger.info("Got " + osArray.length + " output states!");
             }

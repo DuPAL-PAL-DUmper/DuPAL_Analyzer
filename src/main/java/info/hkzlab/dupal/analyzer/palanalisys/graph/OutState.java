@@ -129,4 +129,8 @@ public class OutState implements GraphState {
     public OutLink[] getOutLinks() {
         return outLinks.clone();
     }
+
+    public RegLink[] getRegLinks() {
+        return regLinks.clone();
+    }
 }
