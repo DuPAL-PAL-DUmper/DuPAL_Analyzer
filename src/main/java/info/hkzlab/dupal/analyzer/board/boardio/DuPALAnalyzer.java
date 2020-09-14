@@ -3,7 +3,6 @@ package info.hkzlab.dupal.analyzer.board.boardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import info.hkzlab.dupal.analyzer.devices.*;
 import info.hkzlab.dupal.analyzer.exceptions.*;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.OSExplorer;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
@@ -24,8 +23,8 @@ public class DuPALAnalyzer {
     private final DuPALCmdInterface dpci;
     private int ioAsOutMask;
     
-    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs palSpecs, int ioAsOutMask, final String outPath) {
-        this.dpci = new DuPALCmdInterface(dpm, palSpecs);
+    public DuPALAnalyzer(final DuPALCmdInterface dpci, int ioAsOutMask, final String outPath) {
+        this.dpci = dpci;
         this.ioAsOutMask = ioAsOutMask;
 
         //serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
@@ -72,8 +71,8 @@ public class DuPALAnalyzer {
         return ioAsOutMask;
     }
     
-    public DuPALAnalyzer(final DuPALManager dpm, final PALSpecs palSpecs) {
-        this(dpm, palSpecs, -1, null);
+    public DuPALAnalyzer(final DuPALCmdInterface dpci) {
+        this(dpci, -1, null);
     }
 
     public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException,

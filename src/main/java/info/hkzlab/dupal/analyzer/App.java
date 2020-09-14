@@ -39,12 +39,15 @@ public class App {
         parseArgs(args);
 
         DuPALManager dpm = new DuPALManager(serialDevice);
-        DuPALAnalyzer dpan = new DuPALAnalyzer(dpm, pspecs, outMask, outDir);
+        DuPALCmdInterface dpci = new DuPALCmdInterface(dpm, pspecs);
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpci, outMask, outDir);
 
         if (!dpm.enterRemoteMode()) {
             System.out.println("Unable to put DuPAL board in REMOTE MODE!");
             System.exit(-1);
         } 
+
+        
 
         dpan.startAnalisys();
     }
