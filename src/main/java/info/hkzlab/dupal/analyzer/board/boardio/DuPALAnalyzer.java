@@ -1,5 +1,11 @@
 package info.hkzlab.dupal.analyzer.board.boardio;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +20,10 @@ import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
-    //private static final String SERIALIZED_DUMP = "dupalstat.dmp";
-    //private static final String OUT_TABLE = "dupal_thrtable.tbl";
-    //private static final String DUPAL_STRUCT = "dupal_struct.txt";
+    private static final String OUT_TABLE = "dupal_thrtable.tbl";
 
     
-    //private final String serdump_path;
-    //private final String tblPath;
-    //private final String structPath;
+    private final String tblPath;
 
     private final DuPALCmdInterface dpci;
     private int ioAsOutMask;
@@ -30,9 +32,7 @@ public class DuPALAnalyzer {
         this.dpci = dpci;
         this.ioAsOutMask = ioAsOutMask;
 
-        //serdump_path = outPath + File.separator+ SERIALIZED_DUMP;
-        //tblPath = outPath + File.separator + OUT_TABLE;
-        //structPath = outPath + File.separator + DUPAL_STRUCT;
+        tblPath = outPath + File.separator + OUT_TABLE;
     } 
 
     public int detectIOTypeMask(final DuPALCmdInterface dpci) throws DuPALBoardException {
@@ -78,8 +78,7 @@ public class DuPALAnalyzer {
         this(dpci, -1, null);
     }
 
-    public void startAnalisys() throws InvalidIOPinStateException, ICStateException, DuPALBoardException,
-            DuPALAnalyzerException {
+    public void startAnalisys() throws Exception {
 
         DuPALCmdInterface.DuPAL_LED led;
         
@@ -120,10 +119,29 @@ public class DuPALAnalyzer {
 
                 logger.info("Got " + osArray.length + " output states!");
             }
+
+            saveTableToFile(tblPath, header, table, footer);
         } catch(Exception e) {
             throw e;
         } finally {
             dpci.setLED(led, false);
+        }
+    }
+
+    private void saveTableToFile(String destination, String header, String[] rows, String footer) throws IOException {
+        FileOutputStream fout = null;
+        
+        try {
+            fout = new FileOutputStream(tblPath);
+
+            fout.write(header.getBytes(StandardCharsets.US_ASCII));
+            for(String row : rows) fout.write(row.getBytes(StandardCharsets.US_ASCII));
+            fout.write(footer.getBytes(StandardCharsets.US_ASCII));
+
+            fout.close();
+        } catch(IOException e) {
+            logger.error("Error printing out the registered outputs table (not including outputs).");
+            throw e;
         }
     }
 }
