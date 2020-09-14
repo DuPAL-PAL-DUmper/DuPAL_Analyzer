@@ -3,7 +3,6 @@ package info.hkzlab.dupal.analyzer.board.boardio;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
