@@ -78,7 +78,7 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() throws Exception {
-
+        int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
         
         switch(dpci.palSpecs.slotNumber()) {
@@ -91,7 +91,7 @@ public class DuPALAnalyzer {
                 break;
         }
 
-        dpci.setLED(led, true);
+        if(board_revision >= 2) dpci.setLED(led, true);
 
         String header = null;
         String[] table = null;
@@ -123,7 +123,7 @@ public class DuPALAnalyzer {
         } catch(Exception e) {
             throw e;
         } finally {
-            dpci.setLED(led, false);
+            if(board_revision >= 2) dpci.setLED(led, false);
         }
     }
 
