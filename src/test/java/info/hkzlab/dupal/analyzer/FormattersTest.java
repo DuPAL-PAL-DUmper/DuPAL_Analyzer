@@ -24,6 +24,13 @@ public class FormattersTest {
                 + ".ob o19 o12 io18 io17 o19oe o12oe io18oe io17oe \n" + ".phase 00001111\n\n";
 
         assertEquals("EspressoFormatter should build a correct 16L8 header", expectedHeader, header);
+
+        header = EspressoFormatter.formatEspressoTableHeader(pSpecs, ioAsOutMask, true);
+        expectedHeader = "# PAL16L8\n" + ".i 14\n" + ".o 8\n"
+                + ".ilb i1 i2 i3 i4 i5 i6 i7 i8 i9 i11 io16 io15 io14 io13 \n"
+                + ".ob o19 o12 io18 io17 o19oe o12oe io18oe io17oe \n" + ".phase 00001111\n\n";
+
+        assertEquals("EspressoFormatter should build a correct 16L8 header ignoring feedback IOs", expectedHeader, header);        
     }
 
     @Test
@@ -70,5 +77,24 @@ public class FormattersTest {
         Arrays.sort(rows);
 
         assertArrayEquals("EspressoFormatter should build the correct truth table for specified states", expected, rows);
+
+        rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states, true);
+        expected = new String[] {
+            "0000000000000 --11111000\n",
+            "0000000000011 0110-00001\n",
+            
+            "1110000000000 0110-00001\n",
+            "0010000000000 0000000000\n",
+            
+            "1001000000000 0000000000\n",
+            "0000000000010 0110-00001\n",
+            "0010000000000 0110-00001\n",
+        };
+
+        // Sort them, as we cannot guarantee the order of the formatted espresso table
+        Arrays.sort(expected);
+        Arrays.sort(rows);
+
+        assertArrayEquals("EspressoFormatter should build the correct truth table for specified states when ignoring feedback IOs", expected, rows);
     }
 }
