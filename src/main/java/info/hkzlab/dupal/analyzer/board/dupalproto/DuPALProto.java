@@ -61,9 +61,13 @@ public class DuPALProto {
      * @return Returns an integer containing the state of the PAL pins
      */
     public static int handleREADResponse(final String response) {
+        return handleByteResponse(response, CMD_READ);
+    }
+
+    public static int handleByteResponse(final String response, final char expectedCmd) {
         String[] readRes = parseResponse(response);
 
-        if((readRes == null) || readRes.length != 2 || !isStringResponseCommand(response) || readRes[0].charAt(0) != CMD_READ) return -1;
+        if((readRes == null) || readRes.length != 2 || !isStringResponseCommand(response) || readRes[0].charAt(0) != expectedCmd) return -1;
         
         try {
             return Integer.parseInt(readRes[1], 16);
@@ -73,11 +77,11 @@ public class DuPALProto {
     }
 
     public static int handleMODELResponse(final String response) {
-        return handleREADResponse(response);
+        return handleByteResponse(response, CMD_MODEL);
     }
     
     public static int handleLEDResponse(final String response) {
-        return handleREADResponse(response);
+        return handleByteResponse(response, CMD_LED);
     }
 
     public static int handleWRITEResponse(final String response) {
