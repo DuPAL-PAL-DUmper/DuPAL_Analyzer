@@ -73,6 +73,10 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() throws Exception {
+        startAnalisys(false);
+    }
+
+    public void startAnalisys(boolean ignoreFeedbacks) throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
         
@@ -108,8 +112,8 @@ public class DuPALAnalyzer {
                 }
                 
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
-                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
-                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray);
+                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask, ignoreFeedbacks);
+                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray, ignoreFeedbacks);
 
                 logger.info("Got " + osArray.length + " output states!");
             }
