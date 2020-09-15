@@ -1,6 +1,7 @@
 package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutLink;
@@ -46,7 +47,7 @@ public class EspressoFormatter {
    
     public static String[] formatEspressoTable(PALSpecs pSpecs, int ioAsOutMask, OutState[] states) {
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
-        ArrayList<String> tableRows = new ArrayList<>();
+        HashSet<String> tableRows = new HashSet<>();
 
         int ins, io_ins, io_fio, io_fio_hiz, ro_ps, outs, outs_hiz, io_outs, io_outs_hiz, ro;
         StringBuffer strBuf = new StringBuffer();
