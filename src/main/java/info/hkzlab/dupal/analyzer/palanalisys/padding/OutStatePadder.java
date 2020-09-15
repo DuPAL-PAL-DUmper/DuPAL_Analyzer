@@ -23,6 +23,8 @@ public class OutStatePadder {
     static public OutState[] padUnknownOutStates(OutState[] states, PALSpecs pSpecs, int ioAsOutMask)
             throws DuPALAnalyzerException {
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
+        int ioAsOutPins = BitUtils.countBits(ioAsOutMask);
+
         ArrayList<OutState> statesList = new ArrayList<>();
         ArrayList<OutState> outList = new ArrayList<>();
         statesList.addAll(Arrays.asList(states));
@@ -46,6 +48,16 @@ public class OutStatePadder {
             outList.add(os);
 
             curIOIdx = osIdx+1;
+        }
+
+        for(int idx = curIOIdx; idx < (1 << ioAsOutPins); idx++) {
+            OutState padOS = new OutState(new OutStatePins(BitUtils.scatterBitField(idx, ioAsOutMask), 0), states[0].getOutLinks().length, states[0].getRegLinks().length > 0);
+
+            for(int link_idx = 0; link_idx < padOS.getOutLinks().length; link_idx++) padOS.addOutLink(new OutLink(padOS, zeroOutState, BitUtils.scatterBitField(link_idx, pSpecs.getMask_IN() | (pSpecs.getMask_IO_W() & ~ioAsOut_W))));
+            for(int link_idx = 0; link_idx < padOS.getRegLinks().length; link_idx++) padOS.addRegLink(new RegLink(padOS, padOS, zeroOutState, BitUtils.scatterBitField(link_idx, pSpecs.getMask_IN() | (pSpecs.getMask_IO_W() & ~ioAsOut_W))));
+
+            outList.add(padOS);
+            logger.info("padUnknownOutStates() -> end padding with state " + padOS);           
         }
 
         return outList.toArray(new OutState[outList.size()]);
