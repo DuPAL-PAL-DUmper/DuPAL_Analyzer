@@ -5,40 +5,11 @@
 The **DuPAL Analyzer** is a companion software to the **DuPAL** board.
 It uses the board's *REMOTE CONTROL* mode to remotely toggle the pins and read the outputs, and is meant to perform **blackbox analisys** on the registered PAL devices, which are a bit too much for the MCU firmware to handle by itself.
 
-Please, spend some time to read how the [Black Box Analysis](docs/Black_Box_Analysis.md) works and [how to handle recovered equations](docs/Minimize_Equations_with_feedbacks.md) that don't seem to fit a new PAL.
+### What this is NOT
 
-**WARNING:** Currently, PALs that feeds the output of an equation back into the equation itself are **NOT** supported by the analisys algorithm.
-Example:
+Despite the "DUmper" part of the name, this tool is **NOT** meant to produce 1:1 binary dumps of the content of a PAL device, it is meant as an aid to the reversing procedure of an unknown PAL, automatizing a good part of the black box analisys.
 
-```text
-/o18 = /i2 & /i3 & /i4 & /i5 & o14 & o18 +
-       /i2 & /i3 & /i4 & /i5 & o15 & o18 +
-       /i2 & /i3 & /i4 & /i5 & o16 & o18 +
-       /i2 & /i3 & /i4 & /i5 & o17 & o18 +
-       /i5 & /o18
-```
-
-### What it CAN do
-
-This analyzer works in tandem with the DuPAL board to:
-
-- Do a black-box analisys of a set of **registered** PAL devices and produce a truth table that can be minimized and transformed into logic equations functionally equivalent to those used to program the chip.
-- Do bruteforcing of some **combinatorial** PAL devices and produce a truth table.
-- While my opinion is that **for archival purposes** a **dump of the chip is the best option**, I also think that a working machine beats a dead one any day. So this tool can help you creating a functionally identical PAL device starting from a known-good chip, and also store the data for future use.
-
-### What it CAN'T do
-
-- Produce logic equations out of the PAL: reiventing the wheel is not an intelligent thing to do, you can feed the truth table to software like **espresso** heuristic logic minimizer and get the equations automatically. You can then further refine them with a tool like **Logic Friday**, if needed. See below.
-- While the logic equations that are going to be produced by using this + a minimizer are going to be functionally equivalent to those used to program the chip (at least for all the possible inputs), there is a chance they're not going to be identical. This is because the minimizer might further optimize them and because they won't make use of the feedback outputs during optimization.
-  - If the feedback outputs are required (e.g. to further reduce the number of terms so they can fit in a new chip), the equations can be placed into **Logic Friday** and massaged (e.g. factor them, turn them into sums of products, invert them, etc) until a direct substitution with a feedback output becomes easy enough to be performed.
-- Can't resurrect dead ICs: You'll need a PAL in working conditions to obtain a good truth table.
-- Can't work quick: we are not simply "reading" the chip here. We're creating a graph of all the reachable states and all the links between them. This means that we need to reconstruct the behaviour of the black box by feeding it with every possible combination of input. For a chip with 6 registered outputs, and 8 inputs, it means that we're going to have 64 possible states, each one with 256 links out of them that we need to explore. And we cannot teleport from a state to another: we need to move through the graph following links until we get to the state we wish to explore! **Analyzing a chip can take from 10 minutes to several hours**.
-
-## Building
-
-Build and packaging this application requires `maven` and a JDK compatible with Java 1.8 .
-
-Once both are installed, you can run `mvn package` from the project root directory and you should end up with a JAR file in `target/`.
+It will produce a truth table that can be minimized and transformed into a list of equations that you can use to understand the workings of a PAL, and ideally produce an equivalent to program a new device.
 
 ## The Analyzer
 
