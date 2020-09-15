@@ -43,8 +43,8 @@ public class EspressoFormatter {
         strBuf.append("\n");
        
         strBuf.append(".phase ");
-        for(int idx = 0; idx < outCount; idx++) strBuf.append(pSpecs.isActiveLow() ? '0' : '1');
-        for(int idx = 0; idx < outCount_oe; idx++) strBuf.append('1');
+        for(int idx = 0; idx < outCount; idx++) strBuf.append(pSpecs.isActiveLow() ? '1' : '0');
+        for(int idx = 0; idx < outCount_oe; idx++) strBuf.append('0');
         strBuf.append("\n\n");
         
         return strBuf.toString();
