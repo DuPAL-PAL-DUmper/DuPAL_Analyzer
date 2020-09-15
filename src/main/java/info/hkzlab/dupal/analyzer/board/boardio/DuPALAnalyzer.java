@@ -79,6 +79,8 @@ public class DuPALAnalyzer {
     public void startAnalisys(boolean ignoreFeedbacks) throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
+       
+        logger.info("startAnalisys() -> " + (ignoreFeedbacks ? "Feedbacks will be inserted in inputs" : "Feedbacks will not be inserted in inputs."));
         
         switch(dpci.palSpecs.slotNumber()) {
             default:
