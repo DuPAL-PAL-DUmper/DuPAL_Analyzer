@@ -2,6 +2,8 @@ package info.hkzlab.dupal.analyzer;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import info.hkzlab.dupal.analyzer.devices.PAL16L8Specs;
@@ -62,6 +64,10 @@ public class FormattersTest {
             "0000000000010000 0110-00001\n",
             "0010000000000000 0110-00001\n",
         };
+
+        // Sort them, as we cannot guarantee the order of the formatted espresso table
+        Arrays.sort(expected);
+        Arrays.sort(rows);
 
         assertArrayEquals("EspressoFormatter should build the correct truth table for specified states", expected, rows);
     }
