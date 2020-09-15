@@ -1,6 +1,5 @@
 package info.hkzlab.dupal.analyzer.board.boardio;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,19 +18,15 @@ import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 public class DuPALAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(DuPALAnalyzer.class);
 
-    private static final String OUT_TABLE = "dupal_thrtable.tbl";
-
-    
-    private final String tblPath;
+    private final String outFile;
 
     private final DuPALCmdInterface dpci;
     private int ioAsOutMask;
     
-    public DuPALAnalyzer(final DuPALCmdInterface dpci, int ioAsOutMask, final String outPath) {
+    public DuPALAnalyzer(final DuPALCmdInterface dpci, int ioAsOutMask, final String outFile) {
         this.dpci = dpci;
         this.ioAsOutMask = ioAsOutMask;
-
-        tblPath = outPath + File.separator + OUT_TABLE;
+        this.outFile = outFile;
     } 
 
     public int detectIOTypeMask(final DuPALCmdInterface dpci) throws DuPALBoardException {
@@ -119,7 +114,7 @@ public class DuPALAnalyzer {
                 logger.info("Got " + osArray.length + " output states!");
             }
 
-            saveTableToFile(tblPath, header, table, footer);
+            saveTableToFile(outFile, header, table, footer);
         } catch(Exception e) {
             throw e;
         } finally {
@@ -133,7 +128,7 @@ public class DuPALAnalyzer {
         logger.info("saveTableToFile() -> Saving to " + destination);
 
         try {
-            fout = new FileOutputStream(tblPath);
+            fout = new FileOutputStream(outFile);
 
             fout.write(header.getBytes(StandardCharsets.US_ASCII));
             for(String row : rows) fout.write(row.getBytes(StandardCharsets.US_ASCII));

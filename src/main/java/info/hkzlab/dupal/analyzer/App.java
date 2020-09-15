@@ -17,7 +17,7 @@ public class App {
     private static String serialDevice = null;
     private static PALSpecs pspecs = null;
     private static int outMask = -1;
-    private static String outDir = null;
+    private static String outFile = null;
 
     public static void main(String[] args) throws Exception {
         System.out.println("DuPAL Analyzer " + version);
@@ -30,7 +30,7 @@ public class App {
             }
 
             logger.error("Wrong number of arguments passed.\n"
-                    + "dupal_analyzer <serial_port> <pal_type> <output_dir> [hex_output_mask]\n"
+                    + "dupal_analyzer <serial_port> <pal_type> <output_file> [hex_output_mask]\n"
                     + "Where <pal_type> can be:\n" + supportedPALs.toString() + "\n");
 
             return;
@@ -40,7 +40,7 @@ public class App {
 
         DuPALManager dpm = new DuPALManager(serialDevice);
         DuPALCmdInterface dpci = new DuPALCmdInterface(dpm, pspecs);
-        DuPALAnalyzer dpan = new DuPALAnalyzer(dpci, outMask, outDir);
+        DuPALAnalyzer dpan = new DuPALAnalyzer(dpci, outMask, outFile);
 
         if (!dpm.enterRemoteMode()) {
             System.out.println("Unable to put DuPAL board in REMOTE MODE!");
@@ -69,7 +69,7 @@ public class App {
             System.exit(-1);
         }
 
-        outDir = args[2];
+        outFile = args[2];
 
         if(args.length >= 4) {
             outMask = Integer.parseInt(args[3], 16);
