@@ -1,6 +1,7 @@
 package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
@@ -144,7 +145,7 @@ public class EspressoFormatter {
                         strBuf.append(fio_pin_hiz ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
                     }
                 }
-                
+
                 for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro_ps >> idx) & 0x01) + 0x30));
                 
                 strBuf.append(' ');
@@ -162,7 +163,10 @@ public class EspressoFormatter {
             }
         }
 
-        return tableRows.toArray(new String[tableRows.size()]);
+        String[] table = tableRows.toArray(new String[tableRows.size()]);
+        Arrays.sort(table);
+
+        return table;
     }
 
     public static String[] formatEspressoTable(PALSpecs pSpecs, SimpleState[] states) {
