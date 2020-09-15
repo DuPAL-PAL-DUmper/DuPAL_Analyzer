@@ -1,7 +1,6 @@
 package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
@@ -163,10 +162,7 @@ public class EspressoFormatter {
             }
         }
 
-        String[] table = tableRows.toArray(new String[tableRows.size()]);
-        Arrays.sort(table);
-
-        return table;
+        return tableRows.toArray(new String[tableRows.size()]);
     }
 
     public static String[] formatEspressoTable(PALSpecs pSpecs, SimpleState[] states) {

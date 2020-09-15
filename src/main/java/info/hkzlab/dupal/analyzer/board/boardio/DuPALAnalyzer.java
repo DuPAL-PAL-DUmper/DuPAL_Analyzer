@@ -12,6 +12,7 @@ import info.hkzlab.dupal.analyzer.palanalisys.explorers.OSExplorer;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.SimpleExplorer;
 import info.hkzlab.dupal.analyzer.palanalisys.formatter.EspressoFormatter;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
+import info.hkzlab.dupal.analyzer.palanalisys.padding.OutStatePadder;
 import info.hkzlab.dupal.analyzer.palanalisys.simple.SimpleState;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
 
@@ -114,6 +115,7 @@ public class DuPALAnalyzer {
                 }
                 
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+                osArray = OutStatePadder.padUnknownOutStates(osArray, dpci.palSpecs, ioAsOutMask);
                 header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask, ignoreFeedbacks);
                 table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray, ignoreFeedbacks);
 
