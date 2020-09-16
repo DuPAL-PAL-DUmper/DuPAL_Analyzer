@@ -186,7 +186,7 @@ public class EspressoFormatter {
                         for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < io_outs_count; cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
-                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('0');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('-');
 
                         strBuf.append('\n');
                         padding.add(strBuf.toString());
@@ -209,7 +209,7 @@ public class EspressoFormatter {
                         for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < io_outs_count; cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
-                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('0');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('-');
 
                         strBuf.append('\n');
                         padding.add(strBuf.toString());
