@@ -62,6 +62,7 @@ public class EspressoFormatter {
         int ins, io_ins, io_fio, io_fio_hiz, ro_ps, outs, outs_hiz, io_outs, io_outs_hiz, ro;
         int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
         int io_fio_count = BitUtils.countBits(pSpecs.getMask_IO_R() & ioAsOutMask);
+        int io_outs_count = BitUtils.countBits(ioAsOutMask);
 
         StringBuffer strBuf = new StringBuffer();
 
@@ -77,6 +78,8 @@ public class EspressoFormatter {
                 io_ins = BitUtils.consolidateBitField(ol.inputs, pSpecs.getMask_IO_W() & ~ioAsOut_W); // IOs as inputs
                 io_fio = BitUtils.consolidateBitField(ol.src.pins.out, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks)
                 io_fio_hiz = BitUtils.consolidateBitField(ol.src.pins.hiz, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks) - hiz flags
+                io_fio &= ~io_fio_hiz;
+
                 ro_ps = BitUtils.consolidateBitField(ol.src.pins.out, pSpecs.getMask_RO_R()); // Old Registered Outputs
 
                 outs = BitUtils.consolidateBitField(ol.dest.pins.out, pSpecs.getMask_O_R()); // Outputs
@@ -105,7 +108,6 @@ public class EspressoFormatter {
 
                 strBuf.append(' ');
                 // Print the outputs
-                int io_outs_count = BitUtils.countBits(ioAsOutMask);
                 for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) {
                     boolean out_pin_hiz = ((outs_hiz >> idx) & 0x01) != 0;
                     strBuf.append(out_pin_hiz ? '-' : (char)(((outs >> idx) & 0x01) + 0x30));
@@ -131,6 +133,7 @@ public class EspressoFormatter {
                 io_ins = BitUtils.consolidateBitField(rl.inputs, pSpecs.getMask_IO_W() & ~ioAsOut_W); // IOs as inputs
                 io_fio = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks)
                 io_fio_hiz = BitUtils.consolidateBitField(rl.middle.pins.hiz, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks) - hiz flags
+                io_fio &= ~io_fio_hiz;
                 ro_ps = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_RO_R()); // Old Registered Outputs
 
                 visitedROs.add(ro_ps);
@@ -142,8 +145,6 @@ public class EspressoFormatter {
                 ro = BitUtils.consolidateBitField(rl.dest.pins.out, pSpecs.getMask_RO_R()); // Registered outputs
 
                 // Print the inputs
-                int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
-                int io_fio_count = BitUtils.countBits(pSpecs.getMask_IO_R() & ioAsOutMask);
                 for(int idx = 0; idx < pSpecs.getPinCount_IN(); idx++) strBuf.append((char)(((ins >> idx) & 0x01) + 0x30));
                 for(int idx = 0; idx < io_ins_count; idx++) strBuf.append((char)(((io_ins >> idx) & 0x01) + 0x30));
 
@@ -157,7 +158,6 @@ public class EspressoFormatter {
                 strBuf.append(' ');
 
                 // Print the outputs
-                int io_outs_count = BitUtils.countBits(ioAsOutMask);
                 for(int idx = 0; idx < pSpecs.getPinCount_O(); idx++) strBuf.append('-');
                 for(int idx = 0; idx < io_outs_count; idx++) strBuf.append('-');
                 for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro >> idx) & 0x01) + 0x30));
@@ -171,31 +171,60 @@ public class EspressoFormatter {
 
         ArrayList<String> padding = new ArrayList<>();
         if(padTable) {
-            // Feedback IOs
-            for(int idx = 0; idx < (1 << BitUtils.countBits(ioAsOutMask)); idx++) {
-                if(!visitedFIOs.contains(idx)) {
-                    strBuf.delete(0, strBuf.length());
+            if(BitUtils.countBits(ioAsOutMask) > 0) {
+                // Feedback IOs
+                padding.add("# Padding FIOs START\n");
+                for(int idx = 0; idx < (1 << BitUtils.countBits(ioAsOutMask)); idx++) {
+                    if(!visitedFIOs.contains(idx)) {
+                        strBuf.delete(0, strBuf.length());
 
-                    for(int cidx = 0; cidx < pSpecs.getPinCount_IN(); cidx++) strBuf.append('-');
-                    strBuf.append(' ');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_IN(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_ins_count; cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_fio_count; cidx++) strBuf.append((((idx >> cidx) & 0x01) != 0) ? '1' : '0');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
+                        strBuf.append(' ');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_outs_count; cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('0');
 
-                    strBuf.append('\n');
-                    padding.add(strBuf.toString());
+                        strBuf.append('\n');
+                        padding.add(strBuf.toString());
+                    }
                 }
             }
 
-            // Registered Outputs
-            for(int idx = 0; idx < (1 << pSpecs.getPinCount_RO()); idx++) {
-                if(!visitedROs.contains(idx)) {
-                    strBuf.delete(0, strBuf.length());
-                    
-                    strBuf.append('\n');
-                    padding.add(strBuf.toString());
+            if(pSpecs.getPinCount_RO() > 0) {
+                // Registered Outputs
+                padding.add("# Padding ROs START\n");
+                for(int idx = 0; idx < (1 << pSpecs.getPinCount_RO()); idx++) {
+                    if(!visitedROs.contains(idx)) {
+                        strBuf.delete(0, strBuf.length());
+                        
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_IN(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_ins_count; cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_fio_count; cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append((((idx >> cidx) & 0x01) != 0) ? '1' : '0');
+                        strBuf.append(' ');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < io_outs_count; cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('0');
+
+                        strBuf.append('\n');
+                        padding.add(strBuf.toString());
+                    }
                 }
             }
+
+            padding.add("# Padding END\n");
         }
 
-        return tableRows.toArray(new String[tableRows.size()]);
+        ArrayList<String> paddedTable = new ArrayList<>();
+        for(String p : padding) paddedTable.add(p);
+        paddedTable.addAll(tableRows);
+
+        return paddedTable.toArray(new String[paddedTable.size()]);
     }
 
     public static String[] formatEspressoTable(PALSpecs pSpecs, SimpleState[] states) {

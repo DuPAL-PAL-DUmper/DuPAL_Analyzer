@@ -27,6 +27,51 @@ public class FormattersTest {
     }
 
     @Test
+    public void espressoFormatterShouldCorrectlyPadTableWithOutLinks() throws DuPALAnalyzerException {
+        PAL16L8Specs pSpecs = new PAL16L8Specs();
+        int ioAsOutMask = 0x07;
+        OutState[] states = new OutState[3];
+
+        states[0] = new OutState(new OutStatePins(0x38, 0x00), 3);
+        states[1] = new OutState(new OutStatePins(0xAF, 0x01), 3);
+        states[2] = new OutState(new OutStatePins(0x00, 0x00), 3);
+
+        states[0].addOutLink(new OutLink(states[0], states[0], 0x00));
+        states[0].addOutLink(new OutLink(states[0], states[1], 0x3800));
+        states[0].addOutLink(new OutLink(states[0], states[2], 0x04));
+        
+        states[1].addOutLink(new OutLink(states[1], states[0], 0x00));
+        states[1].addOutLink(new OutLink(states[1], states[1], 0x07));
+        states[1].addOutLink(new OutLink(states[1], states[2], 0x04));
+        
+        states[2].addOutLink(new OutLink(states[2], states[2], 0x09));
+        states[2].addOutLink(new OutLink(states[2], states[1], 0x2800));
+        states[2].addOutLink(new OutLink(states[2], states[1], 0x04));
+
+        String[] rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states, true);
+
+        String[] expected = new String[] {
+            "# Padding FIOs START\n",
+            "-------------100 -----00000\n",
+            "-------------010 -----00000\n",
+            "-------------110 -----00000\n",
+            "-------------001 -----00000\n",
+            "-------------101 -----00000\n",
+            "# Padding END\n",
+            "1110000000000-11 01-1100100\n",
+            "0000000000000-11 0000000000\n",
+            "0010000000000000 01-1100100\n",
+            "0010000000000000 0000000000\n",
+            "0010000000000-11 0000000000\n",
+            "1001000000000000 0000000000\n",
+            "0000000000000000 0000000000\n",
+            "0000000000100000 01-1100100\n"
+        };
+
+        assertArrayEquals("EspressoFormatter should correctly build and pad the table", expected, rows);
+    }
+
+    @Test
     public void espressoFormatterShouldBuildCorrect16L8TableWithoutRegLinks() throws DuPALAnalyzerException {
         PAL16L8Specs pSpecs = new PAL16L8Specs();
         int ioAsOutMask = 0x38;
@@ -49,7 +94,7 @@ public class FormattersTest {
         states[2].addOutLink(new OutLink(states[2], states[1], 0x2800));
         states[2].addOutLink(new OutLink(states[2], states[1], 0x04));
 
-        String[] rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states);
+        String[] rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states, false);
 
         String[] expected = new String[] {
             "0000000000000111 --11111000\n",
