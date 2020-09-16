@@ -171,6 +171,19 @@ public class EspressoFormatter {
 
         ArrayList<String> padding = new ArrayList<>();
         if(padTable) {
+            int outAlwaysOff = 0xFF;
+            int outAlwaysOn = 0xFF;
+
+            for(OutState os : states) {
+                outAlwaysOff &= os.pins.hiz;
+                outAlwaysOn &= ~os.pins.hiz;
+            }
+            
+            int oAOff = BitUtils.consolidateBitField(outAlwaysOff, pSpecs.getMask_O_R());
+            int oAOn = BitUtils.consolidateBitField(outAlwaysOn, pSpecs.getMask_O_R());
+            int ioAOff = BitUtils.consolidateBitField(outAlwaysOff, ioAsOutMask);
+            int ioAOn = BitUtils.consolidateBitField(outAlwaysOn, ioAsOutMask);
+
             if(BitUtils.countBits(ioAsOutMask) > 0) {
                 // Feedback IOs
                 padding.add("# Padding FIOs START\n");
@@ -186,7 +199,17 @@ public class EspressoFormatter {
                         for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < io_outs_count; cidx++) strBuf.append('-');
                         for(int cidx = 0; cidx < pSpecs.getPinCount_RO(); cidx++) strBuf.append('-');
-                        for(int cidx = 0; cidx < pSpecs.getPinCount_O()+io_outs_count; cidx++) strBuf.append('-');
+                        
+                        for(int cidx = 0; cidx < pSpecs.getPinCount_O(); cidx++) {
+                            if(((oAOff >> cidx) & 0x01) != 0) strBuf.append('1');
+                            else if(((oAOn >> cidx) & 0x01) != 0) strBuf.append('0');
+                            else strBuf.append('-');
+                        }
+                        for(int cidx = 0; cidx < io_outs_count; cidx++) {
+                            if(((ioAOff >> cidx) & 0x01) != 0) strBuf.append('1');
+                            else if(((ioAOn >> cidx) & 0x01) != 0) strBuf.append('0');
+                            else strBuf.append('-');
+                        }
 
                         strBuf.append('\n');
                         padding.add(strBuf.toString());
