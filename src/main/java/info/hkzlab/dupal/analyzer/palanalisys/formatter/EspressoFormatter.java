@@ -51,10 +51,10 @@ public class EspressoFormatter {
     }
   
     public static String[] formatEspressoTable(PALSpecs pSpecs, int ioAsOutMask, OutState[] states) {
-        return formatEspressoTable(pSpecs, ioAsOutMask, states, false);
+        return formatEspressoTable(pSpecs, ioAsOutMask, states, true);
     }
     
-    public static String[] formatEspressoTable(PALSpecs pSpecs, int ioAsOutMask, OutState[] states, boolean ignoreFeedbacks) {
+    public static String[] formatEspressoTable(PALSpecs pSpecs, int ioAsOutMask, OutState[] states, boolean padTable) {
         int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W());
         HashSet<String> tableRows = new HashSet<>();
 
@@ -84,7 +84,7 @@ public class EspressoFormatter {
                 for(int idx = 0; idx < io_ins_count; idx++) strBuf.append((char)(((io_ins >> idx) & 0x01) + 0x30));
                 for(int idx = 0; idx < io_fio_count; idx++) {
                     boolean fio_pin_hiz = ((io_fio_hiz >> idx) & 0x01) != 0;
-                    strBuf.append((fio_pin_hiz || ignoreFeedbacks) ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
+                    strBuf.append(fio_pin_hiz ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
                 }
                 for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro_ps >> idx) & 0x01) + 0x30));
 
@@ -132,7 +132,7 @@ public class EspressoFormatter {
 
                 for(int idx = 0; idx < io_fio_count; idx++) {
                     boolean fio_pin_hiz = ((io_fio_hiz >> idx) & 0x01) != 0;
-                    strBuf.append((fio_pin_hiz || ignoreFeedbacks) ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
+                    strBuf.append(fio_pin_hiz ? '-' : (char)(((io_fio >> idx) & 0x01) + 0x30));
                 }
 
                 for(int idx = 0; idx < pSpecs.getPinCount_RO(); idx++) strBuf.append((char)(((ro_ps >> idx) & 0x01) + 0x30));

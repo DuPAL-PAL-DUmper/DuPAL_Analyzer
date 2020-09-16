@@ -70,24 +70,5 @@ public class FormattersTest {
         Arrays.sort(rows);
 
         assertArrayEquals("EspressoFormatter should build the correct truth table for specified states", expected, rows);
-
-        rows = EspressoFormatter.formatEspressoTable(pSpecs, ioAsOutMask, states, true);
-        expected = new String[] {
-            "0000000000000--- --11111000\n",
-            "0000000000011--- 0110-00001\n",
-            
-            "1110000000000--- 0110-00001\n",
-            "0010000000000--- 0000000000\n",
-            
-            "1001000000000--- 0000000000\n",
-            "0000000000010--- 0110-00001\n",
-            "0010000000000--- 0110-00001\n",
-        };
-
-        // Sort them, as we cannot guarantee the order of the formatted espresso table
-        Arrays.sort(expected);
-        Arrays.sort(rows);
-
-        assertArrayEquals("EspressoFormatter should build the correct truth table for specified states when ignoring feedback IOs", expected, rows);
     }
 }

@@ -76,11 +76,11 @@ public class DuPALAnalyzer {
         startAnalisys(false);
     }
 
-    public void startAnalisys(boolean ignoreFeedbacks) throws Exception {
+    public void startAnalisys(boolean padTable) throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
        
-        logger.info("startAnalisys() -> " + (!ignoreFeedbacks ? "Feedbacks will be inserted in inputs" : "Feedbacks will not be inserted in inputs."));
+        logger.info("startAnalisys() -> Espresso table results will "+(padTable?"":"not")+" be padded.");
         
         switch(dpci.palSpecs.slotNumber()) {
             default:
@@ -115,7 +115,7 @@ public class DuPALAnalyzer {
                 
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
                 header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
-                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray, ignoreFeedbacks);
+                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray, padTable);
 
                 logger.info("Got " + osArray.length + " output states!");
             }

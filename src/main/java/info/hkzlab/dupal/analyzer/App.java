@@ -17,7 +17,7 @@ public class App {
     private static String serialDevice = null;
     private static PALSpecs pspecs = null;
     private static int outMask = -1;
-    private static boolean ignoreFeedbacks = false;
+    private static boolean padTable = true;
     private static String outFile = null;
 
     public static void main(String[] args) throws Exception {
@@ -31,7 +31,7 @@ public class App {
             }
 
             logger.error("Wrong number of arguments passed.\n"
-                    + "dupal_analyzer <serial_port> <pal_type> <output_file> [Y|N] [hex_output_mask]\n"
+                    + "dupal_analyzer <serial_port> <pal_type> <output_file> [pad_table: Y|N] [hex_output_mask]\n"
                     + "Where <pal_type> can be:\n" + supportedPALs.toString() + "\n");
 
             return;
@@ -55,7 +55,7 @@ public class App {
             }
         });
 
-        dpan.startAnalisys(ignoreFeedbacks);
+        dpan.startAnalisys(padTable);
     }
 
     private static void parseArgs(String[] args) {
@@ -73,7 +73,7 @@ public class App {
         outFile = args[2];
 
         if(args.length >= 4) {
-            ignoreFeedbacks = args[3].equalsIgnoreCase("Y");
+            padTable = args[3].equalsIgnoreCase("Y");
         }
 
         if(args.length >= 5) {
