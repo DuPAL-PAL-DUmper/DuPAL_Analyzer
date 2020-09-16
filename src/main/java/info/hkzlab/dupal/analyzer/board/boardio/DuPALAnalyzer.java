@@ -80,7 +80,7 @@ public class DuPALAnalyzer {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
        
-        logger.info("startAnalisys() -> Espresso table results will "+(padTable?"":"not")+" be padded.");
+        logger.info("startAnalisys() -> Espresso table results will"+(padTable?"":" not")+" be padded.");
         
         switch(dpci.palSpecs.slotNumber()) {
             default:
