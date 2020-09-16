@@ -60,6 +60,9 @@ public class EspressoFormatter {
         HashSet<String> tableRows = new HashSet<>();
 
         int ins, io_ins, io_fio, io_fio_hiz, ro_ps, outs, outs_hiz, io_outs, io_outs_hiz, ro;
+        int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
+        int io_fio_count = BitUtils.countBits(pSpecs.getMask_IO_R() & ioAsOutMask);
+
         StringBuffer strBuf = new StringBuffer();
 
         Set<Integer> visitedFIOs = new HashSet<>();
@@ -92,8 +95,6 @@ public class EspressoFormatter {
                 } else visitedFIOs.add(io_fio);
 
                 // Print the inputs
-                int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
-                int io_fio_count = BitUtils.countBits(pSpecs.getMask_IO_R() & ioAsOutMask);
                 for(int idx = 0; idx < pSpecs.getPinCount_IN(); idx++) strBuf.append((char)(((ins >> idx) & 0x01) + 0x30));
                 for(int idx = 0; idx < io_ins_count; idx++) strBuf.append((char)(((io_ins >> idx) & 0x01) + 0x30));
                 for(int idx = 0; idx < io_fio_count; idx++) {
@@ -165,6 +166,32 @@ public class EspressoFormatter {
 
                 strBuf.append('\n');
                 tableRows.add(strBuf.toString());
+            }
+        }
+
+        ArrayList<String> padding = new ArrayList<>();
+        if(padTable) {
+            // Feedback IOs
+            for(int idx = 0; idx < (1 << BitUtils.countBits(ioAsOutMask)); idx++) {
+                if(!visitedFIOs.contains(idx)) {
+                    strBuf.delete(0, strBuf.length());
+
+                    for(int cidx = 0; cidx < pSpecs.getPinCount_IN(); cidx++) strBuf.append('-');
+                    strBuf.append(' ');
+
+                    strBuf.append('\n');
+                    padding.add(strBuf.toString());
+                }
+            }
+
+            // Registered Outputs
+            for(int idx = 0; idx < (1 << pSpecs.getPinCount_RO()); idx++) {
+                if(!visitedROs.contains(idx)) {
+                    strBuf.delete(0, strBuf.length());
+                    
+                    strBuf.append('\n');
+                    padding.add(strBuf.toString());
+                }
             }
         }
 
