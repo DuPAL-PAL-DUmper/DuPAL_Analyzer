@@ -98,15 +98,13 @@ public class OSExplorer {
 
         if(!pulseClock) { // Normal Link
             dpci.write(w_idx);
-            pinState_A = dpci.read();
-            dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
-            pinState_B = dpci.read();
         } else { // Pulse the clock
             dpci.writeAndPulseClock(w_idx);
-            pinState_A = dpci.read();
-            dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
-            pinState_B = dpci.read();
         }
+        
+        pinState_A = dpci.read();
+        dpci.write(w_idx | pSpecs.getMask_O_W() | ioAsOut_W); // Try to force the outputs
+        pinState_B = dpci.read();
 
         // Check that the IOs that we consider as inputs are actually inputs, and are not remaining set to other values (which would mean they're actually outputs)
         int io_in_r = BitUtils.consolidateBitField(pinState_A, pSpecs.getMask_IO_R() & ~ioAsOutMask);
