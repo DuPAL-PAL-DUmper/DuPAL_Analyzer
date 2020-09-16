@@ -2,6 +2,7 @@ package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutLink;
@@ -60,6 +61,10 @@ public class EspressoFormatter {
 
         int ins, io_ins, io_fio, io_fio_hiz, ro_ps, outs, outs_hiz, io_outs, io_outs_hiz, ro;
         StringBuffer strBuf = new StringBuffer();
+
+        Set<Integer> visitedFIOs = new HashSet<>();
+        Set<Integer> visitedROs = new HashSet<>();
+
         for(OutState os : states) {
             OutLink[] outLinks = os.getOutLinks();
             for(OutLink ol : outLinks) {
@@ -76,6 +81,15 @@ public class EspressoFormatter {
                 io_outs = BitUtils.consolidateBitField(ol.dest.pins.out, ioAsOutMask); // IO as outputs (feedbacks)
                 io_outs_hiz = BitUtils.consolidateBitField(ol.dest.pins.hiz, ioAsOutMask); // IO as outputs (feedbacks)
                 ro = 0x00; // We'll set these as "don't care" for this type of link, as they can only be changed via a registered link
+
+                // Build all combinations of the feedback IOs to mark as already visited
+                if(io_fio_hiz != 0) {
+                    int maxVal = 1 << BitUtils.countBits(io_fio_hiz);
+                    for(int idx = 0; idx < maxVal; idx++) {
+                        int fio_comb = io_fio | BitUtils.scatterBitField(idx, io_fio_hiz);
+                        visitedFIOs.add(fio_comb);
+                    }
+                } else visitedFIOs.add(io_fio);
 
                 // Print the inputs
                 int io_ins_count = BitUtils.countBits(pSpecs.getMask_IO_W() & ~ioAsOut_W);
@@ -117,6 +131,8 @@ public class EspressoFormatter {
                 io_fio = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks)
                 io_fio_hiz = BitUtils.consolidateBitField(rl.middle.pins.hiz, pSpecs.getMask_IO_R() & ioAsOutMask); // IO as outputs (feedbacks) - hiz flags
                 ro_ps = BitUtils.consolidateBitField(rl.middle.pins.out, pSpecs.getMask_RO_R()); // Old Registered Outputs
+
+                visitedROs.add(ro_ps);
 
                 outs = 0x00; // Outputs, Ignore, we'll set them as don't care for this type of link, these will be set by outlinks
                 outs_hiz = 0x00;
