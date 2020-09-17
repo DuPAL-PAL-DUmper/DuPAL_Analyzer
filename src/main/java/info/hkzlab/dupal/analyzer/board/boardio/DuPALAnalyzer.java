@@ -73,16 +73,10 @@ public class DuPALAnalyzer {
     }
 
     public void startAnalisys() throws Exception {
-        startAnalisys(false);
-    }
-
-    public void startAnalisys(boolean padTable) throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
         String formatterOutput = null;
        
-        logger.info("startAnalisys() -> Espresso table results will"+(padTable?"":" not")+" be padded.");
-        
         switch(dpci.palSpecs.slotNumber()) {
             default:
             case 0:
