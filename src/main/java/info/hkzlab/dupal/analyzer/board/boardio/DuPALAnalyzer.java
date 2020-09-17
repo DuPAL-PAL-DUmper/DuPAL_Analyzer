@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import info.hkzlab.dupal.analyzer.exceptions.*;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.OSExplorer;
 import info.hkzlab.dupal.analyzer.palanalisys.explorers.SimpleExplorer;
-import info.hkzlab.dupal.analyzer.palanalisys.formatter.EspressoFormatter;
+import info.hkzlab.dupal.analyzer.palanalisys.formatter.JSONFormatter;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.OutState;
 import info.hkzlab.dupal.analyzer.palanalisys.simple.SimpleState;
 import info.hkzlab.dupal.analyzer.utilities.BitUtils;
@@ -79,6 +79,7 @@ public class DuPALAnalyzer {
     public void startAnalisys(boolean padTable) throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
+        String formatterOutput = null;
        
         logger.info("startAnalisys() -> Espresso table results will"+(padTable?"":" not")+" be padded.");
         
@@ -94,19 +95,13 @@ public class DuPALAnalyzer {
 
         if(board_revision >= 2) dpci.setLED(led, true);
 
-        String header = null;
-        String[] table = null;
-        String footer = null;
-
-        footer = EspressoFormatter.formatEspressoFooter();
-
         try {
             if((dpci.palSpecs.getPinCount_IO() == 0) && (dpci.palSpecs.getPinCount_RO() == 0)) { // Purely combinatorial and no feedbacks, we can perform simple bruteforcing
                 SimpleState[] ssArray = SimpleExplorer.exploreStates(dpci);
-                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ssArray);
-                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, 0);
                 
                 logger.info("Got " + ssArray.length + " output states!");
+
+                formatterOutput = JSONFormatter.formatJSON(dpci.palSpecs, ssArray);
             } else { // Either registered, or with feedbacks
                 if(ioAsOutMask < 0) {
                     ioAsOutMask = detectIOTypeMask(dpci);
@@ -114,13 +109,12 @@ public class DuPALAnalyzer {
                 }
                 
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
-                header = EspressoFormatter.formatEspressoTableHeader(dpci.palSpecs, ioAsOutMask);
-                table = EspressoFormatter.formatEspressoTable(dpci.palSpecs, ioAsOutMask, osArray, padTable);
 
                 logger.info("Got " + osArray.length + " output states!");
+                formatterOutput = JSONFormatter.formatJSON(dpci.palSpecs, ioAsOutMask, osArray);
             }
 
-            saveTableToFile(outFile, header, table, footer);
+            saveOutputToFile(outFile, formatterOutput);
         } catch(Exception e) {
             throw e;
         } finally {
@@ -128,18 +122,17 @@ public class DuPALAnalyzer {
         }
     }
 
-    private void saveTableToFile(String destination, String header, String[] rows, String footer) throws IOException {
+    private void saveOutputToFile(String destination, String out) throws IOException {
         FileOutputStream fout = null;
         
-        logger.info("saveTableToFile() -> Saving to " + destination);
+        logger.info("saveOutputToFile() -> Saving to " + destination);
 
         try {
             fout = new FileOutputStream(outFile);
 
-            fout.write(header.getBytes(StandardCharsets.US_ASCII));
-            for(String row : rows) fout.write(row.getBytes(StandardCharsets.US_ASCII));
-            fout.write(footer.getBytes(StandardCharsets.US_ASCII));
-
+            fout.write(out.getBytes(StandardCharsets.US_ASCII));
+            
+            fout.flush();
             fout.close();
         } catch(IOException e) {
             logger.error("Error printing out the registered outputs table (not including outputs).");

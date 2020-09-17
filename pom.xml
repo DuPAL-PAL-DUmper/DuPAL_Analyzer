@@ -6,7 +6,7 @@
 
   <groupId>info.hkzlab.dupal.analyzer</groupId>
   <artifactId>dupal-analyzer</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 
   <name>dupal-analyzer</name>
   <url>https://github.com/DuPAL-PAL-DUmper</url>
@@ -22,6 +22,12 @@
       <groupId>io.github.java-native</groupId>
       <artifactId>jssc</artifactId>
       <version>2.9.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20200518</version>
     </dependency>
 
     <dependency>
