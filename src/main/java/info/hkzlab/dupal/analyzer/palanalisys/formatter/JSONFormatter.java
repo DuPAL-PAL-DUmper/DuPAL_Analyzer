@@ -13,6 +13,10 @@ public class JSONFormatter {
     private JSONFormatter() {};
    
     public static String formatJSON(PALSpecs pSpecs, SimpleState[] states) {
+        return formatJSON(pSpecs, states, false);
+    }
+
+    public static String formatJSON(PALSpecs pSpecs, SimpleState[] states, boolean indent) {
         JSONObject rootObject = new JSONObject();
         
         // Fill in the header and insert it into the root object
@@ -25,10 +29,15 @@ public class JSONFormatter {
 
         rootObject.put("states", ssArray);
 
-        return rootObject.toString(4);
+        if(indent) return rootObject.toString(4);
+        else return rootObject.toString();
     }
 
     public static String formatJSON(PALSpecs pSpecs, int ioAsOutMask, OutState[] states) {
+        return formatJSON(pSpecs, ioAsOutMask, states, false);
+    }
+
+    public static String formatJSON(PALSpecs pSpecs, int ioAsOutMask, OutState[] states, boolean indent) {
         JSONObject rootObject = new JSONObject();
         JSONArray osLinks = new JSONArray();
         JSONArray regLinks = new JSONArray();
@@ -47,7 +56,8 @@ public class JSONFormatter {
         rootObject.put("oLinks", osLinks);
         rootObject.put("rLinks", regLinks);
 
-        return rootObject.toString(4);
+        if(indent) return rootObject.toString(4);
+        else return rootObject.toString();
     }
 
     private static JSONObject buildHeader(PALSpecs pSpecs) {
