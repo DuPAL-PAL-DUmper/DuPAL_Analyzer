@@ -10,7 +10,7 @@ import info.hkzlab.dupal.analyzer.devices.*;
 public class App {
     public static volatile String[] palTypes = { PAL16L8Specs.PAL_TYPE, PAL10L8Specs.PAL_TYPE };
 
-    private final static Logger logger = LoggerFactory.getLogger(DuPALManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(App.class);
 
     private final static String version = App.class.getPackage().getImplementationVersion();
 
