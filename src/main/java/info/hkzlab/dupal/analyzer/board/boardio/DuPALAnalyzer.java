@@ -1,9 +1,9 @@
 package info.hkzlab.dupal.analyzer.board.boardio;
 
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class DuPALAnalyzer {
     public void startAnalisys() throws Exception {
         int board_revision = dpci.getBoardVersion();
         DuPALCmdInterface.DuPAL_LED led;
-        String formatterOutput = null;
+        JSONObject formatterOutput = null;
        
         switch(dpci.palSpecs.slotNumber()) {
             default:
@@ -116,18 +116,17 @@ public class DuPALAnalyzer {
         }
     }
 
-    private void saveOutputToFile(String destination, String out) throws IOException {
-        FileOutputStream fout = null;
-        
+    private void saveOutputToFile(String destination, JSONObject output) throws IOException {
         logger.info("saveOutputToFile() -> Saving to " + destination);
 
         try {
-            fout = new FileOutputStream(outFile);
+            FileWriter filew = new FileWriter(destination);
 
-            fout.write(out.getBytes(StandardCharsets.US_ASCII));
-            
-            fout.flush();
-            fout.close();
+            output.write(filew);
+
+            filew.flush();
+            filew.close();
+
         } catch(IOException e) {
             logger.error("Error printing out the registered outputs table (not including outputs).");
             throw e;

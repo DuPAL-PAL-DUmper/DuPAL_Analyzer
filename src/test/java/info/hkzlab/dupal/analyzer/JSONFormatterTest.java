@@ -2,7 +2,9 @@ package info.hkzlab.dupal.analyzer;
 
 import static org.junit.Assert.*;
 
+import java.io.StringWriter;
 
+import org.json.JSONObject;
 import org.junit.Test;
 
 import info.hkzlab.dupal.analyzer.devices.PAL16L8Specs;
@@ -42,8 +44,10 @@ public class JSONFormatterTest {
         OutState[] oStates = new OutState[] {os_a, os_b, os_c, os_d, os_e};
 
         String expectedJson = "{\"oLinks\":[{\"inputs\":16,\"destination\":{\"outputs\":0,\"hiz\":0},\"source\":{\"outputs\":0,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":1,\"hiz\":0},\"source\":{\"outputs\":0,\"hiz\":0}},{\"inputs\":48,\"destination\":{\"outputs\":2,\"hiz\":0},\"source\":{\"outputs\":0,\"hiz\":0}},{\"inputs\":16,\"destination\":{\"outputs\":0,\"hiz\":0},\"source\":{\"outputs\":1,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":4,\"hiz\":0},\"source\":{\"outputs\":1,\"hiz\":0}},{\"inputs\":48,\"destination\":{\"outputs\":3,\"hiz\":0},\"source\":{\"outputs\":1,\"hiz\":0}},{\"inputs\":16,\"destination\":{\"outputs\":0,\"hiz\":0},\"source\":{\"outputs\":2,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":1,\"hiz\":0},\"source\":{\"outputs\":2,\"hiz\":0}},{\"inputs\":48,\"destination\":{\"outputs\":3,\"hiz\":0},\"source\":{\"outputs\":2,\"hiz\":0}},{\"inputs\":16,\"destination\":{\"outputs\":2,\"hiz\":0},\"source\":{\"outputs\":3,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":1,\"hiz\":0},\"source\":{\"outputs\":3,\"hiz\":0}},{\"inputs\":48,\"destination\":{\"outputs\":4,\"hiz\":0},\"source\":{\"outputs\":3,\"hiz\":0}},{\"inputs\":16,\"destination\":{\"outputs\":0,\"hiz\":0},\"source\":{\"outputs\":4,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":3,\"hiz\":0},\"source\":{\"outputs\":4,\"hiz\":0}},{\"inputs\":32,\"destination\":{\"outputs\":4,\"hiz\":0},\"source\":{\"outputs\":4,\"hiz\":0}}],\"header\":{\"analyzerProgram\":\"DuPAL Analyzer\",\"PAL\":{\"IOsAsOUT\":63,\"type\":\"PAL16L8\"},\"revision\":1},\"rLinks\":[]}";
-        String json = JSONFormatter.formatJSON(new PAL16L8Specs(), 0x3F, oStates, false);
+        JSONObject jobj = JSONFormatter.formatJSON(new PAL16L8Specs(), 0x3F, oStates);
+        StringWriter strw = new StringWriter();
+        jobj.write(strw);
 
-        assertEquals("JSONFormatter should create correct JSON", expectedJson, json);
+        assertEquals("JSONFormatter should create correct JSON", expectedJson, strw.toString());
     }
 }
