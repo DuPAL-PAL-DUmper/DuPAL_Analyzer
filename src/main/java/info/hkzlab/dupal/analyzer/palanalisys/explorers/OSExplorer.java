@@ -39,13 +39,22 @@ public class OSExplorer {
                         else dpci.write(l.getLinkInputs()); 
                     }
                     curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());
+                    int w_link = (linkPath[linkPath.length-1]).getLinkInputs();
                     logger.info("exploreOutStates() -> walked path to state " + curState);
 
                     // Do some doublechecking
-                    int pins = (dpci.read() & (ioAsOutMask | pSpecs.getMask_O_R() | pSpecs.getMask_RO_R())) & ~curState.pins.hiz;
-                    int expected_pins = ((curState.pins.out & ~curState.pins.hiz) & (pSpecs.getMask_O_R() | ioAsOutMask | pSpecs.getMask_RO_R()));
-                    if(pins != expected_pins) {
-                        logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|A:%02X", expected_pins, pins)+") after walking path to state " + curState);
+                    // Extract expected outputs and actual outputs
+                    int pins = (dpci.read() & (ioAsOutMask | pSpecs.getMask_O_R() | pSpecs.getMask_RO_R()));
+                    int expected_pins = curState.pins.out & (pSpecs.getMask_O_R() | ioAsOutMask | pSpecs.getMask_RO_R());
+
+                    int cur_hiz = 0;
+                    int ioAsOut_W = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, pSpecs.getMask_IO_R()), pSpecs.getMask_IO_W()); // Generate IO as output mask for writing
+                    dpci.write(w_link | pSpecs.getMask_O_W() | ioAsOut_W);
+                    int read_forced = dpci.read();
+                    cur_hiz = (pins ^ read_forced) & (pSpecs.getMask_O_R() | ioAsOutMask);
+
+                    if((pins != expected_pins) || (curState.pins.hiz != cur_hiz)) {
+                        logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|%02X - A:%02X|%02X", expected_pins, curState.pins.hiz, pins, cur_hiz)+") after walking path to state " + curState);
                         throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState);
                     }
                     continue; // Loop again
