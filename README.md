@@ -9,7 +9,7 @@ It uses the board's *REMOTE CONTROL* mode to remotely toggle the pins and read t
 
 Despite the "DUmper" part of the name, this tool is **NOT** meant to produce 1:1 binary dumps of the content of a PAL device, it is meant as an aid to the reversing procedure of an unknown PAL, automatizing a good part of the black box analisys.
 
-It will produce a truth table that can be minimized and transformed into a list of equations that you can use to understand the workings of a PAL, and ideally produce an equivalent to program a new device.
+It will produce a JSON file containing every recorded state change of the PAL (outputs states at the beginning, applied inputs and output states at the end), that can then be converted into an espresso truth table or manipulated for further analisys.
 
 ## The Analyzer
 
