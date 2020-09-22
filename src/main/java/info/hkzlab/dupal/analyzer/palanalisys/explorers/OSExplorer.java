@@ -54,7 +54,7 @@ public class OSExplorer {
                     cur_hiz = (pins ^ read_forced) & (pSpecs.getMask_O_R() | ioAsOutMask);
 
                     if((pins != expected_pins) || (curState.pins.hiz != cur_hiz)) {
-                        logger.error("exploreOutStates() -> Mismatch in expected pins ("+String.format("E:%02X|%02X - A:%02X|%02X", expected_pins, curState.pins.hiz, pins, cur_hiz)+") after walking path to state " + curState);
+                        logger.error("exploreOutStates() -> Mismatch in expected pins (E:%02X|%02X - A:%02X|%02X) after walking path to state " + curState, expected_pins, curState.pins.hiz, pins, cur_hiz);
                         throw new DuPALAnalyzerException("exploreOutStates() -> Mismatch in expected pins after walking to state " + curState);
                     }
                     continue; // Loop again
@@ -122,7 +122,7 @@ public class OSExplorer {
             int newMask = BitUtils.scatterBitField(io_in_r, pSpecs.getMask_IO_R() ^ BitUtils.scatterBitField(io_in_w, pSpecs.getMask_IO_R()));
             newMask |= ioAsOutMask;
 
-            logger.error("An IO pin marked as input is behaving as an output. New IO mask: " + String.format("%02X", newMask));
+            logger.error("An IO pin marked as input is behaving as an output. New IO mask: %02X", newMask);
             throw new DuPALAnalyzerException("IO pin marked as input is behaving as output.");
         }
 

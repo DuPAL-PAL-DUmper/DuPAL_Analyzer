@@ -59,7 +59,7 @@ public class DuPALCmdInterface {
         res = DuPALProto.handleWRITEResponse(dpm.readResponse());
 
         if(res < 0) {
-            logger.error("write("+String.format("%08X", data)+") -> FAILED!");
+            logger.error("write(%08X) -> FAILED!", data);
             throw new DuPALBoardException("write("+String.format("%08X", data)+") command failed!");
         }
 
@@ -75,7 +75,7 @@ public class DuPALCmdInterface {
             write(data_clk);
             write(data_noclk);
         } catch(DuPALBoardException e) {
-            logger.error("Pulsing clock to insert data " + String.format("%06X", data) + " failed.");
+            logger.error("Pulsing clock to insert data %06X failed.", data);
             throw e;
         }
 
