@@ -49,8 +49,8 @@ public class PathFinderTest {
         OutState os_b = new OutState(new OutStatePins(0x01, 0x00), 3);
         OutState os_c = new OutState(new OutStatePins(0x02, 0x00), 3);
         OutState os_d = new OutState(new OutStatePins(0x03, 0x00), 3);
-        OutState os_e = new OutState(new OutStatePins(0x04, 0x00), 3, true);
-        OutState os_f = new OutState(new OutStatePins(0x05, 0x00), 3, true);
+        OutState os_e = new OutState(new OutStatePins(0x04, 0x00), 3, 3);
+        OutState os_f = new OutState(new OutStatePins(0x05, 0x00), 3, 3);
 
         os_a.addOutLink(new OutLink(os_a, os_a, 0x10));
         os_a.addOutLink(new OutLink(os_a, os_b, 0x20));

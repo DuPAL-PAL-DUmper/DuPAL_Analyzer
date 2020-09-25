@@ -77,7 +77,13 @@ public class OSExplorer {
                 nextIdx = curState.getNextRegLinkIdx();
                 nOutState = getOutStateForIdx(dpci, nextIdx, true, ioAsOutMask, maxLinks, statesMap);
                 int w_idx = calcolateWriteINFromIdx(nextIdx, pSpecs, ioAsOutMask);
-                RegLink rl = new RegLink(curState, curState.getOutLinks()[nextIdx].dest, nOutState, w_idx);
+                OutState middleState = null;
+
+                // If we have no outlinks (eg for 16R8), just use the current state as middle
+                if(curState.getOutLinks().length == 0) middleState = curState;
+                else middleState = curState.getOutLinks()[nextIdx].dest;
+
+                RegLink rl = new RegLink(curState, middleState, nOutState, w_idx);
                 curState.addRegLink(rl);
                 logger.info("exploreOutStates() -> Creating RegLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + rl);
             }
@@ -127,7 +133,7 @@ public class OSExplorer {
         }
 
         OutStatePins osp = extractOutPinStates(pSpecs, ioAsOutMask, pinState_A, pinState_B);
-        OutState os = new OutState(osp, maxLinks, (pSpecs.getPinCount_RO() > 0));
+        OutState os = new OutState(osp, ((pSpecs.getPinCount_O() + pSpecs.getPinCount_IO()) > 0 ? maxLinks : 0), (pSpecs.getPinCount_RO() > 0 ? maxLinks : 0));
 
         // Check if we already visited this state, in which case, recover that state, otherwise save the state in the map
         if(statesMap.containsKey(os.hashCode())) os = statesMap.get(os.hashCode());
