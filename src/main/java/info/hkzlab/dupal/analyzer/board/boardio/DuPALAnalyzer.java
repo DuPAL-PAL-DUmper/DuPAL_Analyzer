@@ -30,6 +30,11 @@ public class DuPALAnalyzer {
     } 
 
     public int detectIOTypeMask(final DuPALCmdInterface dpci) throws DuPALBoardException {
+        if(dpci.palSpecs.getPinCount_IO() == 0) {
+            logger.info("detectIOTypeMask -> This PAL has no IOs");
+            return 0;
+        }
+
         int ioAsOutMask = 0;
         int maxINVal = 1 << (dpci.palSpecs.getPinCount_IN() + dpci.palSpecs.getPinCount_IO());
 
