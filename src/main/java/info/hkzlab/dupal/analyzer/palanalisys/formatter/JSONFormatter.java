@@ -41,7 +41,7 @@ public class JSONFormatter {
             RegLink[] rLinks = os.getRegLinks();
 
             for(OutLink ol : oLinks) osLinks.put(buildObjectFromOutLink(ol));
-            for(RegLink rl : rLinks) osLinks.put(buildObjectFromRegLink(rl));
+            for(RegLink rl : rLinks) regLinks.put(buildObjectFromRegLink(rl));
         }
 
         rootObject.put("oLinks", osLinks);
