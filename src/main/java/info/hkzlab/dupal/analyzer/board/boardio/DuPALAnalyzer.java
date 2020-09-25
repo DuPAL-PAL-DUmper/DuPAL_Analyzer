@@ -54,7 +54,7 @@ public class DuPALAnalyzer {
                 int sub_o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, (dpci.palSpecs.getMask_IO_R())), dpci.palSpecs.getMask_IO_W());
                 int sub_writeAddr = BitUtils.scatterBitField(sub_idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField(sub_idx >> dpci.palSpecs.getPinCount_IN(), dpci.palSpecs.getMask_IO_W());
                 
-                if((sub_writeAddr & sub_o_write_mask) != 0) continue; // Skip this run, as we're tryng to set something we found to be an output
+                if((sub_writeAddr & sub_o_write_mask) != 0) continue; // Skip this run, as we're trying to set something we found to be an output
 
                 dpci.write(sub_writeAddr);
                 int pinstat = dpci.read();
