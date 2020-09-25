@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-## [0.1.0] - unknown
+## [0.1.2] - unknown
 
 - Rewrite of PAL analisys algorithm
+- Generate a JSON containing the RAW analisys results of the PAL. Table generation will be offloaded.
 
 ## [0.0.5] - 2020-08-15
 
