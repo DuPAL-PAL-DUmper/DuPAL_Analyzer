@@ -49,7 +49,7 @@ public class DuPALAnalyzer {
             if((writeAddr & o_write_mask) != 0) continue;
 
             for(int sub_idx = 0; sub_idx < maxINVal; sub_idx++) {
-                if(ioAsOutMask == dpci.palSpecs.getMask_IO_R()) break; // All the IOs we already found to be outputs, no need to continue
+                if(ioAsOutMask == dpci.palSpecs.getMask_IO_R()) return ioAsOutMask; // All the IOs we already found to be outputs, no need to continue
 
                 int sub_o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, (dpci.palSpecs.getMask_IO_R())), dpci.palSpecs.getMask_IO_W());
                 int sub_writeAddr = BitUtils.scatterBitField(sub_idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField(sub_idx >> dpci.palSpecs.getPinCount_IN(), dpci.palSpecs.getMask_IO_W());
