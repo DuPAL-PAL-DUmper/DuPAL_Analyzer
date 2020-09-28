@@ -27,13 +27,13 @@ The following PAL models are supported:
 
 #### Combinatorial
 
-- PAL10L8 *(untested)*
+- PAL10L8
 - PAL16L8
 
 #### Registered
 
-- PAL16R4 *(untested with new algorithm)*
-- PAL16R6 *(untested with new algorithm)*
+- PAL16R4
+- PAL16R6
 - PAL16R8
 
 ### Command line
