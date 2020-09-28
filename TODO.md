@@ -1,3 +1,4 @@
 # TODO List
 
-- Begin splitting out the Analisys code int submodules
+- Reintroduce save-state every X minutes while analyzing.
+- Start adding support for 24pin devices.
