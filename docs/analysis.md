@@ -47,3 +47,13 @@ PAL chips come in different variants with different features that impact their i
 - "simple" inputs
 - asynchronous feedbacks from the outputs
 - synchronous feedbacks from the registered outputs
+
+### "Simple" inputs
+
+These inputs are directly connected to an external pin of the chip, and can be directly toggled by the external circuit.
+Some pins, called I/O, can be configured to act as an input or as an output (which value then gets used as an asynchronous feedback).
+
+### Asynchronous feedbacks
+
+### Synchronous feedbacks
+
