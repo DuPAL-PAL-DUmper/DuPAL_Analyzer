@@ -39,3 +39,11 @@ Most of the chips have their PROM set to **read-protected** once programmed, mea
 
 This tool aims to automate part of the process for the last of these options.
 Ideally, a successfull analysis should recover the original equations, but we'll see how this is not always possible or straightforward.
+
+## PAL Variants
+
+PAL chips come in different variants with different features that impact their internal structure and outward capabilities:
+
+- "simple" inputs
+- asynchronous feedbacks from the outputs
+- synchronous feedbacks from the registered outputs
