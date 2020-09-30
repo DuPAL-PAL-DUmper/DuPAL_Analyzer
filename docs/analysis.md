@@ -42,18 +42,59 @@ Ideally, a successfull analysis should recover the original equations, but we'll
 
 ## PAL Variants
 
-PAL chips come in different variants with different features that impact their internal structure and outward capabilities:
+PAL chips come in different variants with different features that impact their internal structure and outward capabilities. We can differentiate their input types in 3 categories.
 
 - "simple" inputs
 - asynchronous feedbacks from the outputs
 - synchronous feedbacks from the registered outputs
 
+Only one of these types of inputs is under direct control of the external circuit.
+
 ### "Simple" inputs
 
-These inputs are directly connected to an external pin of the chip, and can be directly toggled by the external circuit.
-Some pins, called I/O, can be configured to act as an input or as an output (which value then gets used as an asynchronous feedback).
+These inputs are directly connected to an external pin of the chip, and can be toggled by the external circuit.
+Some pins, called I/O, can be configured to act as an Input or as an Output (in which case, the output value is then used as an asynchronous feedback).
 
 ### Asynchronous feedbacks
 
+This type of input is not controlled by the external circuit, but by the PAL itself. The value is taken from one of the outputs and then fed back into the logic plane. It's asynchronous because its value changes as soon as the output value tied to it changes, and this happens as soon as the inputs that feed it are modified.
+
 ### Synchronous feedbacks
 
+This type of input is similar to the *asynchronous feedback*, with the difference that the output tied to it is a **registered output** that changes its value only in correspondence of a clock pulse, and not immediately after its inputs change value.
+
+## Analysis
+
+Ideally, recovering the structure of the logic plane of a PAL would be done by feeding the logic plane every input combination and record the corresponding outputs.
+
+With such information we could then build a truth table that ties input combinations to output combinations, and from there, obtain logical equations equivalent to the ones used to program the PAL.
+
+Alas, as described above, **we are not in control of all the inputs**, so we can try only the combinations that are realistically possible on the circuit, but we **won't be able to feed the logic plane all the input combinations**.
+
+Take this set of equations, for example:
+
+```text
+o1 = /i1
+
+o2 = i1
+
+o3 = o1 * /i2 +
+     o2 *  i2
+```
+
+We see that for `o1`  to be true, `i1` must be false. We also see that for `o2` to be true, `i1` must be true. From this, we gather that we'll never see both `o1` and `o2` be true or false together.
+
+Then we have `o3`, which depends from the "simple" input `i2` and the asynchronous feedbacks of `o1` and `o2`. While we can control `i2` and set it to what we want, `o1` and `o2` are not under our control, and we cannot try every possible combination.
+
+```text
+i2 o1 o2      o3
+ 0  0  1       0
+ 1  0  1       1
+ 0  1  0       1
+ 1  1  0       0
+
+ 0  0  0       Impossible to test
+ 1  0  0       Impossible to test
+ 0  1  1       Impossible to test
+ 1  1  1       Impossible to test
+```
