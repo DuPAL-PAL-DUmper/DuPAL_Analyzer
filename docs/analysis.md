@@ -98,3 +98,59 @@ i2 o1 o2      o3
  0  1  1       Impossible to test
  1  1  1       Impossible to test
 ```
+
+Now, let's create an input table for `espresso` containing only the combinations we can test, and save it to an `example.tbl` file:
+
+```text
+.i 3
+.o 1
+.ilb i2 o1 o2
+.ob o3
+.phase 1
+
+001 0
+101 1
+010 1
+110 0
+.e
+```
+
+And let's minimize it to obtain the corresponding equations:
+
+```sh
+$ espresso -Dexact -oeqntott example.tbl
+o3 = (i2&!o1&o2) | (!i2&o1&!o2);
+```
+
+The equations are **different from the ones we used to program the PAL**, and yet, they respect the limited truth of the combinations that can be obtained on the chip while inserted in the circuit. The reason for this is that the minimizer did not have the result for all the 8 combinations (2^3 = 8) of inputs to rebuild the table.
+
+For the sake of example, let's try to build a table with the remaining combinations:
+
+```text
+.i 3
+.o 1
+.ilb i2 o1 o2
+.ob o3
+.phase 1
+
+001 0
+101 1
+010 1
+110 0
+000 0
+100 0
+011 1
+111 1
+.e
+```
+
+Then let's try to minimize it:
+
+```sh
+$ espresso -Dexact -oeqntott test3.tbl
+o3 = (!i2&o1) | (i2&o2);
+```
+
+With the full set of combinations at hand, the minimizer will give back the original equations.
+
+So, we'll have to make ourselves content in trying all the possible combinations of feedbacks that the PAL can produce while in-circuit.
