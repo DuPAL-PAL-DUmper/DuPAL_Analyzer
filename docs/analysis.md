@@ -147,10 +147,33 @@ For the sake of example, let's try to build a table with the remaining combinati
 Then let's try to minimize it:
 
 ```sh
-$ espresso -Dexact -oeqntott test3.tbl
+$ espresso -Dexact -oeqntott full-table.tbl
 o3 = (!i2&o1) | (i2&o2);
 ```
 
 With the full set of combinations at hand, the minimizer will give back the original equations.
 
 So, we'll have to make ourselves content in trying all the possible combinations of feedbacks that the PAL can produce while in-circuit.
+
+### A representation of the PAL
+
+To analyze all the possible states of a PAL device we can draw a directed **graph**:
+
+- Every vertex in the graph represents a combination of the **outputs** of the PAL
+- Every edge is associated with a combination of the (simple, directly modifiable) **inputs** of the PAL
+
+With this representation, we can see, for every state of the PAL, how the outputs (and, as a consequence, the feedbacks) change depending on the inputs. Obviously we'll have 2^x edges out of a vertex, where x is the number of the inputs to the PAL (Actually, if the PAL has synchronous AND asynchronous feedbacks, every combination will have to be tried twice, once with a clock pulse and once without, getting a total of 2*2^x edges per vertex).
+
+#### The Map analogy
+
+To build the graph, we can use this analogy: Imagine You get parachuted in the middle of a city with the mission to map every connection this city has with neighbouring cities. Every road out of the city is one-way, and there are no road signs to tell you where every road goes. A road could very well loop you back to the city you are attempting to leave. To draw a map you could follow this simple algorithm:
+
+0. Look around and note in which city you're in as a start.
+1. Search for an yet-unexplored road out of the the current city
+   - Have you found an unexplored road? Go to 2.
+   - Have you not found one? Search on the map you have already drawn for the shortest road that gets you to a city with still unexplored roads
+      - Found a path? Follow it and go back to 1.
+      - No path? Then we're finished. You have a complete map of all the roads.
+2. Follow the road you found at the previous step. Remember to draw a line from the city you depart to the city you get to (which could very well be the same), and not the road number. Go back to 1.
+
+This is exactly the same procedure we follow while analyzing a PAL. Obviously, there could be cities not connected by roads (the unreachable states). Those will never be reachable in reality, but they will still cause our map to be incomplete.
