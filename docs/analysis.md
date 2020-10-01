@@ -166,7 +166,7 @@ With this representation, we can see, for every state of the PAL, how the output
 
 #### The Map analogy
 
-To build the graph, we can use this analogy: Imagine You get parachuted in the middle of a city with the mission to map every connection this city has with neighbouring cities. Every road out of the city is one-way, and there are no road signs to tell you where every road goes. A road could very well loop you back to the city you are attempting to leave. To draw a map you could follow this simple algorithm:
+To build the graph, we can use this analogy: Imagine You get parachuted in the middle of a city with the mission to map every connection this city has with neighbouring cities and then the connections the neighbouring cities have between themselves. Every road out of a city is one-way, and there are no road signs to tell you where every road goes. A road could very well loop you back to the city you are attempting to leave. To draw a map you could follow this simple algorithm:
 
 0. Look around and note in which city you're in as a start.
 1. Search for an yet-unexplored road out of the the current city
