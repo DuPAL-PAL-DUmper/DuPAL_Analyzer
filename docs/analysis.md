@@ -174,6 +174,6 @@ To build the graph, we can use this analogy: Imagine You get parachuted in the m
    - Have you not found one? Search on the map you have already drawn for the shortest road that gets you to a city with still unexplored roads
       - Found a path? Follow it and go back to 1.
       - No path? Then we're finished. You have a complete map of all the roads.
-2. Follow the road you found at the previous step. Remember to draw a line from the city you depart to the city you get to (which could very well be the same), and not the road number. Go back to 1.
+2. Follow the road you found at the previous step. Remember to draw a line from the city you depart to the city you get to (which could very well be the same), and note the road number. Go back to 1.
 
 This is exactly the same procedure we follow while analyzing a PAL. Obviously, there could be cities not connected by roads (the unreachable states). Those will never be reachable in reality, but they will still cause our map to be incomplete.
