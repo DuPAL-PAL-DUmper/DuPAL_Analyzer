@@ -8,11 +8,11 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Programmable_Array_Logic):
 >
 > PAL devices consisted of a small PROM (programmable read-only memory) core and additional output logic used to implement particular desired logic functions with few components.
 
-This PROM is used to implement a programmable logic plane that routes the signal present on input pins (and on the feedbacks from the outputs) to the output logic macrocells.
+This PROM is used to implement a programmable logic plane that routes the signals present on input pins (and the feedbacks from the outputs) to the output macrocells.
 
 This plane is arranged in a **fixed-OR, programmable-AND** configuration,  and is used to implement a binary logic equation for every output pin in the form of **sum-of-products**.
 
-In short, PAL chips programmable content can be defined as a set of equation like the following:
+In short, PAL chips programmable content can be defined as a set of equations like the following:
 
 ```text
 /o13 = /i9 & /i11 & o17 +
@@ -31,10 +31,10 @@ o14.oe = i6 & i7 & /i9 & o18
 o15.oe = i1 & i6 & i7 & /i9
 ```
 
-Most of the chips have their PROM set to **read-protected** once programmed, meaning their content cannot be trivially recovered and leaving a party interested in the recovery with just a few options:
+Once programmed, most of the chips have their PROM set to **read-protected**, meaning their content cannot be trivially recovered and leaving a party interested in the recovery with just a few options:
 
 - Decapping the chip and using a microscope to analyze the PROM
-- There are stories around where a PROM can be glitched to disable read protection, but I've never found the details
+- There are stories around where a PROM can be glitched to disable read protection, but I've never found meaningful details
 - **Blackbox analysis**
 
 This tool aims to automate part of the process for the last of these options.
@@ -42,7 +42,7 @@ Ideally, a successfull analysis should recover the original equations, but we'll
 
 ## PAL Variants
 
-PAL chips come in different variants with different features that impact their internal structure and outward capabilities. We can differentiate their input types in 3 categories.
+PAL chips come in different variants, each with different mix-and-match features that impact their internal structure and outward capabilities. For our analysis, we can differentiate them according to their inputs, ending up with 3 categories:
 
 - "simple" inputs
 - asynchronous feedbacks from the outputs
@@ -52,22 +52,26 @@ Only one of these types of inputs is under direct control of the external circui
 
 ### "Simple" inputs
 
-These inputs are directly connected to an external pin of the chip, and can be toggled by the external circuit.
-Some pins, called I/O, can be configured to act as an Input or as an Output (in which case, the output value is then used as an asynchronous feedback).
+These inputs are directly connected to an external pin of the chip, and can be piloted by an external stimulus.
+Some pins, called I/O, can be programmed to act as an Input or as an Output (in which case, the output value is then used as an asynchronous feedback).
 
 ### Asynchronous feedbacks
 
-This type of input is not controlled by the external circuit, but by the PAL itself. The value is taken from one of the outputs and then fed back into the logic plane. It's asynchronous because its value changes as soon as the output value tied to it changes, and this happens as soon as the inputs that feed it are modified.
+This type of input is not piloted directly by the external circuit: it is a function of the other inputs and is piloted by the PAL itself.
+
+The value is taken from one of the outputs and then fed back into the logic plane. It's asynchronous because its value changes as soon as the output value tied to it changes, and this happens immediately after inputs that feed the function that define this outputs it are modified.
 
 ### Synchronous feedbacks
 
 This type of input is similar to the *asynchronous feedback*, with the difference that the output tied to it is a **registered output** that changes its value only in correspondence of a clock pulse, and not immediately after its inputs change value.
 
+The function that calculates the value of the output whose value is feed back into the plane, is computed only at a clock pulse.
+
 ## Analysis
 
 Ideally, recovering the structure of the logic plane of a PAL would be done by feeding the logic plane every input combination and record the corresponding outputs.
 
-With such information we could then build a truth table that ties input combinations to output combinations, and from there, obtain logical equations equivalent to the ones used to program the PAL.
+With such information we could then build a truth table that ties input combinations to output values, and from there, obtain logical equations equivalent to the ones used to program the PAL.
 
 Alas, as described above, **we are not in control of all the inputs**, so we can try only the combinations that are realistically possible on the circuit, but we **won't be able to feed the logic plane all the input combinations**.
 
