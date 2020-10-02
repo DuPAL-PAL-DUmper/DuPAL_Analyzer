@@ -28,6 +28,8 @@ In short, PAL chips programmable content can be defined as a set of equations li
        /i6 & /o14
 ```
 
+**Note:** The `&` is an AND, the `+` is an OR, the `/` is a NOT and the `/` on the result of the equation indicates that the pin is active-low.
+
 Once programmed, most of the chips have their PROM set to **read-protected**, meaning their content cannot be trivially recovered and leaving a party interested in the recovery with just a few options:
 
 - Decapping the chip and using a microscope to analyze the PROM
