@@ -69,7 +69,7 @@ The function that calculates the value of the output whose value is feed back in
 
 ## Analysis
 
-Ideally, recovering the structure of the logic plane of a PAL would be done by feeding the logic plane every input combination and record the corresponding outputs.
+Ideally, recovering the structure of the logic plane of a PAL would be done by feeding the logic plane every input combination and recording the corresponding outputs.
 
 With such information we could then build a truth table that ties input combinations to output values, and from there, obtain logical equations equivalent to the ones used to program the PAL.
 
