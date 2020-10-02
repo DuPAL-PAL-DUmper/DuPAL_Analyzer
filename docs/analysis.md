@@ -18,17 +18,14 @@ In short, PAL chips programmable content can be defined as a set of equations li
 /o13 = /i9 & /i11 & o17 +
        /i7 & /i11 +
        /i6 & /i11
-o13.oe = i6 & i7 & /i9 & o17
 
 /o14 = /i9 & /o13 & o18 +
        /i7 & /o13 +
        /i6 & /o13
-o14.oe = i6 & i7 & /i9 & o18
 
 /o15 = i1 & /i9 & /o14 +
        /i7 & /o14 +
        /i6 & /o14
-o15.oe = i1 & i6 & i7 & /i9
 ```
 
 Once programmed, most of the chips have their PROM set to **read-protected**, meaning their content cannot be trivially recovered and leaving a party interested in the recovery with just a few options:
