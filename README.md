@@ -29,6 +29,7 @@ The following PAL models are supported:
 
 - PAL10L8
 - PAL16L8
+- PAL20L8
 
 #### Registered
 
