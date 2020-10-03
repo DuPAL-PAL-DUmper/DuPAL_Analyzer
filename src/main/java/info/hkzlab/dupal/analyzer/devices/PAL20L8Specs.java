@@ -31,7 +31,7 @@ public class PAL20L8Specs implements PALSpecs {
 
     @Override
     public int getMask_IN() {
-        return 0x3FF;
+        return 0x3C03FF;
     }
 
     @Override
