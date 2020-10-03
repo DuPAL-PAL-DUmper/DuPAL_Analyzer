@@ -12,7 +12,8 @@ public class App {
                                                  PAL16R6Specs.PAL_TYPE,
                                                  PAL16R4Specs.PAL_TYPE,
                                                  PAL16L8Specs.PAL_TYPE,
-                                                 PAL10L8Specs.PAL_TYPE };
+                                                 PAL10L8Specs.PAL_TYPE,
+                                                 PAL20L8Specs.PAL_TYPE };
 
     private final static Logger logger = LoggerFactory.getLogger(App.class);
 
