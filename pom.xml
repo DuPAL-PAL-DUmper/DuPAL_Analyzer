@@ -6,7 +6,7 @@
 
   <groupId>info.hkzlab.dupal.analyzer</groupId>
   <artifactId>dupal-analyzer</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
 
   <name>dupal-analyzer</name>
   <url>https://github.com/DuPAL-PAL-DUmper</url>
