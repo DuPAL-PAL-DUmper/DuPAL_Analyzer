@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-## [0.1.2] - unknown
+## [0.1.3] - unknown
+
+- Add PAL20L8 support
+
+## [0.1.2] - 2020-09-28
 
 - Rewrite of PAL analisys algorithm
 - Generate a JSON containing the RAW analisys results of the PAL. Table generation will be offloaded.
