@@ -4,10 +4,10 @@ public class PAL10L8Specs implements PALSpecs {
 
     public static final String PAL_TYPE = "10L8";
 
-    private static final String[] LABELS_RO = { };
+    private static final String[] LABELS_RO =  { };
     private static final String[] LABELS_IN =  {  "i1",  "i2",  "i3",  "i4",  "i5",  "i6",  "i7",  "i8",  "i9", "i11",   null,   null,   null,   null,   null,   null,   null,   null };
     private static final String[] LABELS_IO =  { };
-    private static final String[] LABELS_O  = {  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,   null,  "o17",   "o16",   "o15",   "o14",   "o13",  "o19",  "o12" };
+    private static final String[] LABELS_O  =  {  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,  "o18",  "o17",   "o16",   "o15",   "o14",   "o13",  "o19",  "o12" };
 
     @Override
     public String toString() {
