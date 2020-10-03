@@ -7,7 +7,7 @@ public class PAL20L8Specs implements PALSpecs {
     private static final String[] LABELS_RO = { };
     private static final String[] LABELS_IN =  {  "i1",  "i2",  "i3",  "i4",  "i5",  "i6",  "i7",  "i8",  "i9", "i10",   null,   null,   null,   null,   null,   null,   null,   null,  "i11",  "i13",  "i14",  "i23" };
     private static final String[] LABELS_IO =  {  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,   null, "io16", "io17", "io18", "io19", "io20", "io21",   null,   null,   null,   null,   null };
-    private static final String[] LABELS_O  = {  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,   "o15",   null,   null,   null,   null,   null,   null,  "o22",   null,   null,   null,   null };
+    private static final String[] LABELS_O  = {   null,  null,  null,  null,  null,  null,  null,  null,  null,  null,  "o15",   null,   null,   null,   null,   null,   null,  "o22",   null,   null,   null,   null };
 
     @Override
     public String toString() {
@@ -36,12 +36,12 @@ public class PAL20L8Specs implements PALSpecs {
 
     @Override
     public int getMask_IO_R() {
-        return 0x3F;
+        return 0x7E;
     }
 
     @Override
     public int getMask_IO_W() {
-        return 0xFC00;
+        return 0x1F800;
     }
 
     @Override
