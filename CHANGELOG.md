@@ -5,6 +5,7 @@
 ## [0.1.3] - unknown
 
 - Add PAL20L8 support
+- Check that the output path is not pointing to an existing file nor to a directory
 
 ## [0.1.2] - 2020-09-28
 
