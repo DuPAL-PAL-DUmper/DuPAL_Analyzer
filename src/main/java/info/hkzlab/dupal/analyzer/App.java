@@ -1,5 +1,6 @@
 package info.hkzlab.dupal.analyzer;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.slf4j.*;
@@ -78,6 +79,25 @@ public class App {
 
         if(args.length >= 4) {
             outMask = Integer.parseInt(args[3], 16);
+        }
+
+        checkOutPath(outFile);
+    }
+
+    private static void checkOutPath(String path) {
+        File file = new File(path);
+
+        boolean exists = file.exists();
+        boolean isDirectory = file.isDirectory();
+
+        if(isDirectory) {
+            logger.error("Output path " + path + " points to a directory, please specify an output file!");
+            System.exit(-1);
+        }
+
+        if(exists) {
+            logger.error("Output path " + path + " points to an existing file. We're not going to overwrite it!");
+            System.exit(-1);
         }
     }
 }
