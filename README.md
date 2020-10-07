@@ -36,6 +36,9 @@ The following PAL models are supported:
 - PAL16R4
 - PAL16R6
 - PAL16R8
+- PAL20R4
+- PAL20R6
+- PAL20R8
 
 ### Command line
 
