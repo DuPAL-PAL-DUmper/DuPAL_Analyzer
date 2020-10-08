@@ -29,18 +29,18 @@ public class OSExplorer {
         while(curState != null) {
             // If we ended up in a state where all the links have already been explored...
             if(curState.isStateFull()) {
-                logger.info("exploreOutStates() -> " + curState + " is full.");
+                logger.debug("exploreOutStates() -> " + curState + " is full.");
                 GraphLink[] linkPath = PathFinder.findPathToNearestUnfilledState(curState);
                 if(linkPath != null && linkPath.length > 0) {
                     for(GraphLink l : linkPath) {
-                        logger.info("exploreOutStates() -> Walking link " + l);
+                        logger.debug("exploreOutStates() -> Walking link " + l);
                         // Now let's walk the path, with proper actions depending on the type of link
                         if(l.isFarLink()) dpci.writeAndPulseClock(l.getLinkInputs()); 
                         else dpci.write(l.getLinkInputs()); 
                     }
                     curState = (OutState) (linkPath[linkPath.length-1].getDestinationState());
                     int w_link = (linkPath[linkPath.length-1]).getLinkInputs();
-                    logger.info("exploreOutStates() -> walked path to state " + curState);
+                    logger.debug("exploreOutStates() -> walked path to state " + curState);
 
                     // Do some doublechecking
                     // Extract expected outputs and actual outputs
@@ -72,7 +72,7 @@ public class OSExplorer {
                 OutLink ol = new OutLink(curState, nOutState, w_idx);
                 curState.addOutLink(ol);
             
-                logger.info("exploreOutStates() -> Creating OutLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
+                logger.debug("exploreOutStates() -> Creating OutLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + ol);
             } else { // We'll get a RegLink
                 nextIdx = curState.getNextRegLinkIdx();
                 nOutState = getOutStateForIdx(dpci, nextIdx, true, ioAsOutMask, maxLinks, statesMap);
@@ -85,7 +85,7 @@ public class OSExplorer {
 
                 RegLink rl = new RegLink(curState, middleState, nOutState, w_idx);
                 curState.addRegLink(rl);
-                logger.info("exploreOutStates() -> Creating RegLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + rl);
+                logger.debug("exploreOutStates() -> Creating RegLink ["+nextIdx+"/"+(maxLinks-1)+"] - " + rl);
             }
 
 

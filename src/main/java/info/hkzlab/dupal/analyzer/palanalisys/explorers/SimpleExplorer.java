@@ -31,7 +31,7 @@ public class SimpleExplorer {
             SimpleState ss = new SimpleState(w_idx, read_a, (read_a ^ read_b));
             ssList.add(ss);
 
-            logger.info("exploreStates() -> Generated " + ss);
+            logger.debug("exploreStates() -> Generated " + ss);
         }
 
         return ssList.toArray(new SimpleState[ssList.size()]);

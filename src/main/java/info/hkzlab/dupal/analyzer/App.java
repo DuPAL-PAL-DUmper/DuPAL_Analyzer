@@ -36,7 +36,7 @@ public class App {
     private static String outFile = null;
 
     public static void main(String[] args) throws Exception {
-        System.out.println("DuPAL Analyzer " + version);
+        logger.info("DuPAL Analyzer " + version);
 
         if (args.length < 3) {
             StringBuffer supportedPALs = new StringBuffer();
@@ -59,7 +59,7 @@ public class App {
         DuPALAnalyzer dpan = new DuPALAnalyzer(dpci, outMask, outFile);
 
         if (!dpm.enterRemoteMode()) {
-            System.out.println("Unable to put DuPAL board in REMOTE MODE!");
+            logger.error("Unable to put DuPAL board in REMOTE MODE!");
             System.exit(-1);
         } 
 

@@ -46,8 +46,10 @@ public class DuPALAnalyzer {
             int o_write_mask = BitUtils.scatterBitField(BitUtils.consolidateBitField(ioAsOutMask, (dpci.palSpecs.getMask_IO_R())), dpci.palSpecs.getMask_IO_W());
             int writeAddr = BitUtils.scatterBitField(idx, dpci.palSpecs.getMask_IN()) | BitUtils.scatterBitField((idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_W());
             
+            // Skip this run if we end up trying to write on an output pin
             if((writeAddr & o_write_mask) != 0) continue;
 
+            // Try all input combinations in this state
             for(int sub_idx = 0; sub_idx < maxINVal; sub_idx++) {
                 if(ioAsOutMask == dpci.palSpecs.getMask_IO_R()) return ioAsOutMask; // All the IOs we already found to be outputs, no need to continue
 
@@ -61,12 +63,14 @@ public class DuPALAnalyzer {
 
                 ioAsOutMask |= (pinstat ^ BitUtils.scatterBitField((sub_idx >> dpci.palSpecs.getPinCount_IN()), dpci.palSpecs.getMask_IO_R())) & dpci.palSpecs.getMask_IO_R();
                 
-                logger.info(String.format("detectIOTypeMask -> idx: C(%06X) -> S(%06X) | M[%06X]", sub_idx, sub_writeAddr, ioAsOutMask));
+                logger.debug(String.format("detectIOTypeMask -> idx: C(%06X) -> S(%06X) | M[%02X]", sub_idx, sub_writeAddr, ioAsOutMask));
             }
+
+            logger.info(String.format("detectIOTypeMask -> Currently detected mask is %02X", ioAsOutMask));
 
             if(dpci.palSpecs.getPinCount_RO() == 0) break; // No need to try multiple registered states
 
-            logger.info("detectIOTypeMask -> Pulsing clock with address " + String.format("%06X", writeAddr));
+            logger.debug("detectIOTypeMask -> Pulsing clock with address " + String.format("%06X", writeAddr));
             dpci.writeAndPulseClock(writeAddr);
         }
 
@@ -104,7 +108,7 @@ public class DuPALAnalyzer {
             } else { // Either registered, or with feedbacks
                 if(ioAsOutMask < 0) {
                     ioAsOutMask = detectIOTypeMask(dpci);
-                    logger.info("startAnalisys() -> Detected the following IO Type mask: " + String.format("%06X", ioAsOutMask));
+                    logger.info("Detected the following IO as Outputs mask: " + String.format("%02X", ioAsOutMask));
                 }
                 
                 OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
