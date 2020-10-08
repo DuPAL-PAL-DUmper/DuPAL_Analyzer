@@ -39,7 +39,7 @@ public class DuPALAnalyzer {
         int maxINVal = 1 << (dpci.palSpecs.getPinCount_IN() + dpci.palSpecs.getPinCount_IO());
 
         logger.info("detectIOTypeMask -> Starting IO type detection... This could take a while.");
-        logger.info("detectIOTypeMask -> Highest address for input pins: " + String.format("%06X", maxINVal-1));
+        logger.debug("detectIOTypeMask -> Highest address for input pins: " + String.format("%06X", maxINVal-1));
 
         for(int idx = 0; idx < maxINVal; idx++) {
 
