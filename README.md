@@ -78,6 +78,16 @@ Setting the mask to `0x02`, for example, will notify the analyzer that pin 17 on
 
 Pay attention to the weird position for pin 19, that position is caused by a desire to save a few lines on the firmware.
 
+#### Debugging and verbosity
+
+If you wish to increase the verbosity of the analyzer, add the following parameter to the `java` command:
+
+```text
+-D"org.slf4j.simpleLogger.defaultLogLevel=debug"
+```
+
+Substitute `debug` with `trace` for an even increased verbosity. The default for this parameter is `info`.
+
 #### Requirements
 
 Make sure you have at least a **Java 1.8** compatible JRE installed and have access to your serial port devices (In linux it's usually sufficient to add your user to the `dialout` group).
