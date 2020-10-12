@@ -158,6 +158,42 @@ With the full set of combinations at hand, the minimizer will give back the orig
 
 So, we'll have to make ourselves content in trying all the possible combinations of feedbacks that the PAL can produce while in-circuit.
 
+---
+
+Another issue worth mentioning is **unstable states**.
+Suppose we have the following equations that define an output in a PAL:
+
+```text
+/o18 = /i9 +
+       /i2 & /i3 & i4 & i6 & i7 & /i8 +
+       fio15 & /fio18
+
+/o15 = /i2 & i3 & i4 & i6 & i7 & /i8
+```
+
+`fio15` and `fio18` are the feedbacks from `o15` and `o18` outputs. Suppose that `fio15` is `true` and `fio18` is `false` (so that `/fio18` is `true`). In this condition, `/o18` is in a stable true condition.
+
+We now set the following inputs:
+
+```text
+i2 = 0 ===> /i2 = 1
+i3 = 1
+i4 = 1
+i6 = 1
+i7 = 1
+i8 = 0 ===> /i8 = 1
+i9 = 1
+```
+
+And, considering the feedbacks:
+
+```text
+fio15 = 1
+fio18 = 0 ===> /fio18 = 1
+```
+
+One would say that `/o18` is going to remain `true`, but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes true, so `fio15` becomes false, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too .
+
 ### A representation of the PAL
 
 To analyze all the possible states of a PAL device we can draw a directed **graph**:
