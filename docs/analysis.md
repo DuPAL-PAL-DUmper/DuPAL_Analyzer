@@ -192,7 +192,7 @@ fio15 = 1
 fio18 = 0 ===> /fio18 = 1
 ```
 
-One would say that `/o18` is going to remain `true`, but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes true, so `fio15` becomes false, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too .
+One would say that `/o18` is going to remain `true`, but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes true, so `fio15` becomes false, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too.
 
 ### A representation of the PAL
 
