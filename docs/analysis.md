@@ -161,7 +161,7 @@ So, we'll have to make ourselves content in trying all the possible combinations
 ---
 
 Another issue worth mentioning is what I call **multi-step states**.
-Suppose we have the following equations that define an output in a PAL:
+Suppose we have the following equations that define outputs in a PAL:
 
 ```text
 /o18 = /i9 +
