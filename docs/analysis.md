@@ -160,7 +160,7 @@ So, we'll have to make ourselves content in trying all the possible combinations
 
 ---
 
-Another issue worth mentioning is **unstable states**.
+Another issue worth mentioning is what I call **multi-step states**.
 Suppose we have the following equations that define an output in a PAL:
 
 ```text
@@ -171,28 +171,32 @@ Suppose we have the following equations that define an output in a PAL:
 /o15 = /i2 & i3 & i4 & i6 & i7 & /i8
 ```
 
-`fio15` and `fio18` are the feedbacks from `o15` and `o18` outputs. Suppose that `fio15` is `true` and `fio18` is `false` (so that `/fio18` is `true`). In this condition, `/o18` is in a stable true condition.
+`fio15` and `fio18` are the feedbacks from `o15` and `o18` outputs.
+
+Suppose that `fio15` is currently `true` and `fio18` is `false` (so that `/fio18` is `true`). In this condition, `/o18` is in a stable `true` condition.
 
 We now set the following inputs:
 
 ```text
-i2 = 0 ===> /i2 = 1
-i3 = 1
-i4 = 1
-i6 = 1
-i7 = 1
-i8 = 0 ===> /i8 = 1
-i9 = 1
+i2 = false ===> /i2 = true
+i3 = true
+i4 = true
+i6 = true
+i7 = true
+i8 = false ===> /i8 = true
+i9 = true
 ```
 
-And, considering the feedbacks:
+And, considering the feedbacks as the remaining inputs:
 
 ```text
-fio15 = 1
-fio18 = 0 ===> /fio18 = 1
+fio15 = true
+fio18 = false ===> /fio18 = true
 ```
 
-One would say that `/o18` is going to remain `true`, but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes true, so `fio15` becomes false, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too.
+One would say that `/o18` is going to remain `true` (as both `fio15` and `/fio18` are `true`), but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes `true`, so `fio15` becomes `false`, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too.
+
+So, even though we started from a condition that should have given us a `true` for `/o18`, a feedback changed our conditions as an intermediate step.
 
 ### A representation of the PAL
 
