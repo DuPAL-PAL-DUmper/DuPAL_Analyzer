@@ -4,7 +4,7 @@
 
 ## [0.1.3] - unknown
 
-- Add PAL20L8, 20R4, 20R6 and 20R8 support
+- Add PAL20L8, 20R4, 20R6, 20R8 and 12H6 support
 - Check that the output path is not pointing to an existing file nor to a directory
 - Tweaked log levels
 
