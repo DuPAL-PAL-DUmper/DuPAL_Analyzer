@@ -66,7 +66,7 @@ This type of input is similar to the *asynchronous feedback*, with the differenc
 
 The function that calculates the value of the output whose value is feed back into the plane, is computed only at a clock pulse.
 
-## Analysis
+## Analysis & Limitations
 
 Ideally, recovering the structure of the logic plane of a PAL would be done by feeding the logic plane every input combination and recording the corresponding outputs.
 
@@ -160,7 +160,7 @@ So, we'll have to make ourselves content in trying all the possible combinations
 
 ---
 
-Another issue worth mentioning is what I call **multi-step states**.
+Another issue worth mentioning is what I call **intermediate states**.
 Suppose we have the following equations that define outputs in a PAL:
 
 ```text
@@ -197,6 +197,26 @@ fio18 = false ===> /fio18 = true
 One would say that `/o18` is going to remain `true` (as both `fio15` and `/fio18` are `true`), but what happens is that `/o15 = /i2 & i3 & i4 & i6 & i7 & /i8` becomes `true`, so `fio15` becomes `false`, making `fio15 & /fio18` false, and thus `/o18` is going to become `false` too.
 
 So, even though we started from a condition that should have given us a `true` for `/o18`, a feedback changed our conditions as an intermediate step.
+
+---
+
+Another important limitations is that the DuPAL Board is able to capture **ONLY STABLE STATES**, if a PAL has an output that is continuously flipping state because it's piloted by an equation like
+
+```text
+o18 = /o18
+```
+
+then the board won't be able to capture it properly.
+
+Intermediate states are also impossible to capture with the current hardware: as in the previous example, when we have a situation with intermediate states, what will happen is the following
+
+1. Inputs will be set on the PAL
+2. Outputs will change accordingly (Intermediate state)
+3. Feedbacks of the outputs will be fed back into the PAL
+4. Outputs will change again. Repeat 3/4 until we reach a stable combination
+5. Stable state reached (this will be captured by the DuPAL Board)
+
+It may be possible to capture the intermediate state **if the outputs are sampled quickly enough** (the timing is also dependent on the type of PAL being under analisys). This might prove to be helpful with PALs that are using feedbacks extensively, but **it will require a new hardware project and a new firmware** and also a new analysis procedure.
 
 ### A representation of the PAL
 
