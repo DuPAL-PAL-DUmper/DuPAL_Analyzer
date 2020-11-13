@@ -11,6 +11,10 @@ Despite the "DUmper" part of the name, this tool is **NOT** meant to produce 1:1
 
 It will produce a JSON file containing every recorded state change of the PAL (outputs states at the beginning, applied inputs and output states at the end), that can then be converted into an espresso truth table or manipulated for further analisys.
 
+### Limitations
+
+The current DuPAL hardware is able to register only **STABLE** states out of a PAL device. To see what this means, please have a look at the [analysis](docs/analysis.md) document.
+
 ## The Analyzer
 
 The analyzer lets the user select which type of PAL is inserted in the board's ZIF socket, whether the IO pins that are set as outputs are known (which saves some time by avoiding autodetection), what is the board's serial interface, and where to save the output file.
