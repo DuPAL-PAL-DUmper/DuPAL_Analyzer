@@ -109,15 +109,18 @@ public class DuPALAnalyzer {
                 if(ioAsOutMask < 0) {
                     ioAsOutMask = detectIOTypeMask(dpci);
                     logger.info("Detected the following IO as Outputs mask: " + String.format("%02X", ioAsOutMask));
-                }
-                
-                OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+                    logger.info("Now, turn OFF and ON again the DuPAL to reset the PAL and run this tool again by specifying the mask and output file.");
 
-                logger.info("Got " + osArray.length + " output states!");
-                formatterOutput = JSONFormatter.formatJSON(dpci.palSpecs, ioAsOutMask, osArray);
+                    return;
+                } else {
+                    OutState[] osArray = OSExplorer.exploreOutStates(dpci, ioAsOutMask);
+
+                    logger.info("Got " + osArray.length + " output states!");
+                    formatterOutput = JSONFormatter.formatJSON(dpci.palSpecs, ioAsOutMask, osArray);
+                }
             }
 
-            saveOutputToFile(outFile, formatterOutput);
+            if(outFile != null) saveOutputToFile(outFile, formatterOutput);
         } catch(Exception e) {
             throw e;
         } finally {

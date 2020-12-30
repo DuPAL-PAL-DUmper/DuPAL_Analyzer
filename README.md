@@ -49,7 +49,7 @@ The following PAL models are supported:
 The format for command line execution is the following:
 
 ```text
-java -jar /path/to/dupal_analyzer.jar <serial_port> <pal_type> <output_file> [hex_output_mask]
+java -jar /path/to/dupal_analyzer.jar <serial_port> <pal_type> [<output_file> hex_output_mask]
 ```
 
 - **serial_port:** is just the serial port to use to connect to the DuPAL board. Connection is hardcoded at **57600bps 8n1** without flow control.

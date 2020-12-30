@@ -2,6 +2,8 @@ package info.hkzlab.dupal.analyzer.palanalisys.formatter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import info.hkzlab.dupal.analyzer.devices.PALSpecs;
 import info.hkzlab.dupal.analyzer.palanalisys.graph.*;
@@ -9,6 +11,7 @@ import info.hkzlab.dupal.analyzer.palanalisys.simple.SimpleState;
 
 public class JSONFormatter {
     public static final int JSON_FORMAT_REVISION = 2;
+    private static final Logger logger = LoggerFactory.getLogger(JSONFormatter.class);
 
     private JSONFormatter() {};
    
@@ -41,8 +44,16 @@ public class JSONFormatter {
             OutLink[] oLinks = os.getOutLinks();
             RegLink[] rLinks = os.getRegLinks();
 
-            for(OutLink ol : oLinks) osLinks.put(buildObjectFromOutLink(ol));
-            for(RegLink rl : rLinks) regLinks.put(buildObjectFromRegLink(rl));
+            for(int idx = 0; idx < oLinks.length; idx++)  {
+                if(oLinks[idx] != null) osLinks.put(buildObjectFromOutLink(oLinks[idx]));
+                else logger.warn("formatJSON -> oLink "+idx+" is null in " + os + "!");
+            }
+
+           for(int idx = 0; idx < rLinks.length; idx++)  {
+                if(rLinks[idx] != null) regLinks.put(buildObjectFromRegLink(rLinks[idx]));
+                else logger.warn("formatJSON -> rLink "+idx+" is null in " + os + "!");
+            }
+
             osStates.put(buildObjectFromPINs(os.pins));
         }
 

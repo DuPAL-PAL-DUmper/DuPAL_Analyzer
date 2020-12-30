@@ -218,6 +218,10 @@ Intermediate states are also impossible to capture with the current hardware: as
 
 It may be possible to capture the intermediate state **if the outputs are sampled quickly enough** (the timing is also dependent on the type of PAL being under analisys). This might prove to be helpful with PALs that are using feedbacks extensively, but **it will require a new hardware project and a new firmware** and also a new analysis procedure.
 
+---
+
+Currently, if the PAL is programmed in such a way that it can only come out of a state (for example, the state it is in right after power up), but never come back into it again via a combination of inputs, we won't be able to perform a complete map of the states graph.
+
 ### A representation of the PAL
 
 To analyze all the possible states of a PAL device we can draw a directed **graph**:

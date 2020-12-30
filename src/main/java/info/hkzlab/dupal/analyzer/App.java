@@ -39,7 +39,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         logger.info("DuPAL Analyzer " + version);
 
-        if (args.length < 3) {
+        if (args.length < 2) {
             StringBuffer supportedPALs = new StringBuffer();
 
             for(String palT : palTypes) {
@@ -47,7 +47,7 @@ public class App {
             }
 
             logger.error("Wrong number of arguments passed.\n"
-                    + "dupal_analyzer <serial_port> <pal_type> <output_file> [hex_output_mask]\n"
+                    + "dupal_analyzer <serial_port> <pal_type> [<output_file> hex_output_mask]\n"
                     + "Where <pal_type> can be:\n" + supportedPALs.toString() + "\n");
 
             return;
@@ -86,13 +86,12 @@ public class App {
             System.exit(-1);
         }
 
-        outFile = args[2];
-
         if(args.length >= 4) {
+            outFile = args[2];
             outMask = Integer.parseInt(args[3], 16);
+            
+            checkOutPath(outFile);
         }
-
-        checkOutPath(outFile);
     }
 
     private static void checkOutPath(String path) {

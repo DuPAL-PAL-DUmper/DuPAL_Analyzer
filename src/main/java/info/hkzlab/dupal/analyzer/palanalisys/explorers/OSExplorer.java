@@ -59,7 +59,10 @@ public class OSExplorer {
                     }
                     continue; // Loop again
 
-                } else break; // We're done: can't move to anywhere else
+                } else {
+                    logger.info("exploreOutStates() -> Can't find a path to an unexplored state from " + curState);
+                    break; // We're done: can't move anywhere else  
+                }
             }
 
             int nextIdx;
