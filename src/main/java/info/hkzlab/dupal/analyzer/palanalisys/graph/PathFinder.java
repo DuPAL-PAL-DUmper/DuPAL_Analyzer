@@ -36,7 +36,10 @@ public class PathFinder {
            GraphLink[] stateLinks = currentState.getLinks(); // Get links present in the current state
 
             for(int idx = 0; idx < stateLinks.length; idx++) { // For every link...
-                if(stateLinks[idx] == null) continue;
+                if(stateLinks[idx] == null) {
+                    logger.warn("findPathToState() -> null link " + idx + " for state " + currentState);
+                    continue;
+                }
 
                 if(!pathMap.containsKey(stateLinks[idx].getDestinationState().hashCode())) { // If it's not leading somewhere we've already visited or we've already put in our path map
                     ArrayList<GraphLink> statePath = (ArrayList<GraphLink>)linkStack.clone(); // Copy the path to the current state
