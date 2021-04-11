@@ -1,5 +1,15 @@
 # DuPAL Analyzer
 
+## DISCLAIMER
+
+Any use of this project is **under your own responsibility**.
+
+You are expected to have enough knowledge to be able to build this yourself (it's a Maven project: search engines are your friend), to understand what it is supposed to do, to understand it is **no magical tool that transforms a read-protected chip into a dump**, to understand truth tables and basic minimization.
+
+Please, **do not come to me asking for hand-holding** using or building this: my time is limited.
+
+Keep in mind that, while the project supports a set of PAL devices, you might wish to modify it to support a specific configuration of a GAL, or even reading of other types of chip. This is on you and you will need basic Java knowledge to accomplish it.
+
 ## Introduction
 
 The **DuPAL Analyzer** is a companion software to the **DuPAL** board.
