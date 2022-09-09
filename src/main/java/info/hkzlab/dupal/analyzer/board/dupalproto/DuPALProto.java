@@ -43,7 +43,7 @@ public class DuPALProto {
      * @return The generated command
      */
     public static String buildWRITECommand(final int address) {
-        return ""+CMD_START+CMD_WRITE+" "+String.format("%08X", address & 0x3FFFF)+CMD_END;
+        return ""+CMD_START+CMD_WRITE+" "+String.format("%08X", address & 0x3FFFFF)+CMD_END;
     }
 
     public static String buildEXITCommand() {
