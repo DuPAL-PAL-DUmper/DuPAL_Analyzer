@@ -208,6 +208,14 @@ o18 = /o18
 
 then the board won't be able to capture it properly.
 
+Another condition that we cannot properly capture, as it generates a state that cannot be exited without a power-cycle, is a pin feeding back into itself in this way:
+
+```text
+out = out +
+      input1 * input2
+```
+In this case, we generate a set-once state that can no longer be exited until the PAL is power-cycled.
+
 Intermediate states are also impossible to capture with the current hardware: as in the previous example, when we have a situation with intermediate states, what will happen is the following
 
 1. Inputs will be set on the PAL

@@ -23,7 +23,9 @@ It will produce a JSON file containing every recorded state change of the PAL (o
 
 ### Limitations
 
-The current DuPAL hardware is able to register only **STABLE** states out of a PAL device. To see what this means, please have a look at the [analysis](docs/analysis.md) document.
+The current DuPAL hardware is able to register only **STABLE** states out of a PAL device. Also, pins feeding back into themselves are **NOT** supported.
+
+To see what this means, please have a look at the [analysis](docs/analysis.md) document.
 
 ## The Analyzer
 
