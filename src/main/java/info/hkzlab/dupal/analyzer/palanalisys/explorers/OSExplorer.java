@@ -139,8 +139,15 @@ public class OSExplorer {
         OutState os = new OutState(osp, ((pSpecs.getPinCount_O() + pSpecs.getPinCount_IO()) > 0 ? maxLinks : 0), (pSpecs.getPinCount_RO() > 0 ? maxLinks : 0));
 
         // Check if we already visited this state, in which case, recover that state, otherwise save the state in the map
-        if(statesMap.containsKey(os.hashCode())) os = statesMap.get(os.hashCode());
-        else statesMap.put(os.hashCode(), os);
+        if(statesMap.containsKey(os.hashCode())) {
+            OutState m_os = statesMap.get(os.hashCode());
+            if(m_os.equals(os)) {
+                os = m_os; // Use the state extracted from the map
+            } else {
+                logger.error("Found an hash collision between state " + os + " and the state already in map " + m_os);
+                throw new DuPALAnalyzerException("hash collision between two different OutStates")
+            }
+        } else statesMap.put(os.hashCode(), os);
 
         return os;
     }

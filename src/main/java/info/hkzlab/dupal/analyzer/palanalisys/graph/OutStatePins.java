@@ -9,7 +9,6 @@ public class OutStatePins {
         this.hiz = hiz;
     }
 
-    
     @Override
     public int hashCode() {
         int hash = 7;
