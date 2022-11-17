@@ -27,7 +27,7 @@ The current DuPAL hardware is able to register only **STABLE** states out of a P
 
 To see what this means, please have a look at the [analysis](docs/analysis.md) document.
 
-Also note that, as of now, SR latches with multiple set-reset conditions seems to confuse the analyzer. See issue #3.
+Also note that, as of now, SR latches with multiple set-reset conditions seems to confuse the analyzer. See issue [#3](https://github.com/DuPAL-PAL-DUmper/DuPAL_Analyzer/issues/3).
 
 ## The Analyzer
 
