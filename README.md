@@ -27,6 +27,8 @@ The current DuPAL hardware is able to register only **STABLE** states out of a P
 
 To see what this means, please have a look at the [analysis](docs/analysis.md) document.
 
+Also note that, as of now, SR latches with multiple set-reset conditions seems to confuse the analyzer. See issue #3.
+
 ## The Analyzer
 
 The analyzer lets the user select which type of PAL is inserted in the board's ZIF socket, whether the IO pins that are set as outputs are known (which saves some time by avoiding autodetection), what is the board's serial interface, and where to save the output file.
